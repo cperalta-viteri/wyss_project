@@ -13,7 +13,6 @@ library(wesanderson)
 
 theme_set(theme_classic())
 
-setwd("~/Documents/Bioinfo_platf/wyss_project/docker_envi/test")
 
 
 source('src/source/Source_new_cellHasR.R')
@@ -28,9 +27,9 @@ dir.create("pdf/1-Loading/")
 
 
 Telley_muA<-local({
-  Telley_muA_mrna<-Read10X_h5("data/muA/filtered_feature_bc_matrix.h5")
+  Telley_muA_mrna<-Read10X_h5("data/postnatal/muA/filtered_feature_bc_matrix.h5")
   
-  htos<-Read10X_h5("data/muA/muAh/raw_feature_bc_matrix.h5")
+  htos<-Read10X_h5("data/postnatal/muA/muAh/raw_feature_bc_matrix.h5")
   
   
   mRNA<-Telley_muA_mrna$`Gene Expression`
@@ -60,7 +59,6 @@ Telley_muA<-local({
   hashtag
   
 })
-
 Telley_muA <- Qc(Telley_muA,HTO_tag=c("HTO-1","HTO-2","HTO-3","HTO-4","HTO-5","HTO-6","HTO-7","HTO-8","HTO-9","HTO-10"),projet="Telley_muA")
 
 
