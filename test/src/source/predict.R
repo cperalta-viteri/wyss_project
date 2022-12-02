@@ -6,9 +6,9 @@ library(cowplot)
 
 
 
-source("/home/dnf/Desktop/final_model_julien_torch/allen20/src/julien/draft/torch/lib_cell_classifier.R")
-source("/home/dnf/Desktop/final_model_julien_torch/allen20/src/julien/draft/torch/lib_torch_dataset.R")
-source("/home/dnf/Desktop/final_model_julien_torch/allen20/src/julien/lib_allen.R")
+source("lib_cell_classifier.R")
+source("/lib_torch_dataset.R")
+#source("/home/dnf/Desktop/final_model_julien_torch/allen20/src/julien/lib_allen.R") #removed
 
 device <- if (cuda_is_available()) "cuda" else "cpu"
 

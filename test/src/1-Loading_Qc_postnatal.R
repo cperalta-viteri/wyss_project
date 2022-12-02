@@ -7,9 +7,15 @@ library(reticulate)
 library(scales)
 library(ggplot2)
 library(Seurat)
-library(DropSeq.util)
+#library(DropSeq.util) # not able to install
 library(RColorBrewer)
 library(wesanderson)
+
+#first create a .Renviron file in directory
+# containing : RETICULATE_PYTHON=path_to_venv
+py_config()
+
+
 
 theme_set(theme_classic())
 
@@ -17,7 +23,7 @@ theme_set(theme_classic())
 
 source('src/source/Source_new_cellHasR.R')
 source('src/source/Source_allen.R')
-source('src/source/predict.R')
+#source('src/source/predict.R') # we need lib_allen source file
 
 
 dir.create("out/1-Loading/")
@@ -27,9 +33,9 @@ dir.create("pdf/1-Loading/")
 
 
 Telley_muA<-local({
-  Telley_muA_mrna<-Read10X_h5("data/postnatal/muA/filtered_feature_bc_matrix.h5")
+  Telley_muA_mrna<-Read10X_h5("data/muA/filtered_feature_bc_matrix.h5")
   
-  htos<-Read10X_h5("data/postnatal/muA/muAh/raw_feature_bc_matrix.h5")
+  htos<-Read10X_h5("data/muA/muAh/raw_feature_bc_matrix.h5")
   
   
   mRNA<-Telley_muA_mrna$`Gene Expression`
@@ -59,8 +65,15 @@ Telley_muA<-local({
   hashtag
   
 })
-Telley_muA <- Qc(Telley_muA,HTO_tag=c("HTO-1","HTO-2","HTO-3","HTO-4","HTO-5","HTO-6","HTO-7","HTO-8","HTO-9","HTO-10"),projet="Telley_muA")
 
+
+Telley_muA <- Qc(Telley_muA,
+                 HTO_tag=c("HTO-1","HTO-2","HTO-3","HTO-4","HTO-5","HTO-6","HTO-7","HTO-8","HTO-9","HTO-10"),
+                 projet="Telley_muA")
+
+# requires cellhashR (problematic)
+# devtools::install_github(repo = 'bimberlab/cellhashR', ref = 'master', dependencies = TRUE, upgrade = 'always')
+# requires python
 
 
 Telley_muA<-local({
