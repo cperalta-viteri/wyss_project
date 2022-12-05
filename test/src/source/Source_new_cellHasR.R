@@ -81,7 +81,12 @@ count_meta<-function(meta_count,name,projet,seurat){
 
 ### QC function
 
-Qc<-function(seurat,filter_singlet=FALSE,methods=c("multiseq","gmm_demux", "htodemux", "dropletutils"),projet="Telley",mito_max=15,HTO_tag=HTO_tag,dims=1:30,min_nfeatures=log10(200),hto=TRUE,py_function=py_run_string("projet='Telley'"), scrublet=FALSE,vars.to.regress=c("nFeature_RNA","percent.mito"),Seurat=TRUE,res=c(1.0),fill= hue_pal()(7)[1], color= hue_pal()(7)[1]){
+Qc<-function(seurat,filter_singlet=FALSE,methods=c("multiseq","gmm_demux", "htodemux", "dropletutils"),
+             projet="Telley",mito_max=15,HTO_tag=HTO_tag,dims=1:30,min_nfeatures=log10(200),
+             hto=TRUE,py_function=py_run_string("projet='Telley'"),
+             scrublet=FALSE,vars.to.regress=c("nFeature_RNA","percent.mito"),
+             Seurat=TRUE,res=c(1.0),
+             fill= hue_pal()(7)[1], color= hue_pal()(7)[1]){
   
   require(Seurat)
   require(ggplot2)
