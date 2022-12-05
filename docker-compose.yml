@@ -1,0 +1,10 @@
+
+
+services:
+  build:
+    image: quay.io/jupyterhub/repo2docker
+    volumes:
+      - ./:/workdir
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: repo2docker --user-id 500 --user-name user1 --no-run /workdir/
+
