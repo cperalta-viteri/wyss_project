@@ -7,14 +7,13 @@ library(reticulate)
 library(scales)
 library(ggplot2)
 library(Seurat)
-#library(DropSeq.util) # not able to install
+#library(DropSeq.util) # not able to install/ Ludov said it's not used
 library(RColorBrewer)
 library(wesanderson)
 
 #first create a .Renviron file in directory
 # containing : RETICULATE_PYTHON=path_to_venv
 py_config()
-
 
 
 theme_set(theme_classic())
