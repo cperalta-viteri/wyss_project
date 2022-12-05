@@ -1,4 +1,4 @@
-
+version: "3.9"
 
 services:
   build:
@@ -6,5 +6,10 @@ services:
     volumes:
       - ./:/workdir
       - /var/run/docker.sock:/var/run/docker.sock
-    command: repo2docker --user-id 500 --user-name user1 --no-run /workdir/
+    command: repo2docker --user-id 500 --user-name user1 --no-run --image-name unigebsp/neurosuite /workdir/
 
+  neurosuite:
+    image: unigebsp/neurosuite
+    ports:
+      - "8888:8888"
+      
