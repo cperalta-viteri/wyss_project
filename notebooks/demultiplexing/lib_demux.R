@@ -1,10 +1,17 @@
 
 
 
-#' Identify contribution of every components to a multiplexed profile 
+#' Solve a least square fitting problem with the constraints that coefficient are positive and sum to 1
 #' 
-#' @param x (n x m) expression profiles of m components
-#' @param y a vector with a multiplexed expression profile of length n
+#' The solution is useful to demultiplex a multiplexed signal where component profiles are known.
+#' For example to demultiplex a bluk RNA-seq signal into known underlying cell-type profiles
+#' 
+#' The function find the solution to the minimization problem:
+#'   min_a (a.x - y)^2 
+#' s.t. 
+#'   a>0 and sum a=1
+#' @param x numeric matrix (n x m) of m components
+#' @param y a vector with multiplexed expression profile of length n
 #' @return a vector of m positive coefficients summing to one.
 #' 
 #' @example 
@@ -15,12 +22,11 @@
 #' alpha_pred <- demux(x,y)
 #' plot(x %*% alpha_pred,y,xlim=c(0,1),ylim=c(0,1));abline(0,1)
 demux <- function(x,y) {
-    stop("this version seems to not work, please fix")
     x <- as.matrix(x)
     y <- as.vector(y)
     stopifnot(identical(nrow(x),length(y)))
-    w <- LowRankQP::LowRankQP(
-        Vmat = diag(colSums(x)^2),
+    w <- LowRankQP::LowRankQP(method="LU",
+        Vmat = crossprod(x),
         dvec = -colSums(y * x),
         Amat = matrix(1,1,ncol(x)),
         bvec = 1,
@@ -29,8 +35,6 @@ demux <- function(x,y) {
     as.vector(w$alpha)
 }
 
-#min_a sum_i (a.x_i - y_i)^2 = min_a sum_i (a.x_i)^2 - 2.a.x_i.y_i + y_i^2
-#                            = min_a sum_i (a.x_i)^2 - 2.a.x_i.y_i
 
 
 
