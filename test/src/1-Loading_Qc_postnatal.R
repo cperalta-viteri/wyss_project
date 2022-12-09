@@ -11,8 +11,20 @@ library(Seurat)
 library(RColorBrewer)
 library(wesanderson)
 
+# R-version 4.04:
+BiocManager::install(c("HDF5Array", "rhdf5",
+                       "scuttle", "Rhdf5lib",
+                       "DropletUtils", "IRanges"))
+# R-version 4.2:
+BiocManager::install(c("HDF5Array", "rhdf5",
+                       "scuttle", "Rhd5lib",
+                       "DropletUtils", "IRanges"))
+
+
+
 #first create a .Renviron file in directory
 # containing : RETICULATE_PYTHON=path_to_venv
+# CLUSTER: make sure to be at test/ directory
 py_config()
 
 
@@ -25,8 +37,8 @@ source('src/source/Source_allen.R')
 #source('src/source/predict.R') # we need lib_allen source file
 
 
-dir.create("out/1-Loading/")
-dir.create("pdf/1-Loading/")
+dir.create("out/1-Loading/", recursive = TRUE)
+dir.create("pdf/1-Loading/", recursive = TRUE)
 
 
 
@@ -116,9 +128,12 @@ Telley_muA<-local({
   plot_save_umap(Telley_muA,genes=c("Slc1a3","Calb1","Pax2","Rbfox3","Lhx9","Sox10","Pvalb","Ret","Nrgn","Calb2","Eomes"))
   
   
+  
   saveRDS(Telley_muA, file = "out/1-Loading/Telley_muA/Telley_muA_all.Rds")
   
+  
   Telley_muA
+  
 })
 
 

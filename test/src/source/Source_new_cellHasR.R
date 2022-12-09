@@ -110,7 +110,9 @@ Qc<-function(seurat,filter_singlet=FALSE,methods=c("multiseq","gmm_demux", "htod
   Raw.data <- CreateSeuratObject(counts = count.data,meta.data=meta.data ,project=projet)
   
   if(hto==TRUE){
+    # retrieving HTO tags for demultiplexing
     htos<-seurat@assays$HTO[HTO_tag]
+    
     Raw.data[["HTO"]] <- CreateAssayObject(counts = htos)
     
     #Raw.data<-NormalizeData(Raw.data,assay = "HTO")
@@ -124,27 +126,34 @@ Qc<-function(seurat,filter_singlet=FALSE,methods=c("multiseq","gmm_demux", "htod
     writeLines(gsub("-",".",colnames(htos)), fileConn)
     close(fileConn)
   
-    
+    # writing table that will be read by cellHashR
     write.table(htos,file=paste0("out/1-Loading/",projet,"/hto.txt"),sep=",")
-    
     
     pdf(paste0("pdf/1-Loading/",projet,"/hto.pdf"),width = 20,height = 20)
     
-    barcodeData <- ProcessCountMatrix(rawCountData =paste0("out/1-Loading/",projet,"/hto.txt") , minCountPerCell = 5, simplifyBarcodeNames = FALSE,cellbarcodeWhitelist=paste0("out/1-Loading/",projet,"/cellbarcodeWhitelist.txt"),barcodeWhitelist = HTO_tag)
+    # parse HTO table, specifying the HTOs (whitelist)
+    barcodeData <- ProcessCountMatrix(rawCountData =paste0("out/1-Loading/",projet,"/hto.txt"),
+                                      minCountPerCell = 5,
+                                      simplifyBarcodeNames = FALSE,
+                                      cellbarcodeWhitelist=paste0("out/1-Loading/",projet,"/cellbarcodeWhitelist.txt"),
+                                      barcodeWhitelist = HTO_tag)
     
     # Create QC plots of barcode normalization
     #PlotNormalizationQC(barcodeData)
     
     #methods <- c("bff_cluster", "bff_threshold", "gmm_demux", "multiseq", "htodemux", "dropletutils")
     # Generate the final cell hashing calls
-    calls <- GenerateCellHashingCalls(barcodeMatrix = barcodeData, methods = methods,doTSNE=FALSE,majorityConsensusThreshold=0.3)
+    calls <- GenerateCellHashingCalls(barcodeMatrix = barcodeData,
+                                      methods = methods,
+                                      doTSNE=FALSE,
+                                      majorityConsensusThreshold=0.3)
     
-    
-  
+    # create summary plots to contrast cells based on call-status. Help inform why some cells were not called
     SummarizeCellsByClassification(calls = calls, barcodeMatrix = barcodeData)
     
     
     dev.off()
+    
     calls$cellbarcode<-gsub("[.]","-",calls$cellbarcode)
 
     
@@ -156,13 +165,12 @@ Qc<-function(seurat,filter_singlet=FALSE,methods=c("multiseq","gmm_demux", "htod
     table1<-table(Raw.data$consensuscall.global)
 
     if(filter_singlet==TRUE){
-      
       Raw.data@active.ident<-factor(Raw.data$consensuscall.global)
       Raw.data <- subset(Raw.data, idents = "Singlet", invert = FALSE)
-      
-      
     }
   }
+  
+  #### when no HTO tags
   
   DefaultAssay(Raw.data) <- "RNA"
   
@@ -170,8 +178,13 @@ Qc<-function(seurat,filter_singlet=FALSE,methods=c("multiseq","gmm_demux", "htod
   Raw.data@meta.data$Barcodes <- rownames(Raw.data@meta.data)
   
   mytheme_classic <- theme_classic()+ 
-    theme(axis.text.y = element_text(size=14, color="black"), axis.ticks = element_line(size=1, color="black"), axis.title.y = element_text(size=18, color="black"),
-          axis.text.x = element_text(size=14, color="black"), axis.title.x=element_text(size=18) ,panel.background =   element_blank(), legend.text = element_text(size=14))
+    theme(axis.text.y = element_text(size=14, color="black"),
+          axis.ticks = element_line(size=1, color="black"),
+          axis.title.y = element_text(size=18, color="black"),
+          axis.text.x = element_text(size=14, color="black"),
+          axis.title.x=element_text(size=18),
+          panel.background =  element_blank(),
+          legend.text = element_text(size=14))
   
   
   
@@ -195,7 +208,8 @@ Qc<-function(seurat,filter_singlet=FALSE,methods=c("multiseq","gmm_demux", "htod
       geom_point(aes(x=as.numeric(orig.ident)-0.3), fill="black", color="black", shape=16, size=0.25,
                  alpha=0.5, position = position_jitter(width=0.25,seed = 12345), show.legend = F)+
       xlab(NULL)+ ggtitle("Number of UMIs")+
-      mytheme_classic +theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.line.x = element_blank(), title = element_text(size = 14,hjust = 0.5))
+      mytheme_classic + theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+                             axis.line.x = element_blank(), title = element_text(size = 14,hjust = 0.5))
     
     p2 <- ggplot(Raw.data@meta.data, aes(x=orig.ident, y=nFeature_RNA))+
       geom_flat_violin(fill=alpha(fill,0.5), color=color, trim= T, show.legend = NA)+
@@ -203,7 +217,8 @@ Qc<-function(seurat,filter_singlet=FALSE,methods=c("multiseq","gmm_demux", "htod
       geom_point(aes(x=as.numeric(orig.ident)-0.3), fill="black", color="black", shape=16, size=0.25,
                  alpha=0.5, position = position_jitter(width=0.25,seed = 12345), show.legend = F)+
       xlab(NULL)+ ggtitle("Number of Genes")+
-      mytheme_classic +theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.line.x = element_blank(), title = element_text(size = 14,hjust = 0.5))
+      mytheme_classic + theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+                             axis.line.x = element_blank(), title = element_text(size = 14,hjust = 0.5))
     
     p3 <- ggplot(Raw.data@meta.data, aes(x=orig.ident, y=percent.mito))+
       geom_flat_violin(fill=alpha(fill,0.5), color=color, trim= T, show.legend = NA)+
@@ -211,7 +226,8 @@ Qc<-function(seurat,filter_singlet=FALSE,methods=c("multiseq","gmm_demux", "htod
       geom_point(aes(x=as.numeric(orig.ident)-0.3), fill="black", color="black", shape=16, size=0.25,
                  alpha=0.5, position = position_jitter(width=0.25,seed = 12345), show.legend = F)+
       xlab(NULL)+ ggtitle("Mitochondrial genes")+
-      mytheme_classic +theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.line.x = element_blank(), title = element_text(size = 14,hjust = 0.5))
+      mytheme_classic +theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+                             axis.line.x = element_blank(), title = element_text(size = 14,hjust = 0.5))
     
     p4 <- ggplot(Raw.data@meta.data, aes(x=orig.ident, y=percent.ribo))+
       geom_flat_violin(fill=alpha(fill,0.5), color=color, trim= T, show.legend = NA)+
@@ -219,11 +235,13 @@ Qc<-function(seurat,filter_singlet=FALSE,methods=c("multiseq","gmm_demux", "htod
       geom_point(aes(x=as.numeric(orig.ident)-0.3), fill="black", color="black", shape=16, size=0.25,
                  alpha=0.5, position = position_jitter(width=0.25,seed = 12345), show.legend = F)+
       xlab(NULL)+ ggtitle("Ribosomal genes")+
-      mytheme_classic +theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.line.x = element_blank(), title = element_text(size = 14,hjust = 0.5))
+      mytheme_classic +theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+                             axis.line.x = element_blank(), title = element_text(size = 14,hjust = 0.5))
     
     p <- plot_grid(plotlist =  list(p1,p2, p3, p4), ncol=2, align = "hv", rel_widths = c(1, 1, 1, 1),rel_heights =  c(1, 1, 1, 1))
     
-    ggsave(filename = paste0("pdf/1-Loading/",projet,"/Flatviolin QC_before filtering.pdf"), plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
+    ggsave(filename = paste0("pdf/1-Loading/",projet,"/Flatviolin QC_before filtering.pdf"),
+           plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
     
     ########### Relation between nUMI and nGene detected
     p1 <- ggplot(Raw.data@meta.data, aes(x=nCount_RNA, y=nFeature_RNA)) + 
@@ -244,7 +262,8 @@ Qc<-function(seurat,filter_singlet=FALSE,methods=c("multiseq","gmm_demux", "htod
     
     p <- plot_grid(plotlist = list(p1,p2), ncol=2, align = "hv", rel_widths = c(1, 1), rel_heights =  c(1, 1))
     
-    ggsave(filename = paste0("pdf/1-Loading/",projet,"/nGenesVSnUMIs.pdf"), plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
+    ggsave(filename = paste0("pdf/1-Loading/",projet,"/nGenesVSnUMIs.pdf"),
+           plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
     
     Cell.QC.Stat <- Raw.data@meta.data
     max.mito.thr <- mito_max
@@ -352,10 +371,6 @@ Qc<-function(seurat,filter_singlet=FALSE,methods=c("multiseq","gmm_demux", "htod
         ggsave(filename = paste0("pdf/1-Loading/",projet,"/percent.mitoVSnGenes.pdf"), plot = p1, device =cairo_pdf, width = 297, height = 210, units = "mm")
       }
       
-      
-      
-      
-      
     }
     
     ######### Filter cells based on these thresholds
@@ -413,8 +428,6 @@ Qc<-function(seurat,filter_singlet=FALSE,methods=c("multiseq","gmm_demux", "htod
     p3<-ggMarginal(p3, type = "densigram",bins=100, fill="grey",  alpha=0.3)
     
     ggsave(filename = paste0("pdf/1-Loading/",projet,"/nGenesvsnUMIs_validCells.pdf"), plot = p3, device =cairo_pdf, width = 297, height = 210, units = "mm")
-    
-    
     
   }
   
@@ -476,8 +489,6 @@ Qc<-function(seurat,filter_singlet=FALSE,methods=c("multiseq","gmm_demux", "htod
     p3<-ggMarginal(p3, type = "densigram",bins=100, fill="grey",  alpha=0.3)
     
     ggsave(filename = paste0("pdf/1-Loading/",projet,"/nGenesvsnUMIs_validCells.pdf"), plot = p3, device =cairo_pdf, width = 297, height = 210, units = "mm")
-    
-    
     
   }
   
@@ -914,15 +925,13 @@ Qc<-function(seurat,filter_singlet=FALSE,methods=c("multiseq","gmm_demux", "htod
     
   }
   
-
-  
   QCFiltered.data
   
 }
 
-
-
 ###############################################
+
+
 "%||%" <- function(a, b) {
   if (!is.null(a))
     a
