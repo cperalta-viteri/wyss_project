@@ -10,3 +10,4 @@
 .ipython/
 .subversion/
 data/
+.DS_Store
