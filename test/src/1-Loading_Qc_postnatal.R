@@ -5,7 +5,6 @@ library(dplyr)
 library(ggnewscale)
 library(reticulate)
 library(scales)
-library(ggplot2)
 library(Seurat)
 #library(DropSeq.util) # not able to install/ Ludov said it's not used
 library(RColorBrewer)

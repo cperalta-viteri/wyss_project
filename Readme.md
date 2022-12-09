@@ -18,6 +18,26 @@ git clone git@github.com:Christ14n97/wyss_project.git
 docker-compose run --rm build
 ```
 
+# Repo2docker building
+
+The order matter in terms of API flags. Now the image name and directory can be customized
+
+```python
+ jupyter-repo2docker -E --image-name 'smt/neuro_suite' --target-repo-dir /workdir  /home/christian97/Documents/Bioinfo_platf/wyss_project/docker_envi 
+```
+
+## ISSUES
+
+* Building the image with docker compose does not allow to mount my local folder when running the image
+
+```bash
+# this is how I mount my directory on my container using simple repo2docker command
+docker run -it --rm -p 8888:8888 -v $PWD:/home/user1 dd7  jupyter lab --ip 0.0.0.0 #permision denied when using docker compose
+```
+
+# Python and R packages
+
+Using environment.yml file, after installing R packages, they are unusable. I will try with install.R. However, bioconductor packages cannot be installed this way.
 
 
 # Run working environment on Baobab 
