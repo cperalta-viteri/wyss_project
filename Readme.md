@@ -18,21 +18,19 @@ git clone git@github.com:Christ14n97/wyss_project.git
 docker-compose run --rm build
 ```
 
-# Repo2docker building
+# Rocket Project
 
-The order matter in terms of API flags. Now the image name and directory can be customized
+Build the image:
 
-```python
- jupyter-repo2docker -E --image-name 'smt/neuro_suite' --target-repo-dir /workdir  /home/christian97/Documents/Bioinfo_platf/wyss_project/docker_envi 
+```bash
+docker build --pull --rm -f "container/Dockerfile" -t dockerenvi:latest "binder"
 ```
 
-## ISSUES
-
-* Building the image with docker compose does not allow to mount my local folder when running the image
+Run container
 
 ```bash
 # this is how I mount my directory on my container using simple repo2docker command
-docker run -it --rm -p 8888:8888 -v $PWD:/home/user1 dd7  jupyter lab --ip 0.0.0.0 #permision denied when using docker compose
+docker run -it --rm -p 8787:8787 -v $PWD/.config:/user/rstudio/.config -v $PWD:/home/rstudio/workdir dockerenvi:latest 
 ```
 
 # Python and R packages
