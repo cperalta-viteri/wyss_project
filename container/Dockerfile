@@ -1,8 +1,5 @@
 FROM bioconductor/bioconductor_docker:RELEASE_3_16
 
-# this set the WD to run commands. 
-#WORKDIR /rstudio
-
 COPY requirements.txt /tmp
 
 
@@ -13,17 +10,9 @@ RUN R -q -e "install.packages(c('ggplot2', 'tidyverse', 'scales', \
     # finishing torch installation
     torch::install_torch(); \
     # bioconductor packages
-    BiocManager::install(c('S4Vectors', 'DropletUtils', 'HDF5array', \
-    'rhdf5','Rhdf5lib', 'scuttle', 'IRanges', 'SummarizedExperiment')) \
+    BiocManager::install(c('S4Vectors', 'DropletUtils', 'HDF5Array','rhdf5','Rhdf5lib', 'scuttle', 'IRanges', 'SummarizedExperiment'));\
     # github packages
     devtools::install_github(repo = 'bimberlab/cellhashR', ref = 'master', dependencies = TRUE, upgrade = 'always')"
-
-#RUN R -q -e "install.packages(c('Seurat', 'ggnewscale'))"
-
-#RUN R -q -e "BiocManager::install(c('S4Vectors', 'DropletUtils', 'HDF5array', \
-#    'rhdf5','Rhdf5lib', 'scuttle', 'IRanges', 'SummarizedExperiment'))"
-
-#RUN R -q -e "devtools::install_github(repo = 'bimberlab/cellhashR', ref = 'master', dependencies = TRUE, upgrade = 'always')"
 
 # removing temporary folders
 RUN rm -rf /tmp/downloaded_packages && rm -rf /tmp/RtmpIj1cu8/downloaded_packages
@@ -32,7 +21,5 @@ RUN rm -rf /tmp/downloaded_packages && rm -rf /tmp/RtmpIj1cu8/downloaded_package
 RUN apt update && apt -y upgrade && apt -y install docker.io nvidia-cuda-toolkit
 
 RUN pip install -r /tmp/requirements.txt
-
-#RUN R -q -e "install.packages(c('ggpubr', 'ggraph', 'tidygraph'))"
 
 ENV DISABLE_AUTH=true
