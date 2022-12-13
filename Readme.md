@@ -20,27 +20,30 @@ docker-compose run --rm build
 
 # Rocket Project
 
+Currently, it only has RStudio as IDE. Python3 is available to use, though.
+
 Build the image:
 
 ```bash
-docker build --pull --rm -f "container/Dockerfile" -t dockerenvi:latest "binder"
+docker build --pull --rm -f "container/Dockerfile" -t neuro_suite:latest "container"
 ```
 
 Run container
 
 ```bash
 # this is how I mount my directory on my container using simple repo2docker command
-docker run -it --rm -p 8787:8787 -v $PWD/.config:/user/rstudio/.config -v $PWD:/home/rstudio/workdir dockerenvi:latest 
+docker run -it --rm -p 8787:8787 -v $PWD:/home/rstudio/workdir neuro_suite:latest 
 ```
 
-# Python and R packages
-
-Using environment.yml file, after installing R packages, they are unusable. I will try with install.R. However, bioconductor packages cannot be installed this way.
+```bash
+# STILL TO TEST: how to mount a config file to save customization on RS IDE.
+docker run -it --rm -p 8787:8787 -v $PWD/.config:/user/rstudio/.config -v $PWD:/home/rstudio/workdir dockerenvi:latest 
+```
 
 
 # Run working environment on Baobab 
 
-## Launch the working environmeent using Singularity
+## Launch the working environment using Singularity
 ```{bash}
 ssh prados@baobab2.hpc.unige.ch
 
