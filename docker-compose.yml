@@ -11,9 +11,10 @@ services:
     ports:
       - "8787:8787" # Rstudio UI
       #  - "3838:3838"  # Shiny server
-    environment:
-      - PASSWORD: my_secret
+      #environment:
+      #- PASSWORD: "my_secret"
     volumes:
-      - ./:/home/rstudio
+      - ./.rstudio_config:/home/rstudio/.config/rstudio
+      - $PWD:/home/rstudio/workspace
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
