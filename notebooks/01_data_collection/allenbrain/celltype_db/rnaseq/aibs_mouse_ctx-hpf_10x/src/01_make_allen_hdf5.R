@@ -1,0 +1,63 @@
+
+library(IRanges)
+library(HDF5Array)
+library(rhdf5)
+library(SingleCellExperiment)
+library(zellkonverter)
+
+setwd("../notebooks/01_data_collection/allenbrain/celltype_db/rnaseq/aibs_mouse_ctx-hpf_10x/src/")
+
+source("../../lib_allen.R")
+
+make_hdf5 <- function(dir="../data") {
+  # Process dendrogram
+  dend <- read_dend_json(file.path(dir,"dend.json.gz"))
+  
+  # Process cells meta-data
+  meta <- read.csv(file.path(dir,"metadata.csv.gz"),check.names = FALSE,stringsAsFactors = FALSE,row.names=NULL)
+  meta <- meta[sapply(meta,function(x) length(unique(x)))>1]
+  stopifnot(all(meta$cell_type_accession_label %in% dend$cell_set_accession))
+  
+  # Add tsne coordinates
+  meta <- local({
+    tsne <- read.csv(file.path(dir,"tsne.csv.gz"),check.names = FALSE,stringsAsFactors = FALSE,row.names="sample_name")
+    stopifnot(setequal(meta$sample_name,rownames(tsne)))
+    cbind(meta,tsne[meta$sample_name,])
+  })
+  
+  # Process medians and trimmed means
+  medians <- data.matrix(read.csv(file.path(dir,"medians.csv.gz"),check.names = FALSE,stringsAsFactors = FALSE,row.names="feature"))
+  trimmed_means <- data.matrix(read.csv(file.path(dir,"trimmed_means.csv.gz"),check.names = FALSE,stringsAsFactors = FALSE,row.names="feature"))
+  stopifnot(identical(dimnames(medians),dimnames(trimmed_means)))
+  
+  M <- HDF5Array(file.path(dir,"matrix.hdf5"),"/data/counts")
+  colnames(M) <- as.character(h5read(file.path(dir,"matrix.hdf5"), name = "data/gene"))
+  
+  M <- t(M)
+  stopifnot(all(rownames(M) == rownames(medians)))
+  stopifnot(all(rownames(M) == rownames(trimmed_means)))
+  stopifnot(all(colnames(M) == rownames(meta)))
+  
+  
+  #save(dend,medians,trimmed_means,meta,M,file = "out/objs.RData")
+  #load("out/objs.RData")
+  h5_file <- "out/mat.h5"
+  h5write(dend,h5_file,"/dendrogram")
+  writeHDF5Array(medians,h5_file,"/medians",with.dimnames = TRUE)
+  writeHDF5Array(trimmed_means,h5_file,"/trimmed_means",with.dimnames = TRUE)
+  h5write(meta,h5_file,"/cell_meta")
+  writeTENxMatrix(M,h5_file,"/matrix")
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
