@@ -1,14 +1,19 @@
 version: "3.9"
 
 services:
-  build:
-    image: neuro_suite:latest
-    volumes:
-      - ./:/workdir
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: repo2docker --user-id 500 --user-name user1 --no-run --image-name unigebsp/neurosuite /workdir/
-
-  neurosuite:
+  rstudio:
     image: unigebsp/neurosuite
+    build:
+      context: "./container"
+      platforms:
+        - "linux/arm64"
+        - "linux/amd64"
     ports:
-      - "8888:8888"
+      - "8787:8787" # Rstudio UI
+      #  - "3838:3838"  # Shiny server
+    environment:
+      - PASSWORD: my_secret
+    volumes:
+      - ./:/home/rstudio
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
