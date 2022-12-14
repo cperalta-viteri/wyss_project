@@ -4,6 +4,7 @@
 *.Rproj
 *.RData
 *.Ruserdata
+*.Renviron
 .cache/
 .config/
 .ipynb*
