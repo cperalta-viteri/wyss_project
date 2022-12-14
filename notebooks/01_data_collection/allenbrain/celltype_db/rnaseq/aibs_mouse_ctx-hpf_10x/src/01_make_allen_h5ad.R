@@ -5,11 +5,10 @@ library(rhdf5)
 library(SingleCellExperiment)
 library(zellkonverter)
 
-setwd("../notebooks/01_data_collection/allenbrain/celltype_db/rnaseq/aibs_mouse_ctx-hpf_10x/src/")
 
-source("../../lib_allen.R")
+source("../lib_allen.R")
 
-make_h5ad <- function(dir="../data", name="new_h5ad") {
+make_h5ad <- function(dir="data/", name="new_h5ad") {
   # Process dendrogram
   dend <- read_dend_json(file.path(dir,"dend.json.gz"))
   
@@ -56,8 +55,8 @@ make_h5ad <- function(dir="../data", name="new_h5ad") {
 }
 
 
-
-
+test <- sce[1:1000, 1:1000]
+h5ad <- readH5AD(paste(dir, "SCE", sep = ""))
 
 
 
