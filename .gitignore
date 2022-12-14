@@ -1,9 +1,9 @@
-.Rproj
-.user
-.Rhistory
-.Rproj
-.RData
-.Ruserdata
+*.Rproj
+*.user
+*.Rhistory
+*.Rproj
+*.RData
+*.Ruserdata
 .cache/
 .config/
 .ipynb*
