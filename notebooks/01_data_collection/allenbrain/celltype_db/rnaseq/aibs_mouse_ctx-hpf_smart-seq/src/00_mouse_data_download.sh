@@ -6,7 +6,7 @@
 
 mkdir ../data
 
-curl 'https://idk-etl-prod-download-bucket.s3.amazonaws.com/aibs_mouse_ctx-hpf_smart-seq/expression_matrix.hdf5' | pigz > ../data/matrix.hdf5 &
+curl 'https://idk-etl-prod-download-bucket.s3.amazonaws.com/aibs_mouse_ctx-hpf_smart-seq/expression_matrix.hdf5' > ../data/matrix.hdf5 &
 curl 'https://idk-etl-prod-download-bucket.s3.amazonaws.com/aibs_mouse_ctx-hpf_smart-seq/expression_matrix_introns.csv' | pigz > ../data/intron.csv.gz &
 curl 'https://idk-etl-prod-download-bucket.s3.amazonaws.com/aibs_mouse_ctx-hpf_smart-seq/expression_matrix_exons.csv' | pigz > ../data/exon.csv.gz &
 curl 'https://idk-etl-prod-download-bucket.s3.amazonaws.com/aibs_mouse_ctx-hpf_smart-seq/trimmed_means.csv' | pigz > ../data/trimmed_means.csv.gz &
