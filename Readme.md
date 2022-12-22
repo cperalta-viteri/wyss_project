@@ -69,3 +69,19 @@ ml GCC/11.3.0  OpenMPI/4.1.4 R/4.2.1
 salloc -n1 --cpus-per-task=8 --time 4:00:00 --partition=shared-bigmem --mem=64G --x11
 R
 ```
+
+
+
+# Use VSCode
+```{bash}
+
+```
+
+## VSCode on a Slurm HPC cluster
+
+## Using VSCode
+```{bash}
+
+```
+
+
