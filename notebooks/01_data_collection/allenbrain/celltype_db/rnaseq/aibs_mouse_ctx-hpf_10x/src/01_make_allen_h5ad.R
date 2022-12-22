@@ -60,9 +60,9 @@ make_h5ad <- function(dir="data/", name="allen_mouse_TENx.h5ad") {
   sce <- SingleCellExperiment(assays = list(counts=M),
                               rowData = data.frame(medians=medians, trim_means=trimmed_means,check.names = FALSE),
                               colData = meta,
-                              metadata = list(taxonomy=dend),
-                              reducedDims = list(umap=tsne))
-  
+                              metadata = list(taxonomy=dend),)
+                              #reducedDims = list(X_umap=as.matrix(tsne)))
+  reducedDim(sce, "X_umap") <- tsne
   
   writeH5AD(sce = sce, file = file.path(dir, name))
 }
@@ -73,15 +73,15 @@ make_h5ad()
 
 
 
-#test <- sce[1:1000, 1:1000]
-#writeH5AD(test, "data/sce.h5ad")
+test <- sce[1:1000, 1:1000]
+writeH5AD(test, "data/sce.h5ad")
 #h5ad <- readH5AD("data/sce.h5ad", use_hdf5 = TRUE)
 
 
 
-library(sceasy)
-library(reticulate)
-loompy <- reticulate::import('loompy')
+# library(sceasy)
+# library(reticulate)
+# loompy <- reticulate::import('loompy')
 
 
 
