@@ -8,6 +8,11 @@ library(zellkonverter)
 
 source("../lib_allen.R")
 
+#reticulate::use_virtualenv("/home/christian97/Documents/Bioinfo_platf/wyss_project/docker_envi/python_3_8_venv")
+
+Sys.setenv(RETICULATE_PYTHON="/home/christian97/Documents/Bioinfo_platf/wyss_project/docker_envi/python_3_8_venv/bin/python")
+
+
 make_h5ad <- function(dir="data/", name="allen_mouse_TENx.h5ad") {
   # Process dendrogram
   dend <- read_dend_json(file.path(dir,"dend.json.gz"))
@@ -17,11 +22,11 @@ make_h5ad <- function(dir="data/", name="allen_mouse_TENx.h5ad") {
   meta <- meta[sapply(meta,function(x) length(unique(x)))>1]
   stopifnot(all(meta$cell_type_accession_label %in% dend$cell_set_accession))
   
-  # Add tsne coordinates
+  
+  tsne <- read.csv(file.path(dir,"tsne.csv.gz"),check.names = FALSE,stringsAsFactors = FALSE,row.names="sample_name")
+  # Checking that meta and tsne have the same number of cells
   meta <- local({
-    tsne <- read.csv(file.path(dir,"tsne.csv.gz"),check.names = FALSE,stringsAsFactors = FALSE,row.names="sample_name")
     #stopifnot(setequal(meta$sample_name,rownames(tsne)))
-    
     # total cells = 1169320 | meta contains 1169213 cell, ~100 less
     if (!all(rownames(tsne) %in% meta$sample_name)) {
       ## this can be used to filter out:
@@ -46,16 +51,18 @@ make_h5ad <- function(dir="data/", name="allen_mouse_TENx.h5ad") {
   
   M <- t(M)
   meta <- meta[order(order(match(colnames(M), rownames(meta)))),]
+  tsne <- tsne[order(order(match(colnames(M), rownames(tsne)))),]
   stopifnot(all(rownames(M) == rownames(medians)))
   stopifnot(all(rownames(M) == rownames(trimmed_means)))
-  stopifnot(all(colnames(M) == rownames(meta))) #checked by SE
+  stopifnot(all(colnames(M) == rownames(meta)))
   
   #browser()
   sce <- SingleCellExperiment(assays = list(counts=M),
                               rowData = data.frame(medians=medians, trim_means=trimmed_means,check.names = FALSE),
                               colData = meta,
-                              metadata = list(taxonomy=dend))
-  
+                              metadata = list(taxonomy=dend),)
+                              #reducedDims = list(X_umap=as.matrix(tsne)))
+  reducedDim(sce, "X_umap") <- tsne
   
   writeH5AD(sce = sce, file = file.path(dir, name))
 }
@@ -68,14 +75,13 @@ make_h5ad()
 
 test <- sce[1:1000, 1:1000]
 writeH5AD(test, "data/sce.h5ad")
-h5ad <- readH5AD("data/sce.h5ad", use_hdf5 = TRUE)
+#h5ad <- readH5AD("data/sce.h5ad", use_hdf5 = TRUE)
 
 
 
-
-
-
-
+# library(sceasy)
+# library(reticulate)
+# loompy <- reticulate::import('loompy')
 
 
 
