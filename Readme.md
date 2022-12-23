@@ -18,21 +18,21 @@ git clone git@github.com:Christ14n97/wyss_project.git
 docker-compose run --rm build
 ```
 
-# Rocket Project
+# Rocket Project (peraltav)
 
 Currently, it only has RStudio as IDE. Python3 is available to use, though.
 
 Build the image:
 
 ```bash
-docker build --pull --rm -f "container/Dockerfile" -t neuro_suite:latest "container"
+docker build --cpuset-cpus 4 --rm -f "container/Dockerfile" -t unigebsp/neurosuite:latest "container"
 ```
 
 Run container
 
 ```bash
 # this is how I mount my directory on my container using simple repo2docker command
-docker run -it --rm -p 8787:8787 -v $PWD:/home/rstudio/workdir neuro_suite:latest 
+docker run --rm -it -p 8787:8787 -v $PWD:/home/rstudio/workdir unigebsp/neurosuite:latest
 ```
 
 ```bash
