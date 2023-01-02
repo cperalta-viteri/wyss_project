@@ -28,6 +28,7 @@ RUN R -q -e " \
     BiocManager::install(c('Rhdf5lib','rhdf5','HDF5Array')); \
     BiocManager::install(c('SingleCellExperiment','SpatialExperiment','LoomExperiment')); \
     BiocManager::install(c('DropletUtils','scuttle','scran','scater','uwot','AUCell','SingleR')); \
+    BiocManager::install(c('biomaRt')); \
     BiocManager::install(c('edgeR','GEOquery','zellkonverter','sceasy')); \
 \
     # github packages \

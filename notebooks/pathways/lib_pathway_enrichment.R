@@ -7,7 +7,7 @@ library(ggplot2)
 #' @param query a logical matrix of selected genes (rownames are gene symbols, colnames are names of the geneset)
 #' @param genes_annotations a CharacterList that list for each gene the sets it belong to. 
 #'        The list should be limited to the gene of the universe, for example genes expressed in the brain.
-multi_gsea <- function(query,genes_annotations) {
+multi_hypergeometric <- function(query,genes_annotations) {
     stopifnot(is.matrix(query))
     stopifnot(is.logical(query))
     
