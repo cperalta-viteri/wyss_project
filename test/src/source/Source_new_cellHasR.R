@@ -249,7 +249,11 @@ Qc<-function(seurat,
       mytheme_classic +theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
                              axis.line.x = element_blank(), title = element_text(size = 14,hjust = 0.5))
     
-    p <- plot_grid(plotlist =  list(p1,p2, p3, p4), ncol=2, align = "hv", rel_widths = c(1, 1, 1, 1),rel_heights =  c(1, 1, 1, 1))
+    p <- plot_grid(plotlist =  list(p1,p2, p3, p4),
+                   ncol=2,
+                   align = "hv",
+                   rel_widths = c(1, 1, 1, 1),
+                   rel_heights =  c(1, 1, 1, 1))
     
     ggsave(filename = paste0("pdf/1-Loading/",projet,"/Flatviolin QC_before filtering.pdf"),
            plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
