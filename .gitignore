@@ -18,3 +18,13 @@ data/
 *.nb.html
 *.zip
 *.tsv
+*.tar*
+*.h5ad
+*.zip
+*.code-workspace
+.bash_history
+test/out/
+test/pdf/
+test/data_info
+test/peralta_qc/
+

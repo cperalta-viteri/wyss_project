@@ -6,7 +6,7 @@ library(scater)
 library(cellhashR)
 library(DropletUtils)
 
-#DropletUtils::read10xCounts()
+# DropletUtils::read10xCounts()
 
 set.seed(12)
 
@@ -19,13 +19,17 @@ h5ls("data/muA/muAh/raw_feature_bc_matrix.h5")
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ============= reading data ===============
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# mrna & atac:
 tenx <- TENxMatrix("data/muA/filtered_feature_bc_matrix.h5")
+
+# HTO tags
 htos <- TENxMatrix("data/muA/muAh/raw_feature_bc_matrix.h5")
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## features x samples
 ## 'gene expresion: 32285 x 20000 sparse Matrix of class "dgCMatrix"
 ## 'peaks: 175091 x 20000 sparse Matrix of class "dgCMatrix"
 
+##~~~~~~~~~~~~~~~~~~~~~ Splitting data ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Expression data
 gene_exp <- tenx[grep("ENS", rownames(tenx)),]
 # setting gene names from feature group in h5 file. Filtering is done to get only genes.
@@ -64,13 +68,16 @@ sce <- scuttle::logNormCounts(sce)
 #'* It's possible to add per-cell QC metrics *
 #sce <- addPerCellQCMetrics(sce, subset=list(Mito=rownames(rowData(sce))[grep("mt-", rownames(rowData(sce)))]))
 
+##~~~~~~~~~~~~~~~~~~~~~ Using DropletUtils ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sce_all <- read10xCounts("data/muA/filtered_feature_bc_matrix.h5")
+
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ============= UMAP =============== 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# this worked but I had to incude logNormCounts
+#' this worked but I had to incude logNormCounts
 ## umap does not accepts HDF5Array products
 
-#sce <- runUMAP(sce) 
+#' sce <- runUMAP(sce) 
 
 plotUMAP(sce)
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
