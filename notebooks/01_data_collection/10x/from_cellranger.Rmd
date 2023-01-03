@@ -1,0 +1,128 @@
+---
+title: "Cellranger input"
+output: html_notebook
+---
+
+# Loading Cellranger count
+
+This notebooks show how to load counts from CellRanger into a
+SummarizedExperiment object, add meta-data (and generate a `.h5ad` file ?).
+
+# Quick start
+
+```{r,message=FALSE}
+o <- DropletUtils::read10xCounts("filtered_feature_bc_matrix.h5")
+o <- splitAltExps(o,rowData(o)$Type,ref = "Gene Expression")
+```
+
+
+
+# Introduction
+
+
+## HDF5 format
+CellRanger store gene expression matrices into files with `.h5` extension (`filtered_feature_bc_matrix.h5`). 
+This file is encoded into the standard format HDF5 (more information [here](https://www.hdfgroup.org)), which is a compressed binary format structured to allow random access to its content. In simple words, it means we can works on the data without loading everything into memory.
+
+To work with HDF5-files, we recommend to use the Bioconductor package `rhdf5`. 
+HDF5-files are organised hierarchically similarly to folders into a filesystem, and to browse their content use `rhdf5::h5ls()`.
+
+```{r}
+rhdf5::h5ls("filtered_feature_bc_matrix.h5")
+```
+
+To read the content of a HDF5, one can use `rhdf5::h5read()`. This function will load all the data into memory. 
+For example to load gene names from a CellRanger h5.
+```{r}
+head(rhdf5::h5read("filtered_feature_bc_matrix.h5","/matrix/features/name"))
+```
+
+
+However, when the data do not fit into memory, like large gene-expression matrices, one should use `HDF5Array` package to map the content of the HDF5 file into an object that can be manipulated similarly to a matrix.
+```{r}
+HDF5Array::TENxMatrix("filtered_feature_bc_matrix.h5","/matrix")
+```
+
+
+
+## Create SingleCellExperiment objects
+`SingleCellExperiment` allows to associate metadata to gene expression counts, and then facilitate data manipulation.
+
+
+
+
+
+# Add HTO informations (optional, only if available)
+
+```{r}
+o <- local({
+  # Load HTO data
+  hto <- DropletUtils::read10xCounts("filtered_feature_bc_matrix_HTO.h5")
+  
+  # Check overlap with gene expression
+  gplots::venn(list(HTO=hto$Barcode,exp=o$Barcode));title("barcode overlap")
+  
+  # Remove cell with none matching barcode in the HTO
+  o <- o[,o$Barcode %in% hto$Barcode]
+  
+  # Add HTO informations to the data
+  altExp(o,"Antibody Capture") <- hto[,match(o$Barcode,hto$Barcode)]
+  
+  o
+})
+```
+
+
+```{r}
+# Determine 
+v <- altExp(o,"Antibody Capture") |> 
+  assay() |>
+  as.matrix()
+v <- t(v/rowMeans(v))
+heatmap(log1p(v[sample(nrow(v),1000),1:11]),scale="none")
+
+source("../lib_util.R")
+i <- order.col(-v)
+V <- array(v[cbind(as.vector(row(i)),as.vector(i))],dim(i))
+tag <- i[,1]
+tag[V[,1] - V[,2] < 1] <- 0
+
+table(tag)
+plot(sort(V[,1] - V[,2]),log="y")
+
+
+```
+
+
+
+
+
+
+# Add samples meta-data
+
+When possible add the following meta-data, respecting the field names:
+`sex`, `age`, `cell_type`
+
+The field `label` is reserved for sample labeling.
+
+
+# Store SingleCellExperiment object as H5AD
+
+
+
+# Parking
+
+H5 format is a standard format to `.h5` At this step, you should do your
+best to organize your data and collect meta-data as the generated
+`h5ad`-file will be used at all step of your analysis.
+
+Using data loaded from CellRanger output, we create a
+`SingleCellExperiment()` object which will store all our data and
+metadata. The content of this object will be stored into the final
+`h5ad` file. We try to respect specific field name conventions for
+compatibility: - Use following assay names when relevant: `counts`,
+`normcounts`, `logcounts`, `tpm`, `cpm` - Use gene symbol names as
+rownames to easily query the object. Preserve gene identifiers into the
+rowData. - Try to store genomic positions of the features as character
+string into `rowData()$interval`. You will later be able to convert this
+information into `GRanges()` to work with them

@@ -15,6 +15,9 @@
 data/
 .DS_Store
 .Rproj.user
+*.nb.html
+*.zip
+*.tsv
 *.tar*
 *.h5ad
 *.zip
@@ -24,3 +27,4 @@ test/out/
 test/pdf/
 test/data_info
 test/peralta_qc/
+
