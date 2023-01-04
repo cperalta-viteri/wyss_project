@@ -22,7 +22,7 @@ source("../lib_kegg.R")
 ```
 
 
-# From ensembl
+# From Ensembl
 
 ## Retreive informations about genes from Ensembl using biomaRt package
 ```{r}
@@ -88,7 +88,7 @@ gene_info$reactom_id <- local({
   names(x) <- c("ensembl_id","reactome_id","evidence","organism")
   x <- x[x$organism %in% "Mus musculus",]
   x$ensembl_id <- factor(x$ensembl_id,unique(gene_info$ensembl_gene_id))
-  x <- unique(splitAsList(x$reactome_id,x$ensembl_id))
+  x <- splitAsList(x$reactome_id,x$ensembl_id) |> unique()
   x[gene_info$ensembl_gene_id] |> unname()
 })
 ```
@@ -138,14 +138,14 @@ gene_info$kegg_pathway_id <- local({
   p <- read_kegg_link("data/kegg_link_mmu_pathway.tsv")
   p$locus_tag <- factor(p$locus_tag,unique(gene_info$entrezgene_id))
   p <- splitAsList(p$pathway_id,p$locus_tag)
-  c(CharacterList(character()),p)[match(gene_info$entrezgene_id,names(p),nomatch = 0)+1L] |> unname()
+  c(CharacterList(character()),p)[match(gene_info$entrezgene_id,names(p),nomatch = 0)+1L] |> unname() |> unique()
 })
 
 gene_info$kegg_module_id <- local({
   p <- read_kegg_link("data/kegg_link_mmu_module.tsv")
   p$locus_tag <- factor(p$locus_tag,unique(gene_info$entrezgene_id))
   p <- splitAsList(p$pathway_id,p$locus_tag)
-  c(CharacterList(character()),p)[match(gene_info$entrezgene_id,names(p),nomatch = 0)+1L] |> unname()
+  c(CharacterList(character()),p)[match(gene_info$entrezgene_id,names(p),nomatch = 0)+1L] |> unname() |> unique()
 })
 ```
 
@@ -176,4 +176,10 @@ gene_info$msigdb <- local({
 ```
 
 
+
+# Store gene annotations
+
+```{r}
+saveRDS(gene_info,"data/gene_info.rds")
+```
 
