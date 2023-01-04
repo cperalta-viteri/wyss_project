@@ -11,8 +11,24 @@ SummarizedExperiment object, add meta-data (and generate a `.h5ad` file ?).
 # Quick start
 
 ```{r,message=FALSE}
+library(SingleCellExperiment)
+
+# Load 10x dataset
 o <- DropletUtils::read10xCounts("filtered_feature_bc_matrix.h5")
 o <- splitAltExps(o,rowData(o)$Type,ref = "Gene Expression")
+```
+
+
+```{r,message=FALSE}
+# Add genes annotations
+rowData(o) <- cbind(
+  rowData(o),
+  local({
+    meta <- read.table("../01_genome/mouse/data/gene_info.tsv",sep="\t",header=TRUE)
+    meta[match(rowData(o)$ID,meta$ensembl_gene_id),]
+  })
+)
+#rowData(o)$go_ids <- CharacterList(strsplit(rowData(o)$go_ids,";"))
 ```
 
 

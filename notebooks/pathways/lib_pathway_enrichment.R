@@ -3,6 +3,8 @@
 library(IRanges)
 library(ggplot2)
 
+
+
 #' Test GOterm enrichement for the given list of genes
 #' @param query a logical matrix of selected genes (rownames are gene symbols, colnames are names of the geneset)
 #' @param genes_annotations a CharacterList that list for each gene the sets it belong to. 
@@ -42,28 +44,6 @@ multi_hypergeometric <- function(query,genes_annotations) {
     o[is.na(o)] <- +Inf
     o <- order(Biobase::rowMin(o))
     gsea[o,]
-}
-
-
-
-read_gmt <- function(con) {
-  txt <- readLines(con)
-  pat <- "^([^\t]*)\t([^\t]*)\t(.*)$"
-  z <- DataFrame(
-    STANDARD_NAME = sub(pat,"\\1",txt),
-    EXTERNAL_DETAILS_URL = sub(pat,"\\2",txt),
-    MEMBERS = CharacterList(strsplit(sub(pat,"\\3",txt),"\t",fixed=TRUE))
-  )
-}
-
-
-read_gaf <- function(gaf_file) {
-  txt <- readLines(gaf_file)
-  stopifnot(grepl("^!gaf-version:",txt[1]))
-  txt <- txt[!grepl("^!",txt)]
-  gaf <- read.table(text = txt,sep="\t",quote="",comment.char = "")
-  colnames(gaf) <- c("db","db_object_id","db_object_symbol","qualifier","go_id","db_ref","evidence","with_or_from","aspect","db_object_name","db_object_synonym","db_object_type","taxon","date","assigned_by","annotation_extension","gene_product_form_id")
-  return(gaf)
 }
 
 
