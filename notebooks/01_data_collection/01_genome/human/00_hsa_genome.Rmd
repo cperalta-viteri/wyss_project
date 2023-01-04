@@ -1,0 +1,87 @@
+---
+title: "Make Mouse gene_id mapping table"
+output: html_notebook
+---
+
+
+
+```{r, setup, include=FALSE}
+knitr::opts_knit$set(root.dir = '.')
+```
+
+
+```{r}
+library(biomaRt)
+```
+
+
+
+# From Ensembl
+
+## Retreive GeneID mapping table from Ensembl using biomaRt package
+```{r}
+mart <- biomaRt::useEnsembl('genes','hsapiens_gene_ensembl')
+geneid_map <- biomaRt::getBM(
+  mart = mart,
+  attributes = c("ensembl_gene_id","entrezgene_id","hgnc_id","external_gene_name","gene_biotype")
+)
+write.table(geneid_map,file="geneid_map.tsv",sep="\t",row.names = FALSE)
+```
+
+
+## GO terms
+```{r}
+local({
+  x <- getBM(
+    mart = mart,
+    attributes = c("ensembl_gene_id","go_id")
+  )
+  write.table(x,file="ensembl_go_id.tsv",sep="\t",row.names = FALSE)
+})
+```
+
+```{r}
+local({
+  x <- getBM(
+    mart = mart,
+    attributes = c("ensembl_gene_id","goslim_goa_accession")
+  )
+  write.table(x,file="ensembl_goslim_goa.tsv",sep="\t",row.names = FALSE)
+})
+```
+
+```{r}
+download.file("http://purl.obolibrary.org/obo/go/go-basic.obo","go-basic.obo")
+```
+
+
+# Reactome pathways
+```{r}
+download.file("https://reactome.org/download/current/Ensembl2Reactome.txt","Ensembl2Reactome.txt")
+download.file("https://reactome.org/download/current/ReactomePathways.txt","ReactomePathways.txt")
+download.file("https://reactome.org/download/current/ReactomePathwaysRelation.txt","ReactomePathwaysRelation.txt")
+```
+
+
+# MsigDB (GSEA)
+
+warning: this chunk require user authentication to run => download the zip manually from the website.
+
+```{r,eval=FALSE}
+download.file(
+  "http://www.gsea-msigdb.org/gsea/msigdb/download_file.jsp?filePath=/msigdb/release/2022.1.Hs/msigdb_v2022.1.Hs_files_to_download_locally.zip",
+  "msigdb_v2022.1.Hs_files_to_download_locally.zip"
+)
+```
+
+
+# Retreive IUPHAR categories
+```{r}
+download.file("https://www.guidetopharmacology.org/DATA/targets_and_families.tsv","iuphar_targets_and_families.tsv")
+```
+
+
+
+
+
+
