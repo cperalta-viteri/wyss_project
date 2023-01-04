@@ -9,11 +9,14 @@ output: html_document
 
 ```{r message=FALSE}
 library(HDF5Array)
-library(Seurat)
+#library(Seurat)
 library(SingleCellExperiment) # just for testing
-library(scater)
 library(cellhashR)
 library(DropletUtils)
+library(scater)
+library(scuttle)
+library(scales)
+library(ggExtra)
 
 # DropletUtils::read10xCounts()
 ```
@@ -33,10 +36,10 @@ h5ls("data/muA/muAh/raw_feature_bc_matrix.h5")
 
 ```{r}
 # mrna & atac:
-tenx <- TENxMatrix("data/muA/filtered_feature_bc_matrix.h5")
+#tenx <- TENxMatrix("data/muA/filtered_feature_bc_matrix.h5")
 
 # HTO tags
-htos <- TENxMatrix("data/muA/muAh/raw_feature_bc_matrix.h5")
+#htos <- TENxMatrix("data/muA/muAh/raw_feature_bc_matrix.h5")
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## features x samples
 ## 'gene expresion: 32285 x 20000 sparse Matrix of class "dgCMatrix"
@@ -45,7 +48,7 @@ htos <- TENxMatrix("data/muA/muAh/raw_feature_bc_matrix.h5")
 
 # Data manipulation
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 ##~~~~~~~~~~~~~~~~~~~~~ Splitting data ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Expression data
 gene_exp <- tenx[grep("ENS", rownames(tenx)),]
@@ -64,7 +67,9 @@ rownames(atac) <- as.character(HDF5Array("data/muA/filtered_feature_bc_matrix.h5
 
 ```
 
-```{r}
+# This is still done using the `HDF5Array::TENxMatrix` function. Has to be modified to fit the function `DropletUtils::read10xCounts`
+
+```{r eval=FALSE, include=FALSE}
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ============= subsetting by HTO tags ===============
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -77,17 +82,17 @@ htos <- htos[, intersect(colnames(gene_exp), colnames(htos))]
 
 # SingleCell object
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 sce <- SingleCellExperiment(assays = list(counts=gene_exp),
                             colData=list(t(htos))) # IDN why it adds a new column: "sizeFactor"
                            
 sce <- scuttle::logNormCounts(sce)
 
 #'* It's possible to add per-cell QC metrics *
-#sce <- addPerCellQCMetrics(sce, subset=list(Mito=rownames(rowData(sce))[grep("mt-", rownames(rowData(sce)))]))
+sce <- addPerCellQCMetrics(sce, subset=list(Mito=rownames(rowData(sce))[grep("mt-", rownames(rowData(sce)))]))
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ============= UMAP =============== 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -99,36 +104,42 @@ sce <- scuttle::logNormCounts(sce)
 #plotUMAP(sce)
 ```
 
-# DropLetUtils for data importing and SCE object creation
+# Data Loading & SCE object creation
 
 ```{r}
-sce_all <- read10xCounts("data/muA/filtered_feature_bc_matrix.h5")
-sce_all <- splitAltExps(sce_all, rowData(sce_all)[, "Type"])
-sce_all <- swapAltExp(sce_all, "Gene Expression")
-rownames(sce_all) <- rowData(sce_all)[, "Symbol"]
-colnames(sce_all) <- colData(sce_all)[, "Barcode"]
+sce <- read10xCounts("data/muA/filtered_feature_bc_matrix.h5")
+sce <- splitAltExps(sce, rowData(sce)[, "Type"])
+sce <- swapAltExp(sce, "Gene Expression")
+rownames(sce) <- make.unique(rowData(sce)$Symbol)
+colnames(sce) <- colData(sce)[, "Barcode"]
 ```
 
-
-
 ```{r}
-sce_all
+sce
 ```
 
 *To add HTOs as metadata, remember to perform the intersection counts-htos*
 
 ```{r}
-stopifnot(setequal(colnames(htos), colData(sce_all)[, "Barcode"]))
-stopifnot(setequal(colnames(htos), colnames(sce_all)))
-metadata(sce_all) <- list("hto_tag"=htos)
+#htos <- TENxMatrix("data/muA/muAh/raw_feature_bc_matrix.h5")
+# using DropletUtils
+htos <- read10xCounts("data/muA/muAh/raw_feature_bc_matrix.h5")
+colnames(htos) <- colData(htos)$Barcode
+htos <- htos[, intersect(colnames(sce), colnames(htos))]
 ```
 
+```{r}
+#stopifnot(setequal(colnames(htos), colData(sce)[, "Barcode"]))
+stopifnot(setequal(colnames(htos), colnames(sce)))
+#metadata(sce) <- list("hto_tag"=htos)
+```
 
+*Adding hto information as alternative experiment*
 
-
-
-
-
+```{r}
+altExp(sce, "hto") <- SummarizedExperiment(assay(htos))
+#rm(htos)
+```
 
 # Demultiplexing
 
@@ -146,37 +157,28 @@ require(cellhashR)
 
 ```
 
-
 ```{r}
 reticulate::py_config()
 ```
-
 
 ```{r}
 HTO_tag=c("HTO-1","HTO-2","HTO-3","HTO-4","HTO-5","HTO-6","HTO-7","HTO-8","HTO-9","HTO-10")
 ```
 
+**if hto == TRUE** `line 122`
 
 ```{r}
 # getting a list of cellbarcode
 fileConn <- file(file.path("peralta_qc/out/cellbarcodeWhitelist.txt"))
-writeLines(gsub("-", ".", colnames(sce_all)), fileConn) #it's using seurat, so it's mandatory to gsub
+writeLines(gsub("-", ".", colnames(sce)), fileConn) #it's using seurat, so it's mandatory to gsub
 close(fileConn)
 ```
 
 ```{r}
-#barcode_df <- as.data.frame(colData(sce)[, colnames(colData(sce)) %in% HTO_tag])
-
-# metadata has neither colnames nor rownames!!!
-barcode_df <- as.data.frame(metadata(sce_all))
-colnames(barcode_df) <- colnames(htos)
-rownames(barcode_df) <- rownames(htos)
-barcode_df <- barcode_df[rownames(barcode_df) %in%  HTO_tag, ]
-
-write.table(barcode_df,
+# swapping experiment to hto and subsetting rownames by HTO-tag, list of interest.
+write.table(assay(swapAltExp(sce, "hto"))[rownames(assay(swapAltExp(sce, "hto"))) %in% HTO_tag,],
             file = "peralta_qc/out/hto.txt", sep = ",", col.names = TRUE, row.names = TRUE)
 ```
-
 
 ```{r}
 pdf(file.path("peralta_qc/pdf/hto.pdf"), width = 20, height = 20)
@@ -192,10 +194,191 @@ calls <- GenerateCellHashingCalls(barcodeMatrix = barcodeData,
                                   methods = methods, 
                                   doTSNE = FALSE,
                                   majorityConsensusThreshold = 0.3)
+# create summary plots to contrast cells based on call-status. Help inform why some cells were not called
+SummarizeCellsByClassification(calls = calls, barcodeMatrix = barcodeData)
 dev.off()
 ```
 
-*Linea 186*
+```{r}
+# reverting name change of barcodes
+calls$cellbarcode<-gsub("[.]","-",calls$cellbarcode)
+```
+
+```{r}
+# interest in filtering by calls$consensuscall.global
+if(filter_singlet==TRUE){sce[, sce$Barcode %in% calls[ calls$consensuscall.global=="Singlet", ]$cellbarcode]}
+
+```
+
+**Closed if statement** `line 182`
+
+\# when no HTO tag
+
+```{r}
+##~~~~~~~~~~~~~~~~~~~~~ Percentent mitochondrial counts ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+length(grep("^mt-", rownames(sce)))
+
+```
+
+*QC metrics*
+
+-   number of UMI x=orig.ident, y=nCount_RNA
+-   number of genes x=orig.ident, y=nFeature_RNA
+-   mitochondrial genes x=orig.ident, y=percent.mito
+-   ribosomal genes x=orig.ident, y=percent.ribo
+
+*Relationship between nGenes-nUMIs* + nCount_RNA vs nFeature_RNA
+
+# QC Metrics with scuttle/scater
+
+## QC, mito-ribo
+
+The `sum` column contains the total count for each cell and the `detected` column contains the number of detected genes. The `subsets_Mito_percent` column contains the percentage of reads mapped to mitochondrial transcripts. Finally, the `altexps_ERCC_percent` column contains the percentage of reads mapped to ERCC transcripts.
+
+```{r}
+
+sce <- addPerCellQCMetrics(sce, subset=list(Mito=rownames(rowData(sce))[grep("mt-", rownames(rowData(sce)))],
+                                            Ribo=rownames(rowData(sce))[grep("(^Rpl|^Rps|Mrp)", rownames(rowData(sce)))]))
+
+```
+
+## Percent of mitochondrial - ribosomal genes
+
+```{r}
+source('src/source/Source_new_cellHasR.R')
+```
+
+```{r}
+fill= hue_pal()(7)[1]
+color= hue_pal()(7)[1]
+```
+
+```{r eval=FALSE, include=FALSE}
+theme(axis.text.y = element_text(size=14, color="black"),
+          axis.ticks = element_line(size=1, color="black"),
+          axis.title.y = element_text(size=18, color="black"),
+          axis.text.x = element_text(size=14, color="black"),
+          axis.title.x=element_text(size=18),
+          panel.background =  element_blank(),
+          legend.text = element_text(size=14))
+```
+
+```{r warning=FALSE}
+
+##~~~~~~~~~~~~~~~~~~~~~ Number of UMIs ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+plotColData(sce, y="sum") + 
+  geom_point(size=0.25, alpha=0.5, position = position_jitter(width=0.25,seed = 12345))+
+  geom_boxplot(width=0.025, outlier.size = 0.5, outlier.alpha = 0.8)+
+  xlab(NULL)+
+  ylab("nCount_RNA")+ 
+  ggtitle("Number of UMIs")+
+  theme(axis.text.y=element_text(size = 14,hjust = 0.5), title = element_text(size = 14,hjust = 0.5))
+```
+
+```{r}
+
+##~~~~~~~~~~~~~~~~~~~~~ Number of Genes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+plotColData(sce, y="detected") + 
+  geom_point(size=0.25, alpha=0.5, position = position_jitter(width=0.25,seed = 12345))+
+  geom_boxplot(width=0.025, outlier.size = 0.5, outlier.alpha = 0.8)+
+  xlab(NULL)+
+  ylab("nFeature_RNA")+ 
+  ggtitle("Number of Genes")+
+  theme(axis.text.y=element_text(size = 14,hjust = 0.5), title = element_text(size = 14,hjust = 0.5))
+```
+
+```{r}
+
+##~~~~~~~~~~~~~~~~~~~~~ Mitochondrial Genes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+plotColData(sce, y="subsets_Mito_percent") + 
+  geom_point(size=0.25, alpha=0.5, position = position_jitter(width=0.25,seed = 12345))+
+  geom_boxplot(width=0.025, outlier.size = 0.5, outlier.alpha = 0.8)+
+  xlab(NULL)+
+  ylab("percent.mito")+ 
+  ggtitle("Mitochondrial genes")+
+  theme(axis.text.y=element_text(size = 14,hjust = 0.5), title = element_text(size = 14,hjust = 0.5))
+```
+
+```{r}
+
+##~~~~~~~~~~~~~~~~~~~~~ Ribosomal Genes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+plotColData(sce, y="subsets_Ribo_percent") + 
+  geom_point(size=0.25, alpha=0.5, position = position_jitter(width=0.25,seed = 12345))+
+  geom_boxplot(width=0.025, outlier.size = 0.5, outlier.alpha = 0.8)+
+  xlab(NULL)+
+  ylab("percent.ribo")+ 
+  ggtitle("Ribosomal genes")+
+  theme(axis.text.y=element_text(size = 14,hjust = 0.5), title = element_text(size = 14,hjust = 0.5))
+```
+
+## Relation between nUMI and nGene deteced
+
+```{r message=FALSE}
+
+##~~~~~~~~~~~~~~~~~~~~~ nGenes vs nUMIs ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+p1 <- plotColData(sce, x="sum" , y="detected",
+            colour_by = "subsets_Mito_percent",
+            size_by = "subsets_Ribo_percent") + 
+  scale_colour_gradient(aesthetics = c("colour"),low = "gray90", high = "black") +
+  scale_size_area(max_size = 3)+
+  geom_smooth(method = "lm")+
+  xlab("nCount_RNA")+
+  ylab("nFeature_RNA")+ 
+  ggtitle(NULL) +
+  theme(legend.position = "left")
+
+p1 <- ggMarginal(p1, type = "densigram",bins=100, fill="grey", alpha=.3)
+
+p1
+```
+
+```{r}
+
+##~~~~~~~~~~~~~~~~~~~~~ log10(nGenes vs nUMIs) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+p2 <- plotColData(sce, x="sum" , y="detected",
+            colour_by = "subsets_Mito_percent",
+            size_by = "subsets_Ribo_percent") + 
+  scale_x_log10()+ scale_y_log10()+
+  scale_colour_gradient(aesthetics = c("colour"),low = "gray90", high = "black") +
+  scale_size_area(max_size = 3)+
+  geom_smooth(method = "lm")+
+  xlab("nCount_RNA")+
+  ylab("nFeature_RNA")+ 
+  ggtitle(NULL) +
+  theme(legend.position = "left")
+
+p2 <- ggMarginal(p2, type = "densigram",bins=100, fill="grey", alpha=.3)
+
+p2
+
+```
+
+
+
+**if hto==TRUE ** `line 284`
+
+```{r}
+mito_max <- 15
+min_features <- log10(200)
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
 

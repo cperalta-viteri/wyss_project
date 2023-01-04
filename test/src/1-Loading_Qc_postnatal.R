@@ -54,7 +54,7 @@ Telley_muA<-local({
   
   print(rowMeans(htos))
   
-  # Select cell barcodes detected by both RNA and HTO In the example datasets we have already
+  # Select cell barcodes detected by both RNA and HTO. In the example datasets we have already
   # filtered the cells for you, but perform this step for clarity.
   joint.bcs <- intersect(colnames(mRNA), colnames(htos))
   
