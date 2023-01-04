@@ -173,9 +173,18 @@ gene_info$msigdb <- local({
 ```
 
 
-
+# Save annotations
 ```{r}
+# binary version
 saveRDS(gene_info,"data/gene_info.rds")
+
+# text version
+local({
+  gene_info <- readRDS("data/gene_info.rds")
+  msk <- sapply(gene_info,is,"CharacterList")
+  gene_info[msk] <- gene_info[msk] |> lapply(unstrsplit,";")
+  write.table(as(gene_info,"data.frame"),"data/gene_info.tsv",sep="\t",row.names = FALSE)
+})
 ```
 
 
