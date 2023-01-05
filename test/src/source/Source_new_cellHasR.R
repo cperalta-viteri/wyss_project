@@ -545,8 +545,10 @@ Qc<-function(seurat,
       xlab(NULL)+ ggtitle("Ribosomal genes")+
       mytheme_classic +theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.line.x = element_blank(), title = element_text(size = 14,hjust = 0.5))
     
-    p <- plot_grid(plotlist =  list(p1,p2, p3, p4), ncol=2, align = "hv", rel_widths = c(1, 1, 1, 1),rel_heights =  c(1, 1, 1, 1))
-    ggsave(filename = paste0("pdf/1-Loading/",projet,"/Flatviolin QC_after filtering.pdf"), plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
+    p <- plot_grid(plotlist =  list(p1,p2, p3, p4), ncol=2, align = "hv",
+                   rel_widths = c(1, 1, 1, 1),rel_heights =  c(1, 1, 1, 1))
+    ggsave(filename = paste0("pdf/1-Loading/",projet,"/Flatviolin QC_after filtering.pdf"),
+           plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
     
     p1 <- ggplot(Raw.data@meta.data, aes(x=log10(nCount_RNA), y=log10(nFeature_RNA))) + 
       geom_point(aes(color=percent.mito, size= percent.ribo)) + 
@@ -555,7 +557,8 @@ Qc<-function(seurat,
       geom_smooth(method="lm")+mytheme_classic+theme(legend.position = "left")
     p1<-ggMarginal(p1, type = "densigram",bins=100, fill="grey", alpha=0.3)
     
-    ggsave(filename = paste0("pdf/1-Loading/",projet,"/nUMIsVSnGenes_afterfiltering.pdf"), plot = p1, device =cairo_pdf, width = 297, height = 210, units = "mm")
+    ggsave(filename = paste0("pdf/1-Loading/",projet,"/nUMIsVSnGenes_afterfiltering.pdf"),
+           plot = p1, device =cairo_pdf, width = 297, height = 210, units = "mm")
     
     
   }
@@ -579,9 +582,11 @@ Qc<-function(seurat,
       mytheme_classic +theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.line.x = element_blank(), title = element_text(size = 14,hjust = 0.5))
     
     
-    ggsave(filename = paste0("pdf/1-Loading/",projet,"/QC_after filtering_1.pdf"), plot = p1, device =cairo_pdf, width = 297, height = 210, units = "mm")
+    ggsave(filename = paste0("pdf/1-Loading/",projet,"/QC_after filtering_1.pdf"),
+           plot = p1, device =cairo_pdf, width = 297, height = 210, units = "mm")
     
-    ggsave(filename = paste0("pdf/1-Loading/",projet,"/QC_after filtering_2.pdf"), plot = p2, device =cairo_pdf, width = 297, height = 210, units = "mm")
+    ggsave(filename = paste0("pdf/1-Loading/",projet,"/QC_after filtering_2.pdf"),
+           plot = p2, device =cairo_pdf, width = 297, height = 210, units = "mm")
     
   }
   
@@ -589,7 +594,7 @@ Qc<-function(seurat,
   
   dir.create(paste0("out/1-Loading/",projet))
   
-  
+  # peraltav, this was false
   if(scrublet==TRUE){
     
     
