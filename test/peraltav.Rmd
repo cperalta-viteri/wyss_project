@@ -272,7 +272,7 @@ theme(axis.text.y = element_text(size=14, color="black"),
           legend.text = element_text(size=14))
 ```
 
-```{r warning=FALSE}
+```{r nUMIs_before_filtering, warning=FALSE}
 
 ##~~~~~~~~~~~~~~~~~~~~~ Number of UMIs ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -285,7 +285,7 @@ plotColData(sce, y="sum") +
   theme(axis.text.y=element_text(size = 14,hjust = 0.5), title = element_text(size = 14,hjust = 0.5))
 ```
 
-```{r}
+```{r nGenes_before_filtering}
 
 ##~~~~~~~~~~~~~~~~~~~~~ Number of Genes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -298,7 +298,7 @@ plotColData(sce, y="detected") +
   theme(axis.text.y=element_text(size = 14,hjust = 0.5), title = element_text(size = 14,hjust = 0.5))
 ```
 
-```{r}
+```{r nMitoGenes_before_filtering}
 
 ##~~~~~~~~~~~~~~~~~~~~~ Mitochondrial Genes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -311,7 +311,7 @@ plotColData(sce, y="subsets_Mito_percent") +
   theme(axis.text.y=element_text(size = 14,hjust = 0.5), title = element_text(size = 14,hjust = 0.5))
 ```
 
-```{r}
+```{r nRiboGenes_before_filtering}
 
 ##~~~~~~~~~~~~~~~~~~~~~ Ribosomal Genes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -323,6 +323,8 @@ plotColData(sce, y="subsets_Ribo_percent") +
   ggtitle("Ribosomal genes")+
   theme(axis.text.y=element_text(size = 14,hjust = 0.5), title = element_text(size = 14,hjust = 0.5))
 ```
+
+
 
 ## Relation between nUMI and nGene deteced
 
@@ -449,8 +451,7 @@ if(sum(sce$subsets_Mito_percent <= mito_max)!=length(sce$subsets_Mito_percent <=
 
 ```{r warning=FALSE}
 if(sum(sce$subsets_Mito_percent <= mito_max)==length(sce$subsets_Mito_percent <= mito_max)){
-  p <- plotColData(sce, x="detected", y="subsets_Mito_percent",
-            color_by = "consensus_call_global")+
+  p <- plotColData(sce, x="detected", y="subsets_Mito_percent")+
   geom_hline(aes(yintercept = mito_max), colour = "red", linetype = 2) +
   geom_vline(aes(xintercept = 10^min_nfeatures), colour = "red", linetype = 2) +
   xlab("nFeature_RNA")+
@@ -467,8 +468,7 @@ if(sum(sce$subsets_Mito_percent <= mito_max)==length(sce$subsets_Mito_percent <=
 
 ```{r warning=FALSE}
 if(sum(sce$subsets_Mito_percent > mito_max)==length(sce$subsets_Mito_percent <= mito_max)){
-  p <- plotColData(sce, x="detected", y="subsets_Mito_percent",
-            color_by = "consensus_call_global")+
+  p <- plotColData(sce, x="detected", y="subsets_Mito_percent")+
   geom_hline(aes(yintercept = mito_max), colour = "red", linetype = 2) +
   geom_vline(aes(xintercept = 10^min_nfeatures), colour = "red", linetype = 2) +
   xlab("nFeature_RNA")+
@@ -485,8 +485,7 @@ if(sum(sce$subsets_Mito_percent > mito_max)==length(sce$subsets_Mito_percent <= 
 
 ```{r warning=FALSE}
 if(sum(sce$subsets_Mito_percent <= mito_max)!=length(sce$subsets_Mito_percent <= mito_max)&sum(sce$subsets_Mito_percent > mito_max)!=length(sce$subsets_Mito_percent <= mito_max)){
-  p <- plotColData(sce, x="detected", y="subsets_Mito_percent",
-            color_by = "consensus_call_global")+
+  p <- plotColData(sce, x="detected", y="subsets_Mito_percent")+
   geom_hline(aes(yintercept = mito_max), colour = "red", linetype = 2) +
   geom_vline(aes(xintercept = 10^min_nfeatures), colour = "red", linetype = 2) +
   xlab("nFeature_RNA")+
@@ -504,8 +503,7 @@ if(sum(sce$subsets_Mito_percent <= mito_max)!=length(sce$subsets_Mito_percent <=
 
 
 ```{r MitovsnGenes_model, warning=FALSE, eval=FALSE, include=FALSE}
-p <- plotColData(sce, x="detected", y="subsets_Mito_percent",
-            color_by = "consensus_call_global")+
+p <- plotColData(sce, x="detected", y="subsets_Mito_percent")+
   geom_hline(aes(yintercept = mito_max), colour = "red", linetype = 2) +
   geom_vline(aes(xintercept = 10^min_nfeatures), colour = "red", linetype = 2) +
   xlab("nFeature_RNA")+
@@ -699,11 +697,65 @@ Here we retain those which passed all the filters, in the `qc` column as *passed
 
 \##~~~~~~~~~~~~~~~~~~~~~ Plot final QC metrics ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-```{r}
+**After filtering**
 
+```{r nUMIs_after_filtering, warning=FALSE}
+
+##~~~~~~~~~~~~~~~~~~~~~ Number of UMIs ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+plotColData(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"],
+            y="sum") + 
+  geom_point(size=0.25, alpha=0.5, position = position_jitter(width=0.25,seed = 12345))+
+  geom_boxplot(width=0.025, outlier.size = 0.5, outlier.alpha = 0.8)+
+  xlab(NULL)+
+  ylab("nCount_RNA")+ 
+  ggtitle("Number of UMIs")+
+  theme(axis.text.y=element_text(size = 14,hjust = 0.5), title = element_text(size = 14,hjust = 0.5))
 ```
 
 
+```{r nGenes_after_filtering}
+
+##~~~~~~~~~~~~~~~~~~~~~ Number of Genes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+plotColData(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"],
+            y="detected") + 
+  geom_point(size=0.25, alpha=0.5, position = position_jitter(width=0.25,seed = 12345))+
+  geom_boxplot(width=0.025, outlier.size = 0.5, outlier.alpha = 0.8)+
+  xlab(NULL)+
+  ylab("nFeature_RNA")+ 
+  ggtitle("Number of Genes")+
+  theme(axis.text.y=element_text(size = 14,hjust = 0.5), title = element_text(size = 14,hjust = 0.5))
+```
+
+
+```{r nMitoGenes_after_filtering}
+
+##~~~~~~~~~~~~~~~~~~~~~ Mitochondrial Genes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+plotColData(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"],
+            y="subsets_Mito_percent") + 
+  geom_point(size=0.25, alpha=0.5, position = position_jitter(width=0.25,seed = 12345))+
+  geom_boxplot(width=0.025, outlier.size = 0.5, outlier.alpha = 0.8)+
+  xlab(NULL)+
+  ylab("percent.mito")+ 
+  ggtitle("Mitochondrial genes")+
+  theme(axis.text.y=element_text(size = 14,hjust = 0.5), title = element_text(size = 14,hjust = 0.5))
+```
+
+```{r nRiboGenes_after_filtering}
+
+##~~~~~~~~~~~~~~~~~~~~~ Ribosomal Genes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+plotColData(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"],
+            y="subsets_Ribo_percent") + 
+  geom_point(size=0.25, alpha=0.5, position = position_jitter(width=0.25,seed = 12345))+
+  geom_boxplot(width=0.025, outlier.size = 0.5, outlier.alpha = 0.8)+
+  xlab(NULL)+
+  ylab("percent.ribo")+ 
+  ggtitle("Ribosomal genes")+
+  theme(axis.text.y=element_text(size = 14,hjust = 0.5), title = element_text(size = 14,hjust = 0.5))
+```
 
 
 
