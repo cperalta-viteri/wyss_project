@@ -246,7 +246,8 @@ The `sum` column contains the total count for each cell and the `detected` colum
 ```{r}
 
 sce <- addPerCellQCMetrics(sce, subset=list(Mito=rownames(rowData(sce))[grep("mt-", rownames(rowData(sce)))],
-                                            Ribo=rownames(rowData(sce))[grep("(^Rpl|^Rps|Mrp)", rownames(rowData(sce)))]))
+                                            Ribo=rownames(rowData(sce))[grep("(^Rpl|^Rps|Mrp)",
+                                                                             rownames(rowData(sce)))]))
 
 ```
 
@@ -502,7 +503,7 @@ if(sum(sce$subsets_Mito_percent <= mito_max)!=length(sce$subsets_Mito_percent <=
 ```
 
 
-```{r MitovsnGenes_model, warning=FALSE}
+```{r MitovsnGenes_model, warning=FALSE, eval=FALSE, include=FALSE}
 p <- plotColData(sce, x="detected", y="subsets_Mito_percent",
             color_by = "consensus_call_global")+
   geom_hline(aes(yintercept = mito_max), colour = "red", linetype = 2) +
@@ -520,15 +521,10 @@ p
 
 **closed if statement** `line 340`
 
-\##~~~~~~~~~~~~~~~~~~~~~ Filter cells based on mito threshold ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Filtering metrics
 
-`line 392`
 
-```{r fitering_mito}
-sce_Mito_filt <- sce[, sce$subsets_Mito_percent <= mito_max]
-```
-
-`setting a column where to store QC control criteria`
+### setting a column where to store QC control information
 
 ```{r}
 # filtering by mito genes: sce[, sce$subsets_Mito_percent <= mito_max]
@@ -539,20 +535,50 @@ sce_Mito_filt <- sce[, sce$subsets_Mito_percent <= mito_max]
 ```
 
 
-```{r nGenesvsnUMIs_beforefiltering, warning=FALSE}
-p1 <- ggcells(sce_Mito_filt, mapping=aes(x=log10(sum), y=log10(detected),
-        colour=subsets_Mito_percent,
-        size=subsets_Ribo_percent)) +
-  geom_point() + 
+```{r}
+colData(sce)$qc <- NULL
+colData(sce)$qc <- gsub("TRUE", "passed", gsub("FALSE", "fails_maxMito", sce$subsets_Mito_percent <= mito_max))
+colData(sce)$qc <- 
+  replace(x=colData(sce)$qc,
+          list=which(sce$qc == "passed"),
+          values=gsub(
+            "TRUE", "passed", gsub("FALSE", "fails_minFeat", log10(sce[,sce$qc == "passed"]$detected)
+                                   >=min_nfeatures)))
+
+lm <- lm(log10(sce[, sce$qc == "passed"]$detected) ~ log10(sce[, sce$qc == "passed"]$sum))
+
+colData(sce)$qc <- 
+  replace(x=colData(sce)$qc,
+          list=which(sce$qc =="passed"),
+          values=gsub(
+            "TRUE", "passed",
+            gsub("FALSE", "fails_lm",
+                 log10(sce[, sce$qc == "passed"]$detected) > 
+                   log10(sce[, sce$qc == "passed"]$sum) * lm$coefficients[2] + (lm$coefficients[1]-.09))))
+```
+
+
+
+\##~~~~~~~~~~~~~~~~~~~~~ Filter cells based on maxMito threshold ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+`line 392`
+
+
+```{r nGenesvsnUMIs_beforefiltering}
+p1 <- plotColData(sce[, !sce$qc == "fails_maxMito"], x="sum", y="detected",
+            color_by = "subsets_Mito_percent",
+            size_by = "subsets_Ribo_percent") +
+  scale_x_log10() + scale_y_log10() +
   scale_colour_gradient(aesthetics = c("colour"),low = "gray90", high = "black") +
   scale_size_area(max_size = 3)+
   geom_smooth(method = "lm", show.legend = FALSE)+
-  geom_hline(aes(yintercept = min_nfeatures), colour = "darkgreen", linetype = 2)+
+  geom_hline(aes(yintercept = 10^min_nfeatures), colour = "darkgreen", linetype = 2)+
   xlab("log10(nCount_RNA)")+
   ylab("log10(nFeature_RNA)") +
   theme_classic() + 
   theme(legend.position = "left") +
-  labs(colour="percent.mito", size="percent.ribo")
+  labs(colour="percent.mito") +
+  guides(size=guide_legend("percent.ribo"))
 
 p1 <- ggMarginal(p1, type = "densigram",bins=100, fill="grey", alpha=.3)
 
@@ -560,36 +586,29 @@ p1
 ```
 
 
-
-\##~~~~~~~~~~~~~~~~~~~~~ Filter cells based on both metrics ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\##~~~~~~~~~~~~~~~~~~~~~ Filter cells based on maxMito & minFeat ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 `line 412`
-
-```{r filtering_mito_rna}
-sce_mito_rna_filt <- sce_Mito_filt[, log10(sce_Mito_filt$detected) >= min_nfeatures]
-```
-
-
-```{r}
-lm <- lm(log10(sce_mito_rna_filt$detected) ~ log10(sce_mito_rna_filt$sum))
-```
 
 
 ```{r nGenesvsUMIs_cutoff, warning=FALSE}
-p2 <- ggcells(sce_mito_rna_filt, mapping=aes(x=log10(sum), y=log10(detected),
-        colour=subsets_Mito_percent,
-        size=subsets_Ribo_percent)) +
-  geom_point() + 
+p2 <- plotColData(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat"],
+                  x="sum", y="detected",
+        colour_by="subsets_Mito_percent",
+        size_by="subsets_Ribo_percent") +
+  scale_x_log10() + scale_y_log10() + 
   scale_colour_gradient(aesthetics = c("colour"),low = "gray90", high = "black") +
   scale_size_area(max_size = 3)+
   geom_smooth(method = "lm", show.legend = FALSE)+
-  geom_hline(aes(yintercept = min_nfeatures), colour = "darkgreen", linetype = 2)+
+  geom_hline(aes(yintercept = 10^min_nfeatures), colour = "darkgreen", linetype = 2)+
   geom_abline(intercept = lm$coefficients[1] - 0.09, slope = lm$coefficients[2], color="orange") +
   xlab("log10(nCount_RNA)")+
   ylab("log10(nFeature_RNA)") +
   theme_classic() + 
   theme(legend.position = "left") +
-  labs(colour="percent.mito", size="percent.ribo") +
-  annotate(geom = "text",size=4, label = paste0(dim(sce_mito_rna_filt)[2], " QC passed cells"), x = 3, y = 3.8)
+  labs(colour="percent.mito") +
+  guides(size=guide_legend("percent.ribo")) +
+  annotate(geom = "text",size=4, label = paste0(dim(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat"])[2], " QC passed cells"),
+           x = 1000, y = 5000)
 
 p2 <- ggMarginal(p2, type = "densigram",bins=100, fill="grey", alpha=.3)
 
@@ -597,19 +616,13 @@ p2
 ```
 
 
-
-```{r storing_validCells into oject}
-#Cell.QC.Stat$valideCells <- (log10(Cell.QC.Stat$nFeature_RNA) > (log10(Cell.QC.Stat$nCount_RNA) * lm.model$coefficients[2] + (lm.model$coefficients[1] - 0.09)))
-
-colData(sce_mito_rna_filt)$validCells <-log10(sce_mito_rna_filt$detected) > log10(sce_mito_rna_filt$sum) * lm$coefficients[2] + (lm$coefficients[1]-.09)
-```
-
 \# cells to exclude lie below an intercept offset of -0.09
 
 
 ```{r nGenesvsnUMIs_validCells, warning=FALSE, message=FALSE}
-p3 <- plotColData(sce_mito_rna_filt, x="sum", y="detected",
-            colour_by = "validCells") +
+p3 <- plotColData(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat"],
+                  x="sum", y="detected",
+            colour_by = "qc") +
   scale_x_log10() + scale_y_log10() +
   scale_colour_manual(values = c("darkred", "dodgerblue")) +
   geom_smooth(method = "lm", color="black",show.legend = FALSE)+
@@ -620,8 +633,9 @@ p3 <- plotColData(sce_mito_rna_filt, x="sum", y="detected",
   theme(legend.position = "left") +
   labs(colour="valid cells") +
   annotate(geom = "text",size=4,
-           label = paste0(table(sce_mito_rna_filt$validCells)[[2]], " QC passed cells\n",
-                                                table(sce_mito_rna_filt$validCells)[[1]], " QC filtered"),
+           label = paste0(
+             table(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat"]$qc)[[2]], " QC passed cells\n",
+             table(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat"]$qc)[[1]], " QC filtered"),
            x = 2000, y = 10000)
 
 p3 <- ggMarginal(p3, type = "densigram",bins=100, fill="grey", alpha=.3)
@@ -676,8 +690,10 @@ p1
 \##~~~~~~~~~~~~~~~~~~~~~ Removing unvalid cells ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 `line 510`
 
+Here we retain those which passed all the filters, in the `qc` column as *passed*.
+
 ```{r}
-sce_validCells <- sce_mito_rna_filt[, sce_mito_rna_filt$validCells]
+
 ```
 
 
