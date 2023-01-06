@@ -585,6 +585,7 @@ p1
 
 
 \##~~~~~~~~~~~~~~~~~~~~~ Filter cells based on maxMito & minFeat ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 `line 412`
 
 
@@ -647,7 +648,7 @@ p3
 \# up to here belong to if the length of mito genes are greater or equal to 1
 
 
-**if statement** `line 450`
+**if statement** `line 450` (ignored)
 
 ```{r eval=FALSE}
 if(!length(grep("^mt-", rownames(sce))) >=1)
@@ -690,10 +691,6 @@ p1
 
 Here we retain those which passed all the filters, in the `qc` column as *passed*.
 
-```{r}
-
-```
-
 
 \##~~~~~~~~~~~~~~~~~~~~~ Plot final QC metrics ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -728,6 +725,12 @@ plotColData(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce
   theme(axis.text.y=element_text(size = 14,hjust = 0.5), title = element_text(size = 14,hjust = 0.5))
 ```
 
+**if statement** `line 531`
+
+```{r eval=FALSE}
+if(!length(grep("^mt-", rownames(sce))) >=1)
+```
+
 
 ```{r nMitoGenes_after_filtering}
 
@@ -756,6 +759,88 @@ plotColData(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce
   ggtitle("Ribosomal genes")+
   theme(axis.text.y=element_text(size = 14,hjust = 0.5), title = element_text(size = 14,hjust = 0.5))
 ```
+
+
+```{r nUMIsVSnGenes_after_filtering}
+
+p1 <- plotColData(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"],
+                  x="sum", y="detected",
+                  colour_by="subsets_Mito_percent",
+                  size_by="subsets_Ribo_percent") +
+  scale_x_log10() + scale_y_log10() + 
+  scale_colour_gradient(aesthetics = c("colour"),low = "gray90", high = "black") +
+  scale_size_area(max_size = 3)+
+  geom_smooth(method = "lm", show.legend = FALSE)+
+  #geom_hline(aes(yintercept=min_nfeatures), colour="darkgreen", linetype=2)+
+  xlab("log10(nCount_RNA)")+
+  ylab("log10(nFeature_RNA)") +
+  theme_classic() + 
+  theme(legend.position = "left") +
+  labs(colour="percent.mito") +
+  guides(size=guide_legend("percent.ribo"))
+
+p1 <- ggMarginal(p1, type = "densigram",bins=100, fill="grey", alpha=.3)
+
+p1
+```
+
+
+**closed if statement** `line 531`
+
+
+
+**if statement** `line 566` (ignored)
+
+**if statement** `line 598` (ignored)
+
+**if scrublet == FALSE** `line 598` 
+
+```{r eval=FALSE, include=FALSE}
+vars_to_regress: "detected" : "subset_Mito_percent"
+```
+
+```{r}
+dims <- 1:30
+```
+
+**if Seurat == TRUE** `line 825` (ignored)
+
+This function cannot be used, and the one on the script works with `Seurat`.
+
+```{r eval=FALSE}
+vst_out <- sctransform::vst(sparseMatrix(assay(sce)), return_cell_attr = FALSE, return_gene_attr = TRUE)
+```
+
+
+**closed if statement** `line 825`
+
+
+
+\##~~~~~~~~~~~~~~~~~~~~~ Continuing with alternative normalization - dim. reduction ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+`line 931`
+
+```{r}
+
+sce <- scuttle::logNormCounts(sce)
+
+```
+
+
+```{r}
+# sce <- runUMAP(sce) 
+
+#plotUMAP(sce)
+```
+
+
+
+
+
+
+
+
+
 
 
 
