@@ -1066,7 +1066,9 @@ seurat_marker<-function(seurat,gene_list){
 
 
 
-plot_save_umap<-function(seurat,genes=c("Slc1a3","Calb1","Pax2","Rbfox3","Lhx9","Sox10","Pvalb","Ret","Nrgn","Calb2","Eomes"),hto=TRUE){
+plot_save_umap<-function(seurat,
+                         genes=c("Slc1a3","Calb1","Pax2","Rbfox3","Lhx9","Sox10","Pvalb","Ret","Nrgn","Calb2","Eomes"),
+                         hto=TRUE){
   
   
 

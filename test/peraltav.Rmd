@@ -257,7 +257,7 @@ sce <- addPerCellQCMetrics(sce, subset=list(Mito=rownames(rowData(sce))[grep("mt
 source('src/source/Source_new_cellHasR.R')
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 fill= hue_pal()(7)[1]
 color= hue_pal()(7)[1]
 ```
@@ -808,7 +808,11 @@ dims <- 1:30
 This function cannot be used, and the one on the script works with `Seurat`.
 
 ```{r eval=FALSE}
-vst_out <- sctransform::vst(sparseMatrix(assay(sce)), return_cell_attr = FALSE, return_gene_attr = TRUE)
+
+#does not work
+s <- as.Seurat(sce, data=NULL)
+
+vst_out <- Seurat::SCTransform()
 ```
 
 
@@ -816,39 +820,115 @@ vst_out <- sctransform::vst(sparseMatrix(assay(sce)), return_cell_attr = FALSE, 
 
 
 
-\##~~~~~~~~~~~~~~~~~~~~~ Continuing with alternative normalization - dim. reduction ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\##~~~~~~~~~~~~~~~~~~~~~ Continuing with logNorm - dim. reduction ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 `line 931`
 
 ```{r}
 
-sce <- scuttle::logNormCounts(sce)
+sce <- logNormCounts(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"])
 
 ```
 
 
 ```{r}
-# sce <- runUMAP(sce) 
+# sce <- runUMAP(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"]) 
 
-#plotUMAP(sce)
+
+#plotUMAP(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"])
 ```
 
 
 
+```{r}
+sce$region[sce$consensus_call == "HTO-1"] <- "VA"
+sce$region[sce$consensus_call == "HTO-2"] <- "VP"
+sce$region[sce$consensus_call == "HTO-3"] <- "VC"
+sce$region[sce$consensus_call == "HTO-4"] <- "H1A"
+sce$region[sce$consensus_call == "HTO-5"] <- "H1P"
+sce$region[sce$consensus_call == "HTO-6"] <- "H1C"
+sce$region[sce$consensus_call == "HTO-7"] <- "H2A"
+sce$region[sce$consensus_call == "HTO-8"] <- "H2P"
+sce$region[sce$consensus_call == "HTO-9"] <- "H3"
+sce$region[sce$consensus_call == "HTO-10"] <- "DCN"
+
+sce$ML[grep("V", sce$region)] <- "Vermis"
+sce$ML[grep("H1", sce$region)] <- "Paravermis"
+sce$ML[grep("H2", sce$region)] <- "Hemisphere_lat"
+sce$ML[grep("H3", sce$region)] <- "Hemisphere_lat"
+sce$ML[grep("DCN", sce$region)] <- "DCN"
+
+
+sce$age <- "P0"
+sce$strain <- "CD1"
 
 
 
+```
 
 
 
+\##~~~~~~~~~~~~~~~~~~~~~ Attempt to implement Pearson Residuals ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+```{r}
+theta <- 100
+```
+
+
+```{r eval=FALSE, include=FALSE}
+counts_sum0 <- rowSums(assay(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"])) # 32285,1 
+counts_sum1 <- colSums(assay(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"])) # 1, 20000
+counts_sum <- sum(assay(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"]))
+```
+
+
+```{r eval=FALSE, include=FALSE}
+mu <- DelayedArray(crossprod(t(counts_sum0), counts_sum1) / counts_sum)
+
+z <- DelayedArray((assay(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"]) - mu) / sqrt(mu + (mu**2/theta)))
+```
 
 
 
+```{r eval=FALSE, include=FALSE}
+sce_2 <- sce
+
+assay(sce_2, "pearson_norm") <- z * assay(sce_2)
+
+```
 
 
 
+```{r eval=FALSE, include=FALSE}
+
+assay(sce_2, "pearson_norm") <- z * assay(sce_2)
+
+sce_2<- runUMAP(sce_2, exprs_values="pearson_norm") 
+
+plotUMAP(sce_2[, !sce_2$qc == "fails_maxMito" & !sce_2$qc == "fails_minFeat" & !sce_2$qc == "fails_lm"],
+         colour_by="consensus_call_global") +
+  scale_colour_manual(values=c("purple", "blue", "green", "orange"))
+
+```
 
 
+
+```{r eval=FALSE, include=FALSE}
+sce_2 <- logNormCounts(sce_2[, !sce_2$qc == "fails_maxMito" & !sce_2$qc == "fails_minFeat" & !sce_2$qc == "fails_lm"])
+
+sce_2<- runUMAP(sce_2[, !sce_2$qc == "fails_maxMito" & !sce_2$qc == "fails_minFeat" & !sce_2$qc == "fails_lm"]) 
+
+plotUMAP(sce_2[, !sce_2$qc == "fails_maxMito" & !sce_2$qc == "fails_minFeat" & !sce_2$qc == "fails_lm"],
+         colour_by="consensus_call_global") +
+  scale_colour_manual(values=c("purple", "blue", "green", "orange"))
+```
+
+
+
+```{r}
+
+```
 
 
 

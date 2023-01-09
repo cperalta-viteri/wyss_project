@@ -124,7 +124,9 @@ Telley_muA<-local({
   
   
   
-  plot_save_umap(Telley_muA,genes=c("Slc1a3","Calb1","Pax2","Rbfox3","Lhx9","Sox10","Pvalb","Ret","Nrgn","Calb2","Eomes"))
+  plot_save_umap(Telley_muA,
+                 genes=c("Slc1a3","Calb1","Pax2","Rbfox3",
+                         "Lhx9","Sox10","Pvalb","Ret","Nrgn","Calb2","Eomes"))
   
   
   
