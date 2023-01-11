@@ -810,13 +810,25 @@ This function cannot be used, and the one on the script works with `Seurat`.
 ```{r eval=FALSE}
 
 
-#assay(sce) <- as(assay(sce),'Matrix')
-altExps(sce) <- NULL
-s <- as.Seurat(sce,counts = "counts" ,data=NULL)
+as(assay(sce),'Matrix')
 
-vst_out <- Seurat::SCTransform()
+do_vst_transform <- function(sce_object){
+  vst <- sctransform::vst(as(assay(sce_object),'Matrix'), return_corrected_umi = TRUE)
+
+  vst <- DelayedArray(log1p(vst$umi_corrected)/log(2))
+}
+
+
 ```
 
+
+
+```{r}
+assay(sce_2, "vst_UMIcorrect") <- vst
+```
+
+
+sctransform::correct_counts and then log1p of counts divided by log2
 
 **closed if statement** `line 825`
 
@@ -870,6 +882,11 @@ sce$ML[grep("H2", sce$region)] <- "Hemisphere_lat"
 sce$ML[grep("H3", sce$region)] <- "Hemisphere_lat"
 sce$ML[grep("DCN", sce$region)] <- "DCN"
 
+sce$AP[grep("A",sce$region)]<-"Anterior"
+sce$AP[grep("P",sce$region)]<-"Posterior"
+sce$AP[grep("C",sce$region)]<-"Central"
+sce$AP[grep("H3",sce$region)]<-"Central"
+sce$AP[grep("DCN",sce$region)]<-"DCN"
 
 sce$age <- "P0"
 sce$strain <- "CD1"
@@ -892,7 +909,18 @@ remove zero cells and genes
 \# SCE data structure
 
 
-```{r eval=FALSE, include=FALSE}
+```{r eval=FALSE}
+library(parallel)
+system.time(
+mclapply(seq(1, 20000, by = 1000), FUN = function(i, x) {
+        DelayedMatrixStats::colSums2(x = x, cols = i:(i+999))
+    },
+    x = h5matrix, mc.cores = 4)
+)
+```
+
+
+```{r eval=FALSE}
 #counts_sum0 <- rowSums(assay(sce[, sce$qc == "passed"][1:1000, 1:1100])) # 1100 cells 
 #counts_sum1 <- colSums(assay(sce[, sce$qc == "passed"][1:1000, 1:1100])) 
 #counts_sum <- sum(assay(sce[, sce$qc == "passed"][1:1000, 1:1100]))
@@ -919,6 +947,11 @@ z <- replace(z, is.na(z), c(0))
 ```
 
 
+```{r eval=FALSE}
+writeHDF5Array(z, filepath = "peralta_qc/pearson_residuals.hdf5")
+```
+
+
 
 UMAP to plot: region, ML, AP, genes, nFeature & percent.mito
 
@@ -928,6 +961,7 @@ genes=c("Slc1a3","Calb1","Pax2","Rbfox3",
 ```
 
 
+\# Filtering by passed only cells and producing UMAP visualization
 
 ```{r eval=FALSE, include=FALSE}
 sce_2 <- sce[, sce$qc == "passed"]
@@ -949,17 +983,101 @@ sce_2<- runUMAP(sce_2, exprs_values="pearson_resid", name = "UMAP_resid",
 ```
 
 
-```{r}
-saveRDS(sce_2, file = "sce_2")
-```
+#'*Importing this is taking up all my RAM memory... *
+
+
 
 
 ```{r}
-plotReducedDim(sce_2, dimred ="UMAP_resid", colour_by = "Rbfox3", by_exprs_values = "pearson_resid") +
+p1 <- plotReducedDim(sce_2, dimred ="UMAP_resid",
+               colour_by = "Rbfox3",
+               by_exprs_values = "pearson_resid",
+               point_size=.1) +
   coord_equal() +
   scale_color_gradient(low = "grey", high = "blue") +
-  geom_point(size=0.3)
+  labs(colour=NULL, title = "Rbfox3")
 ```
+
+
+```{r}
+p2 <-plotReducedDim(sce_2, dimred ="UMAP_resid",
+               colour_by = "Sox10",
+               by_exprs_values = "pearson_resid",
+               point_size=.1) +
+  scale_color_gradient(low = "grey", high = "blue") +
+  labs(colour=NULL, title = "Sox10") +
+  coord_equal()
+```
+
+```{r}
+p <- cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2, align = "hv")
+#ggsave(filename = file.path("peralta_qc/pdf/UMAP_fox_features.pdf"), plot = p, device = cairo_pdf)
+```
+
+
+```{r}
+
+#' Generates a grid plot with UMAP coordinates coloured by a list containing the name of gene markers of interest
+#' @param sce_object a SingeCellExperiment object containing the information needed to subset & plot
+#' @param gene_list a character list containing the names of the gene markers of interest
+#' @param dim_red the name of the reducedDimNames meta data to plot. Default to "UMAP_resid"
+#' @param expr_values the name of the assaysNames to use when retrieving feature information
+#' @return cowplot::plot_grid object
+
+plot_genes_markers <- function(sce_object, gene_list, dimred="UMAP_resid", expr_values="pearson_resid"){
+  plt <- local({
+    plotFUN <- function(gene){
+      plotReducedDim(sce_object, dimred =dimred,
+               colour_by = gene,
+               by_exprs_values = expr_values,
+               point_size=.1) +
+      scale_color_gradient(low = "grey", high = "blue") +
+      labs(colour=NULL, title = gene) +
+      coord_equal()
+    }
+    p <- base::Map(plotFUN, gene_list)
+    p <- cowplot::plot_grid(plotlist = p, ncol = 4, align = "hv")
+    p
+  })
+  
+  plt
+}
+
+p <- plot_genes_markers(sce_2, gene_list = genes)
+
+
+```
+
+
+
+```{r}
+p_region <- plotReducedDim(sce_2, dimred ="UMAP_resid",
+               colour_by = "region",
+               point_size=.1) +
+  coord_equal() + labs(title = "Region") + 
+  guides(colour=guide_legend(NULL, override.aes = list(size=2)))
+```
+
+
+```{r}
+sce_2$AP[grep("A",sce_2$region)]<-"Anterior"
+sce_2$AP[grep("P",sce_2$region)]<-"Posterior"
+sce_2$AP[grep("C",sce_2$region)]<-"Central"
+sce_2$AP[grep("H3",sce_2$region)]<-"Central"
+sce_2$AP[grep("DCN",sce_2$region)]<-"DCN"
+```
+
+
+
+```{r}
+p_AP <- plotReducedDim(sce_2, dimred ="UMAP_resid",
+               colour_by = "AP",
+               point_size=.1) +
+  coord_equal() + 
+  labs(title = "AP")  + 
+  guides(colour=guide_legend(NULL, override.aes = list(size=2)))
+```
+
 
 
 ```{r UMAP_poisson_mu, eval=FALSE, include=FALSE}
@@ -981,6 +1099,23 @@ plotUMAP(sce_2,
 #scale_colour_manual(values=c("purple", "blue", "green", "orange"))
 ```
 
+
+```{r}
+library(parallel)
+
+mclapply(sce_2)
+
+
+
+
+```
+
+
+
+
+```{r eval=FALSE}
+saveHDF5SummarizedExperiment(sce_2, dir = "sce_2_pearson_norm")
+```
 
 
 ```{r}
