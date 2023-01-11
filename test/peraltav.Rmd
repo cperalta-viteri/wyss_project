@@ -534,7 +534,7 @@ p
 
 
 ```{r}
-colData(sce)$qc <- NULL
+
 colData(sce)$qc <- gsub("TRUE", "passed", gsub("FALSE", "fails_maxMito", sce$subsets_Mito_percent <= mito_max))
 colData(sce)$qc <- 
   replace(x=colData(sce)$qc,
@@ -700,7 +700,7 @@ Here we retain those which passed all the filters, in the `qc` column as *passed
 
 ##~~~~~~~~~~~~~~~~~~~~~ Number of UMIs ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-plotColData(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"],
+plotColData(sce[, sce$qc == "passed"],
             y="sum") + 
   geom_point(size=0.25, alpha=0.5, position = position_jitter(width=0.25,seed = 12345))+
   geom_boxplot(width=0.025, outlier.size = 0.5, outlier.alpha = 0.8)+
@@ -715,7 +715,7 @@ plotColData(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce
 
 ##~~~~~~~~~~~~~~~~~~~~~ Number of Genes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-plotColData(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"],
+plotColData(sce[, sce$qc == "passed"],
             y="detected") + 
   geom_point(size=0.25, alpha=0.5, position = position_jitter(width=0.25,seed = 12345))+
   geom_boxplot(width=0.025, outlier.size = 0.5, outlier.alpha = 0.8)+
@@ -736,7 +736,7 @@ if(!length(grep("^mt-", rownames(sce))) >=1)
 
 ##~~~~~~~~~~~~~~~~~~~~~ Mitochondrial Genes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-plotColData(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"],
+plotColData(sce[, sce$qc == "passed"],
             y="subsets_Mito_percent") + 
   geom_point(size=0.25, alpha=0.5, position = position_jitter(width=0.25,seed = 12345))+
   geom_boxplot(width=0.025, outlier.size = 0.5, outlier.alpha = 0.8)+
@@ -750,7 +750,7 @@ plotColData(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce
 
 ##~~~~~~~~~~~~~~~~~~~~~ Ribosomal Genes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-plotColData(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"],
+plotColData(sce[, sce$qc == "passed"],
             y="subsets_Ribo_percent") + 
   geom_point(size=0.25, alpha=0.5, position = position_jitter(width=0.25,seed = 12345))+
   geom_boxplot(width=0.025, outlier.size = 0.5, outlier.alpha = 0.8)+
@@ -763,7 +763,7 @@ plotColData(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce
 
 ```{r nUMIsVSnGenes_after_filtering}
 
-p1 <- plotColData(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"],
+p1 <- plotColData(sce[, sce$qc == "passed"],
                   x="sum", y="detected",
                   colour_by="subsets_Mito_percent",
                   size_by="subsets_Ribo_percent") +
@@ -809,8 +809,10 @@ This function cannot be used, and the one on the script works with `Seurat`.
 
 ```{r eval=FALSE}
 
-#does not work
-s <- as.Seurat(sce, data=NULL)
+
+#assay(sce) <- as(assay(sce),'Matrix')
+altExps(sce) <- NULL
+s <- as.Seurat(sce,counts = "counts" ,data=NULL)
 
 vst_out <- Seurat::SCTransform()
 ```
@@ -822,20 +824,30 @@ vst_out <- Seurat::SCTransform()
 
 \##~~~~~~~~~~~~~~~~~~~~~ Continuing with logNorm - dim. reduction ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+
+```{r}
+saveRDS(sce, "sce_qc.rds")
+```
+
+```{r}
+sce <- readRDS("sce_qc.rds")
+```
+
+
 `line 931`
 
 ```{r}
 
-sce <- logNormCounts(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"])
+#sce <- logNormCounts(sce[, sce$qc == "passed"])
 
 ```
 
 
 ```{r}
-# sce <- runUMAP(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"]) 
+# sce <- runUMAP(sce[, sce$qc == "passed"]) 
 
 
-#plotUMAP(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"])
+#plotUMAP(sce[, sce$qc == "passed"])
 ```
 
 
@@ -875,53 +887,98 @@ sce$strain <- "CD1"
 theta <- 100
 ```
 
+remove zero cells and genes
+
+\# SCE data structure
+
 
 ```{r eval=FALSE, include=FALSE}
-counts_sum0 <- rowSums(assay(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"])) # 32285,1 
-counts_sum1 <- colSums(assay(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"])) # 1, 20000
-counts_sum <- sum(assay(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"]))
+#counts_sum0 <- rowSums(assay(sce[, sce$qc == "passed"][1:1000, 1:1100])) # 1100 cells 
+#counts_sum1 <- colSums(assay(sce[, sce$qc == "passed"][1:1000, 1:1100])) 
+#counts_sum <- sum(assay(sce[, sce$qc == "passed"][1:1000, 1:1100]))
+
+
+counts_sum0 <- rowSums(assay(sce[, sce$qc == "passed"])) # 1100 cells 
+counts_sum1 <- colSums(assay(sce[, sce$qc == "passed"])) 
+counts_sum <- sum(assay(sce[, sce$qc == "passed"]))
 ```
 
 
-```{r eval=FALSE, include=FALSE}
+```{r eval=FALSE}
 mu <- DelayedArray(crossprod(t(counts_sum0), counts_sum1) / counts_sum)
 
-z <- DelayedArray((assay(sce[, !sce$qc == "fails_maxMito" & !sce$qc == "fails_minFeat" & !sce$qc == "fails_lm"]) - mu) / sqrt(mu + (mu**2/theta)))
+#colnames(mu) <- colnames(sce[, sce$qc == "passed"])
+
+z <- DelayedArray((assay(sce[, sce$qc == "passed"]) - mu) / sqrt(mu + (mu**2/theta)))
+```
+
+
+
+```{r eval=FALSE}
+z <- replace(z, is.na(z), c(0))
+```
+
+
+
+UMAP to plot: region, ML, AP, genes, nFeature & percent.mito
+
+```{r}
+genes=c("Slc1a3","Calb1","Pax2","Rbfox3",
+                         "Lhx9","Sox10","Pvalb","Ret","Nrgn","Calb2","Eomes")
 ```
 
 
 
 ```{r eval=FALSE, include=FALSE}
-sce_2 <- sce
+sce_2 <- sce[, sce$qc == "passed"]
 
-assay(sce_2, "pearson_norm") <- z * assay(sce_2)
+#assay(sce_2, "poisson_mu") <- mu
+assay(sce_2, "pearson_resid") <- z
+
+```
+
+```{r}
+bp <- BiocParallel::MulticoreParam(workers = 8, RNGseed = 16, progressbar = TRUE)
+```
+
+
+```{r eval=FALSE}
+sce_2<- runUMAP(sce_2, exprs_values="pearson_resid", name = "UMAP_resid",
+                BPPARAM=bp)
 
 ```
 
 
+```{r}
+saveRDS(sce_2, file = "sce_2")
+```
 
-```{r eval=FALSE, include=FALSE}
 
-assay(sce_2, "pearson_norm") <- z * assay(sce_2)
+```{r}
+plotReducedDim(sce_2, dimred ="UMAP_resid", colour_by = "Rbfox3", by_exprs_values = "pearson_resid") +
+  coord_equal() +
+  scale_color_gradient(low = "grey", high = "blue") +
+  geom_point(size=0.3)
+```
 
-sce_2<- runUMAP(sce_2, exprs_values="pearson_norm") 
 
-plotUMAP(sce_2[, !sce_2$qc == "fails_maxMito" & !sce_2$qc == "fails_minFeat" & !sce_2$qc == "fails_lm"],
-         colour_by="consensus_call_global") +
-  scale_colour_manual(values=c("purple", "blue", "green", "orange"))
+```{r UMAP_poisson_mu, eval=FALSE, include=FALSE}
+sce_2<- runUMAP(sce_2, exprs_values="poisson_mu", name = "UMAP_poisson")
 
+plotReducedDim(sce_2, dimred ="UMAP_poisson", 
+         colour_by="region")
 ```
 
 
 
-```{r eval=FALSE, include=FALSE}
-sce_2 <- logNormCounts(sce_2[, !sce_2$qc == "fails_maxMito" & !sce_2$qc == "fails_minFeat" & !sce_2$qc == "fails_lm"])
+```{r }
+sce_2 <- logNormCounts(sce_2)
 
-sce_2<- runUMAP(sce_2[, !sce_2$qc == "fails_maxMito" & !sce_2$qc == "fails_minFeat" & !sce_2$qc == "fails_lm"]) 
+sce_2<- runUMAP(sce_2) 
 
-plotUMAP(sce_2[, !sce_2$qc == "fails_maxMito" & !sce_2$qc == "fails_minFeat" & !sce_2$qc == "fails_lm"],
-         colour_by="consensus_call_global") +
-  scale_colour_manual(values=c("purple", "blue", "green", "orange"))
+plotUMAP(sce_2,
+         colour_by="region")
+#scale_colour_manual(values=c("purple", "blue", "green", "orange"))
 ```
 
 
