@@ -41,12 +41,12 @@ h5ls("data/muA/muAh/raw_feature_bc_matrix.h5")
 
 
 
-```{r reading_data, include=FALSE}
+```{r reading_data, include=FALSE, eval=FALSE}
 # mrna & atac:
 #tenx <- TENxMatrix("data/muA/filtered_feature_bc_matrix.h5")
 
 # HTO tags
-#htos <- TENxMatrix("data/muA/muAh/raw_feature_bc_matrix.h5")
+htos <- TENxMatrix("data/muA/muAh/raw_feature_bc_matrix.h5")
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## features x samples
 ## 'gene expresion: 32285 x 20000 sparse Matrix of class "dgCMatrix"
@@ -122,18 +122,19 @@ colnames(sce) <- colData(sce)$"Barcode"
 sce
 ```
 
+
 *To add HTOs as metadata, remember to perform the intersection counts-htos*
 
+
 ```{r}
-#htos <- TENxMatrix("data/muA/muAh/raw_feature_bc_matrix.h5")
-# using DropletUtils
+# using DropletUtils::read10xCounts
 htos <- read10xCounts("data/muA/muAh/raw_feature_bc_matrix.h5")
-colnames(htos) <- colData(htos)$Barcode
+colnames(htos) <- htos$Barcode
 htos <- htos[, intersect(colnames(sce), colnames(htos))]
 ```
 
 ```{r}
-#stopifnot(setequal(colnames(htos), colData(sce)[, "Barcode"]))
+# make sure that the colnames are the same in both assays
 stopifnot(setequal(colnames(htos), colnames(sce)))
 
 ```
@@ -142,10 +143,69 @@ stopifnot(setequal(colnames(htos), colnames(sce)))
 
 ```{r}
 altExp(sce, "hto") <- SummarizedExperiment(assay(htos))
+
+# hto can be removed
+
 #rm(htos)
 ```
 
 # Demultiplexing
+
+```{r}
+# make sure to have Python installed with all the required packages if you want to run 'gmm_demux'
+reticulate::py_config()
+```
+
+
+```{r}
+HTO_tag=c("HTO-1","HTO-2","HTO-3","HTO-4","HTO-5","HTO-6","HTO-7","HTO-8","HTO-9","HTO-10")
+```
+
+
+```{r eval=FALSE}
+demultiplex_fun <- function(sce_object,
+                            filter_singlet=FALSE,
+                            methods=c("multiseq","gmm_demux", "htodemux", "dropletutils"),
+                            project= "New_project",
+                            mito_max=15,
+                            HTO_tag,
+                            dims=c(1:30),
+                            min_nfeatures=log10(200),
+                            hto=TRUE,
+                            py_function=py_run_string("project='New_project")){
+  require(ggplot2)
+  require(ggExtra)
+  require(dplyr)
+  require(cowplot)
+  require(Matrix)
+  require(gridExtra)
+  require(ggrepel)
+  require(ggpubr)
+  require(ggnewscale)
+  require(cellhashR)
+  
+  sc_e <- switch(hto, TRUE = {
+    barcode_df <- as.data.frame(
+      assay(swapAltExp(sce_object, "hto"))[rownames(assay(swapAltExp(sce_object, "hto"))) %in% HTO_tag,])
+    pdf(file.path("peralta_qc/pdf/hto.pdf"), width = 20, height = 20)
+    calls <- GenerateCellHashingCalls(barcodeMatrix = barcode_df,
+                                  methods = methods, 
+                                  doTSNE = FALSE,
+                                  majorityConsensusThreshold = 0.3)
+    # create summary plots to contrast cells based on call-status. Help inform why some cells were not called
+    SummarizeCellsByClassification(calls = calls, barcodeMatrix = barcode_df)
+    dev.off()
+    stopifnot(setequal(colnames(sce_object), calls$cellbarcode))
+    colData(sce_object)$consensus_call <- calls$consensuscall
+    colData(sce_object)$consensus_call_global <- calls$consensuscall.global
+    # interest in filtering by calls$consensuscall.global
+    if(filter_singlet==TRUE){sce_object <- sce[, sce$Barcode %in% calls[ calls$consensuscall.global=="Singlet", ]$cellbarcode]}
+    sce_object
+  }
+         )
+}
+```
+
 
 ```{r message=FALSE}
 require(ggplot2)
@@ -161,30 +221,23 @@ require(cellhashR)
 
 ```
 
-```{r}
-reticulate::py_config()
-```
-
-```{r}
-HTO_tag=c("HTO-1","HTO-2","HTO-3","HTO-4","HTO-5","HTO-6","HTO-7","HTO-8","HTO-9","HTO-10")
-```
 
 **if hto == TRUE** `line 122`
 
-```{r eval=FALSE}
+```{r eval=FALSE, include=FALSE}
 # getting a list of cellbarcode
 fileConn <- file(file.path("peralta_qc/out/cellbarcodeWhitelist.txt"))
 writeLines(gsub("-", ".", colnames(sce)), fileConn) #it's using seurat, so it's mandatory to gsub
 close(fileConn)
 ```
 
-```{r eval=FALSE}
+```{r eval=FALSE, include=FALSE}
 # swapping experiment to hto and subsetting rownames by HTO-tag, list of interest.
 write.table(assay(swapAltExp(sce, "hto"))[rownames(assay(swapAltExp(sce, "hto"))) %in% HTO_tag,],
             file = "peralta_qc/out/hto.txt", sep = ",", col.names = TRUE, row.names = TRUE)
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 pdf(file.path("peralta_qc/pdf/hto.pdf"), width = 20, height = 20)
 
 barcodeData <- ProcessCountMatrix(rawCountData = "peralta_qc/out/hto.txt",
@@ -203,7 +256,7 @@ SummarizeCellsByClassification(calls = calls, barcodeMatrix = barcodeData)
 dev.off()
 ```
 
-```{r }
+```{r eval=FALSE, include=FALSE}
 # reverting name change of barcodes
 calls$cellbarcode<-gsub("[.]","-",calls$cellbarcode)
 ```
@@ -215,7 +268,7 @@ if(filter_singlet==TRUE){sce[, sce$Barcode %in% calls[ calls$consensuscall.globa
 ```
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 stopifnot(setequal(colnames(sce), calls$cellbarcode))
 colData(sce)$consensus_call <- calls$consensuscall
 colData(sce)$consensus_call_global <- calls$consensuscall.global
@@ -376,7 +429,7 @@ p2
 ```
 
 
-**if hto==TRUE ** `line 284` 
+**if hto==TRUE ** `line 287` 
 
 ```{r}
 mito_max <- 15
@@ -419,6 +472,9 @@ if(sum(sce$subsets_Mito_percent > mito_max)==length(sce$subsets_Mito_percent <= 
 }
 ```
 
+```{r}
+ plotColData(sce, x="detected", y="subsets_Mito_percent")
+```
 
 
 ```{r warning=FALSE}
@@ -443,7 +499,7 @@ if(sum(sce$subsets_Mito_percent <= mito_max)!=length(sce$subsets_Mito_percent <=
 ```
 
 
-**closed if statement** `line 284`
+**closed if statement** `line 287`
 
 
 **if hto==FALSE ** `line 340`
@@ -805,7 +861,7 @@ dims <- 1:30
 
 **if Seurat == TRUE** `line 825` (ignored)
 
-This function cannot be used, and the one on the script works with `Seurat`.
+
 
 ```{r eval=FALSE}
 
@@ -824,6 +880,8 @@ do_vst_transform <- function(sce_object){
 
 
 ```{r}
+#  add vst as alternative experiments
+
 assay(sce_2, "vst_UMIcorrect") <- vst
 ```
 
@@ -837,11 +895,11 @@ sctransform::correct_counts and then log1p of counts divided by log2
 \##~~~~~~~~~~~~~~~~~~~~~ Continuing with logNorm - dim. reduction ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-```{r}
-saveRDS(sce, "sce_qc.rds")
+```{r eval=FALSE}
+#saveRDS(sce, "sce_qc.rds")
 ```
 
-```{r}
+```{r eval=FALSE}
 sce <- readRDS("sce_qc.rds")
 ```
 
@@ -928,7 +986,7 @@ mclapply(seq(1, 20000, by = 1000), FUN = function(i, x) {
 
 counts_sum0 <- rowSums(assay(sce[, sce$qc == "passed"])) # 1100 cells 
 counts_sum1 <- colSums(assay(sce[, sce$qc == "passed"])) 
-counts_sum <- sum(assay(sce[, sce$qc == "passed"]))
+counts_sum <- sum(assay(sce[, sce$qc == "passed"])) # sum of the cols sum
 ```
 
 
