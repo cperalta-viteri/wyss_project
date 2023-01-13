@@ -1,4 +1,5 @@
 
+library(igraph)
 
 # Convert a json object retrieved from BRITE into a DataFrame
 brite_nodes <- function(n,path="0") {
