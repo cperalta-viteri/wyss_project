@@ -162,50 +162,6 @@ HTO_tag=c("HTO-1","HTO-2","HTO-3","HTO-4","HTO-5","HTO-6","HTO-7","HTO-8","HTO-9
 ```
 
 
-```{r eval=FALSE}
-demultiplex_fun <- function(sce_object,
-                            filter_singlet=FALSE,
-                            methods=c("multiseq","gmm_demux", "htodemux", "dropletutils"),
-                            project= "New_project",
-                            mito_max=15,
-                            HTO_tag,
-                            dims=c(1:30),
-                            min_nfeatures=log10(200),
-                            hto=TRUE,
-                            py_function=py_run_string("project='New_project")){
-  require(ggplot2)
-  require(ggExtra)
-  require(dplyr)
-  require(cowplot)
-  require(Matrix)
-  require(gridExtra)
-  require(ggrepel)
-  require(ggpubr)
-  require(ggnewscale)
-  require(cellhashR)
-  
-  sc_e <- switch(hto, TRUE = {
-    barcode_df <- as.data.frame(
-      assay(swapAltExp(sce_object, "hto"))[rownames(assay(swapAltExp(sce_object, "hto"))) %in% HTO_tag,])
-    pdf(file.path("peralta_qc/pdf/hto.pdf"), width = 20, height = 20)
-    calls <- GenerateCellHashingCalls(barcodeMatrix = barcode_df,
-                                  methods = methods, 
-                                  doTSNE = FALSE,
-                                  majorityConsensusThreshold = 0.3)
-    # create summary plots to contrast cells based on call-status. Help inform why some cells were not called
-    SummarizeCellsByClassification(calls = calls, barcodeMatrix = barcode_df)
-    dev.off()
-    stopifnot(setequal(colnames(sce_object), calls$cellbarcode))
-    colData(sce_object)$consensus_call <- calls$consensuscall
-    colData(sce_object)$consensus_call_global <- calls$consensuscall.global
-    # interest in filtering by calls$consensuscall.global
-    if(filter_singlet==TRUE){sce_object <- sce[, sce$Barcode %in% calls[ calls$consensuscall.global=="Singlet", ]$cellbarcode]}
-    sce_object
-  }
-         )
-}
-```
-
 
 ```{r message=FALSE}
 require(ggplot2)
@@ -868,18 +824,16 @@ dims <- 1:30
 
 as(assay(sce),'Matrix')
 
-do_vst_transform <- function(sce_object){
-  vst <- sctransform::vst(as(assay(sce_object),'Matrix'), return_corrected_umi = TRUE)
+vst <- sctransform::vst(as(assay(sce_object),'Matrix'), return_corrected_umi = TRUE)
 
-  vst <- DelayedArray(log1p(vst$umi_corrected)/log(2))
-}
+vst <- DelayedArray(log1p(vst$umi_corrected)/log(2))
 
 
 ```
 
 
 
-```{r}
+```{r eval=FALSE}
 #  add vst as alternative experiments
 
 assay(sce_2, "vst_UMIcorrect") <- vst
@@ -906,14 +860,14 @@ sce <- readRDS("sce_qc.rds")
 
 `line 931`
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 
 #sce <- logNormCounts(sce[, sce$qc == "passed"])
 
 ```
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 # sce <- runUMAP(sce[, sce$qc == "passed"]) 
 
 
@@ -1006,7 +960,7 @@ z <- replace(z, is.na(z), c(0))
 
 
 ```{r eval=FALSE}
-writeHDF5Array(z, filepath = "peralta_qc/pearson_residuals.hdf5")
+#writeHDF5Array(z, filepath = "peralta_qc/pearson_residuals.hdf5")
 ```
 
 
@@ -1041,9 +995,6 @@ sce_2<- runUMAP(sce_2, exprs_values="pearson_resid", name = "UMAP_resid",
 ```
 
 
-#'*Importing this is taking up all my RAM memory... *
-
-
 
 
 ```{r}
@@ -1073,7 +1024,7 @@ p <- cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2, align = "hv")
 ```
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 
 #' Generates a grid plot with UMAP coordinates coloured by a list containing the name of gene markers of interest
 #' @param sce_object a SingeCellExperiment object containing the information needed to subset & plot
@@ -1156,19 +1107,6 @@ plotUMAP(sce_2,
          colour_by="region")
 #scale_colour_manual(values=c("purple", "blue", "green", "orange"))
 ```
-
-
-```{r}
-library(parallel)
-
-mclapply(sce_2)
-
-
-
-
-```
-
-
 
 
 ```{r eval=FALSE}
