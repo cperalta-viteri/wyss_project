@@ -168,6 +168,11 @@ sce <- addPerCellQCMetrics(sce, subset=list(Mito=grep("mt-", rownames(sce),value
                                     Ribo=grep("(^Rpl|^Rps|Mrp)", rownames(sce), value = TRUE)))
 ```
 
+```{r}
+mito_max=15
+min_nfeatures=log10(200)
+```
+
 
 # QC metrics visualization
 
@@ -297,6 +302,8 @@ p
 
 
 
+
+
 # Set QC status
 
 Here we want to determine what cells has:
@@ -387,7 +394,7 @@ plot_QC_Violin(sce_object = sce[, sce$qc == "passed"],
 
 For a simple normalization of our count matrix, one can use `logNormCounts()` from the scuttle package.
 
-```{r}
+```{r eval=FALSE}
 ?scuttle::logNormCounts
 
 sce <- logNormCounts(sce[, sce$qc == "passed"])
@@ -404,27 +411,28 @@ assays(sce)
 This assay can be used to call dimensionality reduction techniques, such as UMAP.
 Since computing UMAP might take several minutes for large datasets, a good idea is to set a BiocParallel object to passed to the BPPARAM parameter in runUMAP.
 
-```{r}
+```{r eval=FALSE}
 ?BiocParallel::MulticoreParam
 bp <- BiocParallel::MulticoreParam(workers = 12, RNGseed = 16, progressbar = TRUE)
 ```
 
 
-```{r}
-system.time(
-  sce <- runUMAP(sce[, sce$qc == "passed"], BPPARAM=bp)
-)
+```{r eval=FALSE}
+sce <- runUMAP(sce[, sce$qc == "passed"], BPPARAM=bp)
 ```
 
 And now, simply plot UMAP
 
 
-```{r}
+```{r eval=FALSE}
 plotUMAP(sce[, sce$qc == "passed"], point_size=.05, colour_by="Sox10") +
   scale_color_gradient(low = "grey", high = "blue") +
   coord_equal() +
   guides(colour=guide_legend(NULL, override.aes = list(size=2)))
 ```
+
+
+![](umap_AnPearson.png)
 
 
 To know more about parameter one can tune, run ?scater::plotUMAP
@@ -444,9 +452,9 @@ To know more about parameter one can tune, run ?scater::plotUMAP
 #' @param sce_object A SingleCellExperiment objec.
 #' @param as.AltExp Boolean parameter to specify whether add the log-transformed count matrix as alternative experiment to the 
 #' SCE object.
-#' @return When `as.AltExp` is FALSE (default), the function returns a DelayedMatrix. When `as.AltExp` is TRUE, a SCE object is returned. 
+#' @return When `as.AltExp` is TRUE (default), the function returns a DelayedMatrix. When `as.AltExp` is TRUE, a SCE object is returned. 
 
-do_vst_transform <- function(sce_object, as.AltExp=FALSE){
+do_vst_transform <- function(sce_object, as.AltExp=TRUE){
   vst <- sctransform::vst(as(assay(sce_object),'Matrix'), return_corrected_umi = TRUE)
   vst <- DelayedArray(log1p(vst$umi_corrected)/log(2))
   if (as.AltExp) {
@@ -458,14 +466,14 @@ do_vst_transform <- function(sce_object, as.AltExp=FALSE){
 
 
 ```{r}    
-sce <- do_vst_transform(sce, as.AltExp = TRUE)
+sce <- do_vst_transform(sce[, sce$qc=="passed"])
 ```
 
 
 Now we have out count matrix normalized stored as alternative experiment in our SCE object. Remember to swap the experiment and we are go to go for dimensionality reduction.
 
 
-```{r}
+```{r eval=FALSE}
 sce <- swapAltExp(sce, "Gene_Expression_VST")
 
 sce <- runUMAP(sce, BPPARAM=bp, exprs_values="count_vst")
@@ -473,57 +481,85 @@ sce <- runUMAP(sce, BPPARAM=bp, exprs_values="count_vst")
 
 We can give also colors to our plots, provided that we explicitly pass the count matrix via the argument `by_exprs_values`. This is essential if our count matrix name is not `logcounts`.
 
-```{r}
+```{r eval=FALSE}
 plotUMAP(sce, colour_by="Sox10", point_size=.05, by_exprs_values="count_vst") +
   scale_color_gradient(low = "grey", high = "blue") +
   coord_equal() +
   guides(colour=guide_legend(NULL, override.aes = list(size=2)))
 ```
 
+![](umap_vst.png)
+
 
 ## Analytical Pearson Normalization
 
 
 
-```{r}
+```{r eval=FALSE}
 sce <- swapAltExp(sce, "Gene Expression")
 ```
 
 
+```{r read_RDS, eval=FALSE, include=FALSE}
+sce <- readRDS("sce_qc.rds")
+```
+
 
 ```{r}
+#' @title do_AnPearson_transform
+#' @description do_AnPearson_transform carries out Analytical Pearson Residuals Normalization for UMI count matrix,
+#' doi.org/10.1186/s13059-021-02451-7 .
+#' @export
+#' @param sce_object A SingleCellExperiment object.
+#' @param theta A numerical value, default to 100. Set the measure of overdispersion to the Poisson distribution.
+#' @return A SCE object with the normalized matrix added as alternative experiment under the name `Gene_Expression_PearNorm`.
+
 do_AnPearson_transform <- function(sce_object, theta=100){
-  counts_sum0 <- rowSums(assay(sce_object[, sce_object$qc =="passed"]))
-  counts_sum1 <- colSums(assay(sce_object[, sce_object$qc == "passed"]))
-  counts_sum <- sum(sce_object[, sce_object$qc == "passed"]$sum)
+  counts_sum0 <- rowSums(assay(sce_object))
+  counts_sum1 <- colSums(assay(sce_object))
+  counts_sum <- sum(sce_object$sum)
   
   mu <- DelayedArray(crossprod(t(counts_sum0), counts_sum1) / counts_sum)
-  z <- DelayedArray((assay(sce_object[, sce_object$qc == "passed"]) - mu) / sqrt(mu + (mu**2/theta)))
+  z <- DelayedArray((assay(sce_object) - mu) / sqrt(mu + (mu**2/theta)))
   z <- replace(z, is.na(z), c(0))
-
+  z <- z[, order(match(colnames(sce[, sce$qc=="passed"]), colnames(z)))]
+  altExp(sce_object, "Gene_Expression_PearNorm") <- 
+    SingleCellExperiment(list(count_AP=z), colData = colData(sce_object))
+  sce_object
 }
 
 ```
 
 
 
-```{r}
-z <- do_AnPearson_transform(sce)
+```{r eval=FALSE}
+sce <- do_AnPearson_transform(sce[, sce$qc == "passed"])
+```
+
+
+```{r eval=FALSE}
+sce <- swapAltExp(sce, "Gene_Expression_PearNorm")
 ```
 
 
 
+```{r eval=FALSE}
+
+sce <- runUMAP(sce, exprs_values="count_AP", 
+                    name = "UMAP", BPPARAM=bp)
+```
 
 
 
+```{r eval=FALSE}
+plotUMAP(sce, colour_by="Sox10", point_size=.05, by_exprs_values="count_AP") +
+  scale_color_gradient(low = "grey", high = "blue") +
+  coord_equal() +
+  guides(colour=guide_legend(NULL, override.aes = list(size=2)))
+```
 
 
-
-
-
-
-
-
+![](umap_AnPearson.png)
 
 
 

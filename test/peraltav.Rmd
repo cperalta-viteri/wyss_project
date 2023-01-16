@@ -853,7 +853,7 @@ sctransform::correct_counts and then log1p of counts divided by log2
 #saveRDS(sce, "sce_qc.rds")
 ```
 
-```{r eval=FALSE}
+```{r read_RDS, eval=FALSE}
 sce <- readRDS("sce_qc.rds")
 ```
 
@@ -1108,10 +1108,6 @@ plotUMAP(sce_2,
 #scale_colour_manual(values=c("purple", "blue", "green", "orange"))
 ```
 
-
-```{r eval=FALSE}
-saveHDF5SummarizedExperiment(sce_2, dir = "sce_2_pearson_norm")
-```
 
 
 ```{r}
