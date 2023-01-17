@@ -10,12 +10,12 @@ output: html_document
 knitr::opts_chunk$set(warning = FALSE)
 ```
 
-```{r eval=FALSE, include=FALSE}
+```{r docstrings, eval=FALSE, include=FALSE}
 #' @title
 #' @description
 #' @export
 #' @param
-#' return
+#' @return
 ```
 
 
@@ -23,23 +23,22 @@ knitr::opts_chunk$set(warning = FALSE)
 
 ```{r message=FALSE}
 library(HDF5Array)
-#library(Seurat)
-library(SingleCellExperiment) # just for testing
+library(SingleCellExperiment)
 library(cellhashR)
 library(DropletUtils)
 library(scater)
 library(scuttle)
 library(scales)
 library(ggExtra)
-
-# DropletUtils::read10xCounts()
 ```
 
 ```{r}
 set.seed(12)
 ```
 
-```{r}
+In case you want to check the content of your `.h5` file you can run:
+
+```{r eval=FALSE}
 # rna-seq & atac-seq
 h5ls("data/muA/raw_feature_bc_matrix.h5")
 # hto tags
@@ -50,11 +49,20 @@ h5ls("data/muA/muAh/raw_feature_bc_matrix.h5")
 
 # Data Loading & SCE object creation
 
+To load the information contained on a h5 file, use `read10xCounts` because it handles automatically the loading of both mRNA data and ATAC data. `read10xCounts` returns a SingleCellExperiment (SCE) object with all the information. Make sure to split the data so the object contains two separated experiments, one for gene expression and the other for epigenetics, `peaks`.
+
+
 ```{r}
+# Loading data
 sce <- read10xCounts("data/muA/filtered_feature_bc_matrix.h5")
+# spitting by type, i.e. mRNA & ATAC sequencing
 sce <- splitAltExps(sce, rowData(sce)[, "Type"])
+# remember to swap experiments to work with the count matrix of your experiment
 sce <- swapAltExp(sce, "Gene Expression")
+
+# set row names as unique to avoid redundancy
 rownames(sce) <- make.unique(rowData(sce)$Symbol)
+# set colnames as the cell barcode
 colnames(sce) <- colData(sce)$"Barcode"
 ```
 
@@ -65,7 +73,7 @@ sce
 
 
 *To add HTOs as metadata, remember to perform the intersection counts-htos*
-
+The process is repeated, load the data using `read10xCounts` function, set the column names and then perform the intersection.
 
 ```{r}
 # using DropletUtils::read10xCounts
@@ -77,10 +85,9 @@ htos <- htos[, intersect(colnames(sce), colnames(htos))]
 ```{r}
 # make sure that the colnames are the same in both assays
 stopifnot(setequal(colnames(htos), colnames(sce)))
-
 ```
 
-*Adding hto information as alternative experiment*
+Lastly, add the hto data as an alternative experiment.
 
 ```{r}
 altExp(sce, "hto") <- SummarizedExperiment(assay(htos))
@@ -92,18 +99,21 @@ altExp(sce, "hto") <- SummarizedExperiment(assay(htos))
 
 # Demultiplexing
 
+Now the objective is to demultiplex the data and obtain the HTO tag which was used for each cell.
+
 ```{r}
 # make sure to have Python installed with all the required packages if you want to run 'gmm_demux'
 reticulate::py_config()
 ```
 
+Set a list containing the HTO tags of interest. It will be used to filter out those non interesting tags.
 
 ```{r}
 HTO_tag=c("HTO-1","HTO-2","HTO-3","HTO-4","HTO-5","HTO-6","HTO-7","HTO-8","HTO-9","HTO-10")
 ```
 
 
-```{r eval=FALSE}
+```{r }
 #' @title demultiplexer
 #' @description demultiplexer calls cellhashR::GenerateCellHashingCalls. Filtering of the
 #' matrix of counts is performed prior call of the function.
@@ -111,7 +121,7 @@ HTO_tag=c("HTO-1","HTO-2","HTO-3","HTO-4","HTO-5","HTO-6","HTO-7","HTO-8","HTO-9
 #' @param sce_object A SingleCellExperiment object.
 #' @param methods List containing the algorithms to be used for the demultiplexing. This includes
 #' "multiseq", "gmm_demux", "htodemux", "dropletutils".
-#' @param project Character string to use to name the project under the directory of pdf/1-Loading. The PDFs output from GenerateCellHashigCalls will be saved to this directory. Default to "New_project".
+#' @param project Character vector to use to name the project under the directory of pdf/1-Loading. The PDFs output from GenerateCellHashigCalls will be saved to this directory. Default to "New_project".
 #' @param HTO_tag List of character strings containing the name of the HTO tags to keep, the white-list
 #' @param filter_singlet Boolean parameter to specify whether the resulting assay should be filtered to keep only cell barcodes assigned as singlets. Default to FALSE.
 #' @return A SingleCellExperiment object with information of consensus call and consensus call global stored in colData(sce_object).
@@ -151,6 +161,8 @@ demultiplexer <- function(sce_object,
 }
 ```
 
+Call `demultiplexer` function and it will take care of all your problems.
+
 ```{r}
 sce <- demultiplexer(sce, HTO_tag = HTO_tag)
 ```
@@ -159,6 +171,7 @@ sce <- demultiplexer(sce, HTO_tag = HTO_tag)
 # QC metrics computation
 
 Using addPerCellQCMetrics we can add information regarding mitochondrial and ribosomal genes in our assay.
+This information is used for checking the quality of the cells.
 
 
 ```{r}
@@ -167,8 +180,19 @@ sce <- addPerCellQCMetrics(sce, subset=list(Mito=grep("mt-", rownames(sce),value
                                     Ribo=grep("(^Rpl|^Rps|Mrp)", rownames(sce), value = TRUE)))
 ```
 
+It's possible to set the threshold before hand, so it can be passed later to the functions.
+
+```{r}
+mito_max=15
+min_nfeatures=log10(200)
+```
+
+
+doublet finder
 
 # QC metrics visualization
+
+An image is worth a thousand words...
 
 ```{r}
 
@@ -176,14 +200,14 @@ sce <- addPerCellQCMetrics(sce, subset=list(Mito=grep("mt-", rownames(sce),value
 #' @description plot_QC_Violin generates a violin + scatter + box plot for the variable desired.
 #' @export
 #' @param sce_object A SingleCellExperiment object.
-#' @param y Character value from colData information of the SingleCellExperiment object to be displayed.
+#' @param y Character vector from colData information of the SingleCellExperiment object to be displayed.
 #' Default to `sum`which is the total count of UMIs.
-#' @param ylab Character value to be set as the label to be displayed on the Y axis.
-#' @param title Character value to be set as the title of the plot.
-#' @return A graphic display of the variable especified.
+#' @param ylab Character vector to be set as the label to be displayed on the Y axis.
+#' @param title Character vector to be set as the title of the plot.
+#' @return A graphic display of the variable specified.
 
-plot_QC_Violin <- function(sce_object, y="sum", ylab="nCount_RNA", title="Number of UMIs"){
-  p <- scater::plotColData(sce_object, y=y) +
+plot_QC_Violin <- function(sce_object, y="sum", ylab="nCount_RNA", title="Number of UMIs", ...){
+  p <- scater::plotColData(sce_object, y=y, ...) +
     geom_point(size=0.25, alpha=0.5, position = position_jitter(width=0.25,seed = 12345))+
     geom_boxplot(width=0.025, outlier.size = 0.5, outlier.alpha = 0.8)+
     xlab(NULL)+
@@ -196,7 +220,7 @@ plot_QC_Violin <- function(sce_object, y="sum", ylab="nCount_RNA", title="Number
 
 `plot_QC_Violin()` can be used to visualize added by the previous function.
 
-To know more, run ?scuttle::addPerCellQCMetrics().
+To know more, run ?scuttle::addPerCellQCMetrics.
 
 ## Examples visualizing univariate QC metrics
 
@@ -215,14 +239,23 @@ plot_QC_Violin(sce_object = sce, y = "subsets_Mito_percent", ylab = "percent_mit
 ```
 
 
-# Relation between nUMIs and nGenes
+## Relation between nUMIs and nGenes
 
 ```{r}
-plot_UMIvsGene <- function(sce_object){
+
+#' @title plot_UMIvsGene
+#' @description plot_UMIvsGene displays a scatter plot of the relations between log10(UMI) on X axis and log10(genes)  on Y axis. #' a linear regression is fitted to the data and displayed.
+#' @export
+#' @param sce_object A SingleCellExperiment object. It has to contain in the colData: "sum", "detected".
+#' @param colour_by A character vector to set the colour of the data points. It has to be a column in colData(sce_object). 
+#' @param size_by A character vector to set the size of the data points. It has to be a column in colData(sce_object).
+#' @return A  ggplot figure.
+
+plot_UMIvsGene <- function(sce_object, colour_by = NULL, size_by=NULL, ...){
   require(scater)
   p <- plotColData(sce, x="sum", y="detected",
-                           colour_by="subsets_Mito_percent",
-                           size_by="subsets_Ribo_percent") +
+                           colour_by=colour_by,
+                           size_by=size_by, ...) +
     scale_x_log10() + scale_y_log10() + 
     scale_colour_gradient(aesthetics = c("colour"),low = "gray90", high = "black") +
     scale_size_area(max_size = 3)+
@@ -252,7 +285,7 @@ plot_UMIvsGene(sce_object = sce)
 
 To plot a scatter pot, with different information, one can call scater::plotColData. 
 
-## Example plotting scatter plot of QC metrics
+## Example plotting a scatter plot of QC metrics
 
 
 ```{r}
@@ -277,14 +310,43 @@ p <- plotColData(sce, x="detected", y="subsets_Mito_percent",
   xlab("nFeature_RNA")+
   ylab("percent.mito")+
   annotate(geom = "text",size=4, 
-           label = paste0(as.numeric(table( sce$subsets_Mito_percent <= mito_max)[1]),"cells removed\n",
-                          as.numeric(table( sce$subsets_Mito_percent <= mito_max)[2]), "cells remain"),
+           label = paste0(as.numeric(table(sce$subsets_Mito_percent <= mito_max)[1]),"cells removed\n",
+                          as.numeric(table(sce$subsets_Mito_percent <= mito_max)[2]), "cells remain"),
            x = max(sce$detected)-1000, y = mito_max+5)
 p <- ggMarginal(p, type = "densigram",bins=100, fill="grey",  alpha=0.3)
 
 p
 ```
 
+
+```{r}
+plot_QC_scatter <- function(sce_object, x, y, xthreshold=NULL, ythreshold=NULL, ...){
+  p <- plotColData(sce_object, x=x, y=y, ...)
+  if (!is.null(yintercept)){p <- p + geom_hline(aes(yintercept = ythreshold), colour = "red", linetype = 2)}
+  if(!is.null(xintercept)){p <- p + geom_vline(aes(xintercept = xthreshold), colour = "red", linetype = 2)}
+  if(!is.null(c(xthreshold, ythreshold))) {
+    annotations <- data.frame(
+      xpos = c(-Inf,-Inf,Inf,Inf),
+      ypos =  c(-Inf, Inf,-Inf,Inf),
+      annotateText = c(
+        as.character(table(sce_object$subsets_Mito_percent <= xthreshold & sce_object$detected <= 10^ythreshold)[2]), #BL:6
+        as.character(table(sce_object$subsets_Mito_percent >= xthreshold & sce_object$detected <= 10^ythreshold)[2]), #TL:5
+        as.character(table(sce_object$subsets_Mito_percent <= xthreshold & sce_object$detected >= 10^ythreshold)[2]), #BR: 19547
+        as.character(table(sce_object$subsets_Mito_percent <= xthreshold & sce_object$detected >= 10^ythreshold)[2])), #TR: 442
+      hjustvar = c(0,0,1,1),
+      vjustvar = c(0,1,0,1)
+    )
+    p <- p + geom_text(data = annotations, aes(x=xpos,y=ypos,hjust=hjustvar,vjust=vjustvar,label=annotateText))
+  }
+  p
+}
+
+```
+
+```{r}
+plot_QC_scatter(sce, x="detected", y="subsets_Mito_percent",
+            color_by = "consensus_call_global", xthreshold = )
+```
 
 
 # Set QC status
@@ -299,17 +361,41 @@ We save this information into a single column, `qc`, which can be used for stati
 
 
 ```{r}
-set_QC_status <- function(sce_object){
-  colData(sce_object)$qc <- gsub("TRUE", "passed", gsub("FALSE", "fails_maxMito", sce_object$subsets_Mito_percent <= mito_max))
+
+#' @title set_QC_status
+#' @description set_QC_status Created a column in colData indicating whether cells passed or failed three QC criterias: maximum #' mitochondrial gene percentage, minimum features (detected RNA) and laying above a linear regression line with an offset of 
+#' -0.09. For the last criteria, a linear model is fitted using as formula log10(features) ~ log10(UMIs)
+#' @export
+#' @param sce_object A SingleCellExperimet object containing QC metrics computed with scuttle::addPerCellQCMetrics. For more
+#' information ?scuttle::addPerCellQCMetrics .
+#' @param mito_percent_column Character string indicating the name of the column in colData. This column is added by
+#' scuttle::addPerCellQCMetrics.
+#' @param mito_max Numerical value indicating the threshold for the maximum percentage of mitochondrial genes. 
+#' Default to 15.
+#' @param min_nfeatures Numerical value indicating the threshold for the minimum of features. Default to log10(200).
+#' @return
+
+set_QC_status <- function(sce_object=NULL,
+                          mito_percent_column=NULL,
+                          mito_max=15,
+                          min_nfeatures=log10(200)){
+  
+  # Assessing what cells pass the threshold for mitochondrial gene percentage
+  # retrieveCellInfo looks into colData for the column passed and retrieves a list. The second element in the list contains the numerical values.
+  colData(sce_object)$qc <- gsub(
+    "TRUE", "passed", gsub("FALSE", "fails_maxMito", retrieveCellInfo(sce_object, by=mito_percent_column)[[2]] <= mito_max))
+  # filtering by passed cells from mito_percent criteria and assess whether those cells passe or no the min_feature criteria.
   colData(sce_object)$qc <-
     replace(x=colData(sce_object)$qc,
             list=which(sce_object$qc == "passed"),
             values=gsub(
               "TRUE", "passed", gsub("FALSE", "fails_minFeat",
                                      log10(sce_object[,sce_object$qc == "passed"]$detected)>=min_nfeatures)))
-
+  
+  # fitting linear model with the formula log10(features) ~ log10(UMI)
   lm <- lm(log10(sce_object[, sce_object$qc == "passed"]$detected) ~ log10(sce_object[, sce_object$qc == "passed"]$sum))
-
+  
+  # Assessing what cells passed the criteria of laying above a linear model with a offset of -0.09.
   colData(sce_object)$qc <-
     replace(x=colData(sce_object)$qc,
             list=which(sce_object$qc =="passed"),
@@ -320,8 +406,9 @@ set_QC_status <- function(sce_object){
 ```
 
 
+
 ```{r}
-sce <- set_QC_status(sce_object = sce)
+sce <- set_QC_status(sce_object = sce, mito_percent_column = "subsets_Mito_percent")
 ```
 
 We can check the number of cells which failed each condition being:
@@ -345,61 +432,193 @@ plot_QC_Violin(sce_object = sce[, sce$qc == "passed"],
 ```
 
 
+One might be interested in having a look at a particular QC metric for a particular condition. It can be easily done by passing that particular condition to the parameter *others_field* and doing a `facet_wrap()` making use of that field.
+
+For more information, run `?scater::plotColData`. Or check this [tutorial](http://bioconductor.org/books/3.16/OSCA.basic/quality-control.html#common-choices-of-qc-metrics)
+
+
+
+```{r}
+plot_QC_Violin(sce_object = sce, y = "subsets_Mito_percent",
+               ylab = "percent_mito", title = NULL, 
+               other_fields="consensus_call") + 
+  facet_wrap(~consensus_call)
+```
+
+
+
+# Count matrix normalization
+
+## Log-normalized counts
+
+For a simple normalization of our count matrix, one can use `logNormCounts()` from the scuttle package.
+
+```{r eval=FALSE}
+?scuttle::logNormCounts
+
+sce <- logNormCounts(sce[, sce$qc == "passed"])
+```
+
+This functions adds  second assay named as `logcounts`
+
+
+```{r}
+assays(sce)
+```
+
+
+This assay can be used to call dimensionality reduction techniques, such as UMAP.
+Since computing UMAP might take several minutes for large datasets, a good idea is to set a BiocParallel object to passed to the BPPARAM parameter in runUMAP.
+
+```{r eval=FALSE}
+?BiocParallel::MulticoreParam
+bp <- BiocParallel::MulticoreParam(workers = 12, RNGseed = 16, progressbar = TRUE)
+```
+
+
+```{r eval=FALSE}
+sce <- runUMAP(sce[, sce$qc == "passed"], BPPARAM=bp)
+```
+
+And now, simply plot UMAP
+
+
+```{r eval=FALSE}
+plotUMAP(sce[, sce$qc == "passed"], point_size=.05, colour_by="Sox10") +
+  scale_color_gradient(low = "grey", high = "blue") +
+  coord_equal() +
+  guides(colour=guide_legend(NULL, override.aes = list(size=2)))
+```
+
+
+![](umap_logNorm.png)
+
+
+To know more about parameter one can tune, run ?scater::plotUMAP
 
 
 
 
+## Variance Stabilizing transformation, a.k.a SCTransform()
+
+
+```{r}
+#' @title do_vst_transform
+#' @description do_vst_transform Calls sctransform::vst on the count matrix, asking for returning the correct UMI matrix.
+#' The corrected UMI matrix is then log transformed. The matrix can be obtained as it is or within a SCE object, by passing TRUE
+#' to the argument `as.AltExp`.
+#' @export
+#' @param sce_object A SingleCellExperiment objec.
+#' @param as.AltExp Boolean parameter to specify whether add the log-transformed count matrix as alternative experiment to the 
+#' SCE object.
+#' @return When `as.AltExp` is TRUE (default), the function returns a DelayedMatrix. When `as.AltExp` is TRUE, a SCE object is returned. 
+
+do_vst_transform <- function(sce_object, as.AltExp=TRUE){
+  vst <- sctransform::vst(as(assay(sce_object),'Matrix'), return_corrected_umi = TRUE)
+  vst <- DelayedArray(log1p(vst$umi_corrected)/log(2))
+  if (as.AltExp) {
+    altExp(sce_object, "Gene_Expression_VST") <- SummarizedExperiment(list(count_vst=vst), colData = colData(sce_object))
+    sce_object
+  } else {vst}
+}
+```
+
+
+```{r}    
+sce <- do_vst_transform(sce[, sce$qc=="passed"])
+```
+
+
+Now we have out count matrix normalized stored as alternative experiment in our SCE object. Remember to swap the experiment and we are go to go for dimensionality reduction.
+
+
+```{r eval=FALSE}
+sce <- swapAltExp(sce, "Gene_Expression_VST")
+
+sce <- runUMAP(sce, BPPARAM=bp, exprs_values="count_vst")
+```
+
+We can give also colors to our plots, provided that we explicitly pass the count matrix via the argument `by_exprs_values`. This is essential if our count matrix name is not `logcounts`.
+
+```{r eval=FALSE}
+plotUMAP(sce, colour_by="Sox10", point_size=.05, by_exprs_values="count_vst") +
+  scale_color_gradient(low = "grey", high = "blue") +
+  coord_equal() +
+  guides(colour=guide_legend(NULL, override.aes = list(size=2)))
+```
+
+![](umap_vst.png)
+
+
+## Analytical Pearson Normalization
 
 
 
+```{r eval=FALSE}
+sce <- swapAltExp(sce, "Gene Expression")
+```
+
+
+```{r read_RDS, eval=FALSE, include=FALSE}
+sce <- readRDS("sce_qc.rds")
+```
+
+
+```{r}
+#' @title do_AnPearson_transform
+#' @description do_AnPearson_transform carries out Analytical Pearson Residuals Normalization for UMI count matrix,
+#' doi.org/10.1186/s13059-021-02451-7 .
+#' @export
+#' @param sce_object A SingleCellExperiment object.
+#' @param theta A numerical value, default to 100. Set the measure of overdispersion to the Poisson distribution.
+#' @return A SCE object with the normalized matrix added as alternative experiment under the name `Gene_Expression_PearNorm`.
+
+do_AnPearson_transform <- function(sce_object, theta=100){
+  counts_sum0 <- rowSums(assay(sce_object))
+  counts_sum1 <- colSums(assay(sce_object))
+  counts_sum <- sum(sce_object$sum)
+  
+  mu <- DelayedArray(crossprod(t(counts_sum0), counts_sum1) / counts_sum)
+  z <- DelayedArray((assay(sce_object) - mu) / sqrt(mu + (mu**2/theta)))
+  z <- replace(z, is.na(z), c(0))
+  z <- z[, order(match(colnames(sce[, sce$qc=="passed"]), colnames(z)))]
+  altExp(sce_object, "Gene_Expression_PearNorm") <- 
+    SingleCellExperiment(list(count_AP=z), colData = colData(sce_object))
+  sce_object
+}
+
+```
 
 
 
+```{r eval=FALSE}
+sce <- do_AnPearson_transform(sce[, sce$qc == "passed"])
+```
+
+
+```{r eval=FALSE}
+sce <- swapAltExp(sce, "Gene_Expression_PearNorm")
+```
 
 
 
+```{r eval=FALSE}
+
+sce <- runUMAP(sce, exprs_values="count_AP", 
+                    name = "UMAP", BPPARAM=bp)
+```
 
 
 
+```{r eval=FALSE}
+plotUMAP(sce, colour_by="Sox10", point_size=.05, by_exprs_values="count_AP") +
+  scale_color_gradient(low = "grey", high = "blue") +
+  coord_equal() +
+  guides(colour=guide_legend(NULL, override.aes = list(size=2)))
+```
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+![](umap_AnPearson.png)
 
 
 
