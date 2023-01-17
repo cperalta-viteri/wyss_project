@@ -1,0 +1,60 @@
+---
+title: "Muliple ROC curves"
+output: html_notebook
+---
+
+
+```{r,message=FALSE}
+library(IRanges)
+library(ggplot2)
+```
+
+# Generate a fake dataset
+```{r}
+# Generate random cell type labels (10 types, 100 cells in each type)
+y_true <- sample(gl(10,100,labels = sprintf("Type_%.2d",1:10)))
+
+# Generate a matrix of random prediction scores 
+# 1000 cells by 10 classes
+P <- matrix(runif(length(y_true)*nlevels(y_true)),length(y_true),nlevels(y_true),dimnames = list(NULL,levels(y_true)))
+```
+
+
+
+
+# Compute ROC curves
+```{r}
+# Convert the factor of labels into a binary matrix
+Y <- Matrix::sparseMatrix(seq_along(y_true),y_true) |> 
+  as.matrix()
+
+roc_data <- lapply(seq_along(colnames(P)),function(i) {
+  bmrm::roc.stat(P[,i],Y[,i])
+}) 
+names(roc_data) <- colnames(P)
+```
+
+
+# Display ROC curves
+```{r}
+roc_data |> 
+  SplitDataFrameList() |> 
+  stack() |>
+  as.data.frame() |>
+  ggplot(aes(x=sensitivity,y=specificity,color=name)) + 
+    geom_line() + 
+    coord_equal() + 
+    geom_abline(slope=-1,intercept=1) + 
+    scale_x_continuous(label=scales::percent) + 
+    scale_y_continuous(label=scales::percent) + 
+    theme_bw()
+```
+
+# Get AUC values
+```{r}
+sapply(roc_data,attr,"AUC")
+```
+
+
+
+
