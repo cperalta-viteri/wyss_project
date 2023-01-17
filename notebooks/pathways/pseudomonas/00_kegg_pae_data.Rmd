@@ -1,0 +1,56 @@
+---
+title: "Cellranger input"
+output: html_notebook
+---
+
+
+```{r, setup, include=FALSE}
+knitr::opts_knit$set(root.dir = '.')
+```
+
+
+```{r,message=FALSE}
+library(ggraph)
+source("../lib_pathway_enrichment.R")
+source("../../01_data_collection/01_genome/lib_kegg.R")
+```
+
+
+# Download annotations
+```{r,eval=FALSE}
+# Ontology
+download.file("https://rest.kegg.jp/get/br:br08901/json","kegg_brite_br08901_pathways.json")
+download.file("https://rest.kegg.jp/get/br:ko00002/json","kegg_brite_ko00002_modules.json")
+
+# Pseudomonas PAO1  annotations
+download.file("https://rest.kegg.jp/link/pathway/pae","kegg_link_pae_pathway.tsv")
+download.file("https://rest.kegg.jp/link/module/pae","kegg_link_pae_module.tsv")
+```
+
+
+# Parse ontology and annotations
+```{r}
+H <- disjoint_union(
+ brite_ontology_from_json(file="kegg_brite_br08901_pathways.json",root="path"),
+ brite_ontology_from_json(file="kegg_brite_ko00002_modules.json",root="md")
+)
+
+Ann <- unique(rbind(
+  read_kegg_link("kegg_link_pae_pathway.tsv"),
+  read_kegg_link("kegg_link_pae_module.tsv")
+))
+stopifnot(all(Ann$pathway_id %in% V(H)$pathway_id))
+Ann <- merge(Ann,as_data_frame(H,"v")[c("ontology_id","pathway_id")],by="pathway_id")[c("ontology_id","locus_tag")] # Add ontology_id to the annotations
+```
+
+
+# Graphical representation of the ontology
+```{r}
+local({
+  G <- H - V(H)[pathway_id %in% Ann$pathway_id]
+  ggraph(G,"tree",circular=TRUE) + 
+    geom_node_point() + 
+    geom_edge_link() + 
+    coord_equal()
+})
+```
