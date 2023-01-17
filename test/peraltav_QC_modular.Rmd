@@ -36,7 +36,9 @@ library(ggExtra)
 set.seed(12)
 ```
 
-```{r}
+In case you want to check the content of your `.h5` file you can run:
+
+```{r eval=FALSE}
 # rna-seq & atac-seq
 h5ls("data/muA/raw_feature_bc_matrix.h5")
 # hto tags
@@ -47,15 +49,20 @@ h5ls("data/muA/muAh/raw_feature_bc_matrix.h5")
 
 # Data Loading & SCE object creation
 
+To load the information contained on a h5 file, use `read10xCounts` because it handles automatically the loading of both mRNA data and ATAC data. `read10xCounts` returns a SingleCellExperiment (SCE) object with all the information. Make sure to split the data so the object contains two separated experiments, one for gene expression and the other for epigenetics, `peaks`.
+
+
 ```{r}
+# Loading data
 sce <- read10xCounts("data/muA/filtered_feature_bc_matrix.h5")
+# spitting by type, i.e. mRNA & ATAC sequencing
 sce <- splitAltExps(sce, rowData(sce)[, "Type"])
 # remember to swap experiments to work with the count matrix of your experiment
 sce <- swapAltExp(sce, "Gene Expression")
 
 # set row names as unique to avoid redundancy
 rownames(sce) <- make.unique(rowData(sce)$Symbol)
-
+# set colnames as the cell barcode
 colnames(sce) <- colData(sce)$"Barcode"
 ```
 
@@ -66,7 +73,7 @@ sce
 
 
 *To add HTOs as metadata, remember to perform the intersection counts-htos*
-
+The process is repeated, load the data using `read10xCounts` function, set the column names and then perform the intersection.
 
 ```{r}
 # using DropletUtils::read10xCounts
@@ -78,10 +85,9 @@ htos <- htos[, intersect(colnames(sce), colnames(htos))]
 ```{r}
 # make sure that the colnames are the same in both assays
 stopifnot(setequal(colnames(htos), colnames(sce)))
-
 ```
 
-*Adding hto information as alternative experiment*
+Lastly, add the hto data as an alternative experiment.
 
 ```{r}
 altExp(sce, "hto") <- SummarizedExperiment(assay(htos))
@@ -93,11 +99,14 @@ altExp(sce, "hto") <- SummarizedExperiment(assay(htos))
 
 # Demultiplexing
 
+Now the objective is to demultiplex the data and obtain the HTO tag which was used for each cell.
+
 ```{r}
 # make sure to have Python installed with all the required packages if you want to run 'gmm_demux'
 reticulate::py_config()
 ```
 
+Set a list containing the HTO tags of interest. It will be used to filter out those non interesting tags.
 
 ```{r}
 HTO_tag=c("HTO-1","HTO-2","HTO-3","HTO-4","HTO-5","HTO-6","HTO-7","HTO-8","HTO-9","HTO-10")
@@ -152,6 +161,8 @@ demultiplexer <- function(sce_object,
 }
 ```
 
+Call `demultiplexer` function and it will take care of all your problems.
+
 ```{r}
 sce <- demultiplexer(sce, HTO_tag = HTO_tag)
 ```
@@ -160,6 +171,7 @@ sce <- demultiplexer(sce, HTO_tag = HTO_tag)
 # QC metrics computation
 
 Using addPerCellQCMetrics we can add information regarding mitochondrial and ribosomal genes in our assay.
+This information is used for checking the quality of the cells.
 
 
 ```{r}
@@ -168,13 +180,19 @@ sce <- addPerCellQCMetrics(sce, subset=list(Mito=grep("mt-", rownames(sce),value
                                     Ribo=grep("(^Rpl|^Rps|Mrp)", rownames(sce), value = TRUE)))
 ```
 
+It's possible to set the threshold before hand, so it can be passed later to the functions.
+
 ```{r}
 mito_max=15
 min_nfeatures=log10(200)
 ```
 
 
+doublet finder
+
 # QC metrics visualization
+
+An image is worth a thousand words...
 
 ```{r}
 
@@ -188,8 +206,8 @@ min_nfeatures=log10(200)
 #' @param title Character vector to be set as the title of the plot.
 #' @return A graphic display of the variable specified.
 
-plot_QC_Violin <- function(sce_object, y="sum", ylab="nCount_RNA", title="Number of UMIs"){
-  p <- scater::plotColData(sce_object, y=y) +
+plot_QC_Violin <- function(sce_object, y="sum", ylab="nCount_RNA", title="Number of UMIs", ...){
+  p <- scater::plotColData(sce_object, y=y, ...) +
     geom_point(size=0.25, alpha=0.5, position = position_jitter(width=0.25,seed = 12345))+
     geom_boxplot(width=0.025, outlier.size = 0.5, outlier.alpha = 0.8)+
     xlab(NULL)+
@@ -221,7 +239,7 @@ plot_QC_Violin(sce_object = sce, y = "subsets_Mito_percent", ylab = "percent_mit
 ```
 
 
-# Relation between nUMIs and nGenes
+## Relation between nUMIs and nGenes
 
 ```{r}
 
@@ -233,11 +251,11 @@ plot_QC_Violin(sce_object = sce, y = "subsets_Mito_percent", ylab = "percent_mit
 #' @param size_by A character vector to set the size of the data points. It has to be a column in colData(sce_object).
 #' @return A  ggplot figure.
 
-plot_UMIvsGene <- function(sce_object, colour_by = NULL, size_by=NULL){
+plot_UMIvsGene <- function(sce_object, colour_by = NULL, size_by=NULL, ...){
   require(scater)
   p <- plotColData(sce, x="sum", y="detected",
                            colour_by=colour_by,
-                           size_by=size_by) +
+                           size_by=size_by, ...) +
     scale_x_log10() + scale_y_log10() + 
     scale_colour_gradient(aesthetics = c("colour"),low = "gray90", high = "black") +
     scale_size_area(max_size = 3)+
@@ -301,7 +319,34 @@ p
 ```
 
 
+```{r}
+plot_QC_scatter <- function(sce_object, x, y, xthreshold=NULL, ythreshold=NULL, ...){
+  p <- plotColData(sce_object, x=x, y=y, ...)
+  if (!is.null(yintercept)){p <- p + geom_hline(aes(yintercept = ythreshold), colour = "red", linetype = 2)}
+  if(!is.null(xintercept)){p <- p + geom_vline(aes(xintercept = xthreshold), colour = "red", linetype = 2)}
+  if(!is.null(c(xthreshold, ythreshold))) {
+    annotations <- data.frame(
+      xpos = c(-Inf,-Inf,Inf,Inf),
+      ypos =  c(-Inf, Inf,-Inf,Inf),
+      annotateText = c(
+        as.character(table(sce_object$subsets_Mito_percent <= xthreshold & sce_object$detected <= 10^ythreshold)[2]), #BL:6
+        as.character(table(sce_object$subsets_Mito_percent >= xthreshold & sce_object$detected <= 10^ythreshold)[2]), #TL:5
+        as.character(table(sce_object$subsets_Mito_percent <= xthreshold & sce_object$detected >= 10^ythreshold)[2]), #BR: 19547
+        as.character(table(sce_object$subsets_Mito_percent <= xthreshold & sce_object$detected >= 10^ythreshold)[2])), #TR: 442
+      hjustvar = c(0,0,1,1),
+      vjustvar = c(0,1,0,1)
+    )
+    p <- p + geom_text(data = annotations, aes(x=xpos,y=ypos,hjust=hjustvar,vjust=vjustvar,label=annotateText))
+  }
+  p
+}
 
+```
+
+```{r}
+plot_QC_scatter(sce, x="detected", y="subsets_Mito_percent",
+            color_by = "consensus_call_global", xthreshold = )
+```
 
 
 # Set QC status
@@ -387,6 +432,20 @@ plot_QC_Violin(sce_object = sce[, sce$qc == "passed"],
 ```
 
 
+One might be interested in having a look at a particular QC metric for a particular condition. It can be easily done by passing that particular condition to the parameter *others_field* and doing a `facet_wrap()` making use of that field.
+
+For more information, run `?scater::plotColData`. Or check this [tutorial](http://bioconductor.org/books/3.16/OSCA.basic/quality-control.html#common-choices-of-qc-metrics)
+
+
+
+```{r}
+plot_QC_Violin(sce_object = sce, y = "subsets_Mito_percent",
+               ylab = "percent_mito", title = NULL, 
+               other_fields="consensus_call") + 
+  facet_wrap(~consensus_call)
+```
+
+
 
 # Count matrix normalization
 
@@ -432,7 +491,7 @@ plotUMAP(sce[, sce$qc == "passed"], point_size=.05, colour_by="Sox10") +
 ```
 
 
-![](umap_AnPearson.png)
+![](umap_logNorm.png)
 
 
 To know more about parameter one can tune, run ?scater::plotUMAP
