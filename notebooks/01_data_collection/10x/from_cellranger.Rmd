@@ -3,12 +3,7 @@ title: "Cellranger input"
 output: html_notebook
 ---
 
-# Loading Cellranger count
-
-This notebooks show how to load counts from CellRanger into a
-SummarizedExperiment object, add meta-data (and generate a `.h5ad` file ?).
-
-# Quick start
+# Load Cellranger count
 
 ```{r,message=FALSE}
 library(SingleCellExperiment)

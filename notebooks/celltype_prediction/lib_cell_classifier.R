@@ -25,7 +25,9 @@ nn_linear_rescale <- nn_module(
     # apply pruning mask and normalize weights to 1
     with_no_grad({
       self$linear$weight$mul_(self$prune_mask)
-      self$linear$weight$renorm_(p=1,dim=-1L,maxnorm=1.0)
+      d <- self$linear$weight$norm(dim=2L,keepdim=TRUE)
+      d$clamp_min_(1e-6)
+      self$linear$weight$div_(d)
     })
     
     # compute normalization factors for each node of layer1 and each instance
@@ -55,16 +57,23 @@ advanced_cell_classifier <- nn_module(
   initialize = function(feature_names,class_names,...) {
     self$feature_names <- feature_names
     self$class_names <- class_names
+    self$input_dropout <- nn_dropout(0.5)
+    self$layer1 <- nn_linear_rescale(in_features = length(self$feature_names),out_features = 4096L,...)
     self$layers <- nn_sequential(
-      nn_dropout(0.5), nn_linear_rescale(length(self$feature_names),1024L,...), nn_hardtanh(),
+      nn_tanh(),
+      nn_dropout(0.3), nn_linear(in_features = 4096L, out_features = 1024L), nn_relu(),
       nn_dropout(0.3), nn_linear(in_features = 1024L, out_features = 512L), nn_relu(),
-      nn_dropout(0.3), nn_linear(in_features = 512L, out_features = 256L), nn_relu(),
-      nn_dropout(0.3), nn_linear(in_features = 256L, out_features = length(self$class_names))
+      nn_dropout(0.1), nn_linear(in_features = 512L, out_features = 256L), nn_relu(),
+      nn_dropout(0.1), nn_linear(in_features = 256L, out_features = length(self$class_names))
     )
   },
-  forward = function(x) {self$layers(x)},
+  forward = function(x) {x |> self$input_dropout() |> self$layer1() |> self$layers()},
   loss = function(input,target) {nnf_multi_margin_loss(input,target)},
-  compute_prune_mask = function(...) {self$layers[["1"]]$compute_prune_mask()}
+  set_optimizers = function(lr1=1e-5,lr2=lr1) {list(
+  	  	l1 = optim_adam(self$layer1$parameters, lr = lr1,weight_decay=0.1),
+  		  l2 = optim_adam(self$layers$parameters, lr = lr2)
+  )},
+  compute_prune_mask = function(...) {self$layer1$compute_prune_mask()}
 )
 
 
@@ -94,4 +103,28 @@ torch_predict_cell_type <- function(N,model_file="scripts/julien/final_model_pru
   colnames(P) <- model2$class_names
   P  
 }
+
+
+# 
+# DelayedArray_dataset <- dataset(
+#   name = "DelayedArray_dataset",
+#   initialize = function(arrays,dtypes) {
+#       self$arrays <- arrays
+#       self$dtypes <- dtypes
+#   },
+#   .length = function() {nrow(self$arrays[[1]])},
+#   .getbatch = function(index) {
+#       mapply(function(x,dtype) {
+#         x <- as.matrix(x[index,,drop=FALSE])
+#         torch_tensor(x,dtype = dtype)
+#       },self$arrays,self$dtypes)
+#   },
+#   .getitem = function(index) {
+#       if (is.list(index)) {index <- unlist(index)}
+#       self$.getbatch(index)
+#   }
+# )
+
+
+
 
