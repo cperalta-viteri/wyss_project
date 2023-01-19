@@ -3,16 +3,66 @@ title: "Cellranger input"
 output: html_notebook
 ---
 
+```{r,message=FALSE}
+library(SingleCellExperiment)
+library(scater)
+library(BiocParallel)
+library(BiocSingular)
+```
+
 # Load Cellranger count
 
 ```{r,message=FALSE}
-library(SingleCellExperiment)
-
 # Load 10x dataset
 o <- DropletUtils::read10xCounts("filtered_feature_bc_matrix.h5")
 o <- splitAltExps(o,rowData(o)$Type,ref = "Gene Expression")
+rownames(o) <- make.unique(mcols(o)$Symbol)
 ```
 
+# Demultiplex HTO tags
+
+## Load HTO counts
+
+```{r}
+# Add HTO informations (filtering for missing cells)
+o <- local({
+  hto <- DropletUtils::read10xCounts("filtered_feature_bc_matrix_HTO.h5")
+  o <- o[,o$Barcode %in% hto$Barcode] # Remove cell with none matching barcode in the HTO
+  altExp(o,"Antibody Capture") <- hto[,match(o$Barcode,hto$Barcode)]
+  o
+})
+```
+
+## Perform demultiplexing
+
+```{r}
+o$hto_call <- local({
+  hto <- altExp(o,"Antibody Capture") |> 
+    assay() |>
+    as.matrix()
+  hto <- hto[1:10,]
+  hto <- t(hto/rowMeans(hto))
+  
+  plot(sort(hto),log="y")
+  heatmap(log1p(hto[sample(nrow(hto),1000),]),scale="none")
+  
+  hto_call <- colnames(hto)[max.col(hto)]
+  hto_call[-rowQ(-hto,1) < 1] <- "unclear"
+  hto_call[-rowQ(-hto,1) - -rowQ(-hto,2) < 0.3] <- "unclear"
+  hto_call
+})
+ggcells(o) + 
+  geom_bar(aes(y=hto_call))
+```
+
+# Merge multiple experiments
+
+```{r}
+# Set experimental condition
+o$cond <- o$hto_call 
+```
+
+# Add gene annotations
 
 ```{r,message=FALSE}
 # Add genes annotations
@@ -27,113 +77,229 @@ rowData(o) <- cbind(
 ```
 
 
+# QC 
 
-# Introduction
+## Compute QC metrics
 
+```{r}
+o <- scuttle::addPerCellQCMetrics(o,subsets=list(mt=grep("^mt-",rownames(o)),Rp=grep("^Rp",rownames(o))))
+o$qc <- "pass"
+o$qc[o$hto_call %in% "unclear"] <- "fail_hto"
+```
+
+### Transcriptomics
+
+```{r}
+o$qc[o$sum < 1000] <- "rna_low_count"
+o$qc[o$detected < 1000] <- "rna_low_detected"
+o$qc[o$subsets_mt_percent >= 15] <- "rna_high_mt"
+o$qc[o$subsets_Rp_percent >= 15] <- "rna_high_Rp"
+```
+
+### ATAC
+```{r}
+o$qc[o$altexps_Peaks_sum < 3000] <- "atac_low_count"
+o$qc[o$altexps_Peaks_detected < 1000] <- "atac_low_detected"
+```
+
+
+## QC summary
+```{r}
+ggcells(o) + 
+  geom_bar(aes(fill=qc,y=cond),color="black") + 
+  ylab("")
+```
+
+
+
+### Read count
+
+```{r}
+ggcells(o) + 
+  geom_violin(aes(x=sum,y=cond),scale="width") + 
+  geom_vline(xintercept=min(o$sum[o$qc %in% "pass"]),linetype=2) + 
+  scale_x_log10() + 
+  xlab("Read count") + ylab("")
+```
+
+### Detected genes
+
+```{r}
+ggcells(o) + 
+  geom_violin(aes(x=detected,y=cond),scale="width") + 
+  geom_vline(xintercept=min(o$detected[o$qc %in% "pass"]),linetype=2) + 
+  xlab("Num. detected gene") + ylab("")
+```
+
+### Mitochondrial genes
+
+```{r}
+ggcells(o) + 
+  geom_violin(aes(x=subsets_mt_percent,y=cond),scale="width") + 
+  geom_vline(xintercept=max(o$subsets_mt_percent[o$qc %in% "pass"]),linetype=2) +
+  xlab("% Mitochondrial") + ylab("")
+```
+
+### Ribosomal proteins
+
+```{r}
+ggcells(o) + 
+  geom_violin(aes(x=subsets_Rp_percent,y=cond),scale="width") + 
+  geom_vline(xintercept=max(o$subsets_Rp_percent[o$qc %in% "pass"]),linetype=2) +
+  xlab("% Ribosomal protein") + ylab("")
+```
+
+### Read-count / Detected-gene
+
+```{r}
+ggcells(o) + 
+  geom_point(aes(x=sum,y=detected,color=qc)) + 
+  scale_x_log10() + 
+  xlab("Read count") + ylab("Num. detected gene") + theme(legend.position = "none")
+
+```
+
+## ATAC-seq QC
+
+```{r}
+ggcells(o) + 
+  geom_violin(aes(x=altexps_Peaks_sum,y=cond),scale="width") + 
+  geom_vline(xintercept=min(o$altexps_Peaks_sum[o$qc %in% "pass"]),linetype=2) + 
+  scale_x_log10() + 
+  xlab("ATAC read count") + ylab("")
+```
+
+```{r}
+ggcells(o) + 
+  geom_violin(aes(x=altexps_Peaks_detected,y=cond),scale="width") + 
+  geom_vline(xintercept=min(o$altexps_Peaks_detected[o$qc %in% "pass"]),linetype=2) + 
+  xlab("Num. ATAC peak") + ylab("")
+```
+
+```{r}
+ggcells(o) + 
+  geom_point(aes(x=sum,y=altexps_Peaks_sum,color=qc)) + 
+  scale_x_log10() + 
+  scale_y_log10() + 
+  coord_equal() + 
+  xlab("Transcriptomics read-count") + ylab("ATAC read-count")
+
+ggcells(o) + 
+  geom_point(aes(x=detected,y=altexps_Peaks_detected,color=qc)) + 
+  scale_x_log10() + 
+  scale_y_log10() + 
+  coord_equal() + 
+  xlab("Num. detected gene") + ylab("Num. ATAC peak")
+```
+
+
+## Run doublet finder
+
+```{r}
+```
+
+## Predict Neuronal cell type
+
+```{r}
+```
+
+## Predict sex
+
+```{r}
+```
+
+## Cell cycle
+
+```{r}
+```
+
+# Expression Normalization
+
+```{r}
+o <- o[,o$qc %in% "pass"]
+o <- logNormCounts(o,BPPARAM=BiocParallel::MulticoreParam())
+```
+
+# Regressing Variables
+
+```{r}
+```
+
+# Dimensionality reduction
+
+## PCA
+
+```{r}
+o <- runPCA(o,BSPARAM=IrlbaParam(),BPPARAM=MulticoreParam())
+```
+
+```{r}
+ggcells(o) + 
+  geom_point(aes(x=PCA.1,y=PCA.2,color=log10(detected))) + 
+  coord_equal()
+
+ggcells(o) + 
+  geom_point(aes(x=PCA.1,y=PCA.2,color=cond)) + 
+  coord_equal()
+```
+
+## UMAP
+
+```{r}
+set.seed(123456)
+o <- runUMAP(o,dimred="PCA",BPPARAM=BiocParallel::MulticoreParam())
+```
+
+```{r}
+ggcells(o) + 
+  geom_point(aes(x=UMAP.1,y=UMAP.2,color=log10(detected))) + 
+  coord_equal()
+
+ggcells(o) + 
+  geom_point(aes(x=UMAP.1,y=UMAP.2,color=cond)) + 
+  coord_equal()
+```
+
+------------EOF-----------------
+
+# PARKING
 
 ## HDF5 format
-CellRanger store gene expression matrices into files with `.h5` extension (`filtered_feature_bc_matrix.h5`). 
-This file is encoded into the standard format HDF5 (more information [here](https://www.hdfgroup.org)), which is a compressed binary format structured to allow random access to its content. In simple words, it means we can works on the data without loading everything into memory.
 
-To work with HDF5-files, we recommend to use the Bioconductor package `rhdf5`. 
-HDF5-files are organised hierarchically similarly to folders into a filesystem, and to browse their content use `rhdf5::h5ls()`.
+CellRanger store gene expression matrices into files with `.h5` extension (`filtered_feature_bc_matrix.h5`). This file is encoded into the standard format HDF5 (more information [here](https://www.hdfgroup.org)), which is a compressed binary format structured to allow random access to its content. In simple words, it means we can works on the data without loading everything into memory.
+
+To work with HDF5-files, we recommend to use the Bioconductor package `rhdf5`. HDF5-files are organised hierarchically similarly to folders into a filesystem, and to browse their content use `rhdf5::h5ls()`.
 
 ```{r}
 rhdf5::h5ls("filtered_feature_bc_matrix.h5")
 ```
 
-To read the content of a HDF5, one can use `rhdf5::h5read()`. This function will load all the data into memory. 
-For example to load gene names from a CellRanger h5.
+To read the content of a HDF5, one can use `rhdf5::h5read()`. This function will load all the data into memory. For example to load gene names from a CellRanger h5.
+
 ```{r}
 head(rhdf5::h5read("filtered_feature_bc_matrix.h5","/matrix/features/name"))
 ```
 
-
 However, when the data do not fit into memory, like large gene-expression matrices, one should use `HDF5Array` package to map the content of the HDF5 file into an object that can be manipulated similarly to a matrix.
+
 ```{r}
 HDF5Array::TENxMatrix("filtered_feature_bc_matrix.h5","/matrix")
 ```
 
-
-
 ## Create SingleCellExperiment objects
+
 `SingleCellExperiment` allows to associate metadata to gene expression counts, and then facilitate data manipulation.
-
-
-
-
-
-# Add HTO informations (optional, only if available)
-
-```{r}
-o <- local({
-  # Load HTO data
-  hto <- DropletUtils::read10xCounts("filtered_feature_bc_matrix_HTO.h5")
-  
-  # Check overlap with gene expression
-  gplots::venn(list(HTO=hto$Barcode,exp=o$Barcode));title("barcode overlap")
-  
-  # Remove cell with none matching barcode in the HTO
-  o <- o[,o$Barcode %in% hto$Barcode]
-  
-  # Add HTO informations to the data
-  altExp(o,"Antibody Capture") <- hto[,match(o$Barcode,hto$Barcode)]
-  
-  o
-})
-```
-
-
-```{r}
-# Determine 
-v <- altExp(o,"Antibody Capture") |> 
-  assay() |>
-  as.matrix()
-v <- t(v/rowMeans(v))
-heatmap(log1p(v[sample(nrow(v),1000),1:11]),scale="none")
-
-source("../lib_util.R")
-i <- order.col(-v)
-V <- array(v[cbind(as.vector(row(i)),as.vector(i))],dim(i))
-tag <- i[,1]
-tag[V[,1] - V[,2] < 1] <- 0
-
-table(tag)
-plot(sort(V[,1] - V[,2]),log="y")
-
-
-```
-
-
-
-
-
 
 # Add samples meta-data
 
-When possible add the following meta-data, respecting the field names:
-`sex`, `age`, `cell_type`
+When possible add the following meta-data, respecting the field names: `sex`, `age`, `cell_type`
 
 The field `label` is reserved for sample labeling.
 
-
 # Store SingleCellExperiment object as H5AD
-
-
 
 # Parking
 
-H5 format is a standard format to `.h5` At this step, you should do your
-best to organize your data and collect meta-data as the generated
-`h5ad`-file will be used at all step of your analysis.
+H5 format is a standard format to `.h5` At this step, you should do your best to organize your data and collect meta-data as the generated `h5ad`-file will be used at all step of your analysis.
 
-Using data loaded from CellRanger output, we create a
-`SingleCellExperiment()` object which will store all our data and
-metadata. The content of this object will be stored into the final
-`h5ad` file. We try to respect specific field name conventions for
-compatibility: - Use following assay names when relevant: `counts`,
-`normcounts`, `logcounts`, `tpm`, `cpm` - Use gene symbol names as
-rownames to easily query the object. Preserve gene identifiers into the
-rowData. - Try to store genomic positions of the features as character
-string into `rowData()$interval`. You will later be able to convert this
-information into `GRanges()` to work with them
+Using data loaded from CellRanger output, we create a `SingleCellExperiment()` object which will store all our data and metadata. The content of this object will be stored into the final `h5ad` file. We try to respect specific field name conventions for compatibility: - Use following assay names when relevant: `counts`, `normcounts`, `logcounts`, `tpm`, `cpm` - Use gene symbol names as rownames to easily query the object. Preserve gene identifiers into the rowData. - Try to store genomic positions of the features as character string into `rowData()$interval`. You will later be able to convert this information into `GRanges()` to work with them

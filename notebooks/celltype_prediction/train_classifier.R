@@ -78,12 +78,6 @@ ggcells(x) +
   geom_bar(aes(y=orig.ident,fill=qc),color="black")
 
 
-ggcells(x) + 
-  geom_violin(aes(y=orig.ident,x=sum,fill=infected),scale="width") + 
-  geom_vline(xintercept=2000,linetype=2) + 
-  scale_x_log10() + 
-  xlab("read count")
-
 #x <- x[,x$qc=="pass"]
 # QC
 ggcells(x) + 
