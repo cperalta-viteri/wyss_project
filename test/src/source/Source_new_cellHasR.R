@@ -300,7 +300,8 @@ Qc<-function(seurat,
         
         p1<-ggMarginal(p1, type = "densigram",bins=100, fill="grey",  alpha=0.3)
         
-        ggsave(filename = paste0("pdf/1-Loading/",projet,"/percent.mitoVSnGenes.pdf"), plot = p1, device =cairo_pdf, width = 297, height = 210, units = "mm")
+        ggsave(filename = paste0("pdf/1-Loading/",projet,"/percent.mitoVSnGenes.pdf"),
+               plot = p1, device =cairo_pdf, width = 297, height = 210, units = "mm")
       }
       
       if(sum(Cell.QC.Stat$percent.mito > max.mito.thr)==length(Cell.QC.Stat$percent.mito <= max.mito.thr)){
