@@ -2,7 +2,9 @@
 title: "QC notebook"
 author: "Peralta Viteri Christian"
 date: "`r Sys.Date()`"
-output: html_document
+output:
+  html_document:
+    number_sections: true
 ---
 
 
@@ -18,6 +20,15 @@ knitr::opts_chunk$set(warning = FALSE)
 #' @return
 ```
 
+# Introduction
+
+`QC_notebook` is the first of a series of ready-to-do-DataAnalysis. The aim is to turn complex and vast data analysis workflows
+into user-friendly ready-to-use tools for neuro-scientist.
+
+The framework is based on SingleCellExperiment (SCE) project, where in a single object users can combine different single-cell experiments, i.e. expression or epigenetic data. In addition, several different types of information for both genes or cells. With additional metadata space to store, for instance, literature references.
+
+For more information, visit [SCE](https://www.bioconductor.org/packages/devel/bioc/vignettes/SingleCellExperiment/inst/doc/intro.html).
+
 
 # Libraries
 
@@ -29,8 +40,10 @@ library(DropletUtils)
 library(scater)
 library(scuttle)
 library(scales)
-library(ggExtra)
+#library(ggExtra)
 ```
+
+It's important to set a seed for reproducibility. This is used by algorithms which has a randomized initiation.
 
 ```{r}
 set.seed(12)
@@ -49,7 +62,7 @@ h5ls("data/muA/muAh/raw_feature_bc_matrix.h5")
 
 # Data Loading & SCE object creation
 
-To load the information contained on a h5 file, use `read10xCounts` because it handles automatically the loading of both mRNA data and ATAC data. `read10xCounts` returns a SingleCellExperiment (SCE) object with all the information. Make sure to split the data so the object contains two separated experiments, one for gene expression and the other for epigenetics, `peaks`.
+To load the information contained on a h5 file, use `read10xCounts` because it handles automatically the loading of both mRNA data and ATAC data. `read10xCounts` returns a SCE object with all the information. Make sure to split the data so the object contains two separated experiments, one for gene expression and the other for epigenetics, `peaks`.
 
 
 ```{r}
@@ -73,6 +86,7 @@ sce
 
 
 *To add HTOs as metadata, remember to perform the intersection counts-htos*
+
 The process is repeated, load the data using `read10xCounts` function, set the column names and then perform the intersection.
 
 ```{r}
@@ -113,7 +127,7 @@ HTO_tag=c("HTO-1","HTO-2","HTO-3","HTO-4","HTO-5","HTO-6","HTO-7","HTO-8","HTO-9
 ```
 
 
-```{r }
+```{r include=FALSE}
 #' @title demultiplexer
 #' @description demultiplexer calls cellhashR::GenerateCellHashingCalls. Filtering of the
 #' matrix of counts is performed prior call of the function.
@@ -170,9 +184,10 @@ sce <- demultiplexer(sce, HTO_tag = HTO_tag)
 
 # QC metrics computation
 
-Using addPerCellQCMetrics we can add information regarding mitochondrial and ribosomal genes in our assay.
-This information is used for checking the quality of the cells.
+Using addPerCellQCMetrics we can add information regarding mitochondrial and ribosomal genes in our assay, really easily.
+This information is used for checking the quality of the cells in the downstream analysis.
 
+To know more, run ?scuttle::addPerCellQCMetrics
 
 ```{r}
 
@@ -184,17 +199,18 @@ It's possible to set the threshold before hand, so it can be passed later to the
 
 ```{r}
 mito_max=15
-min_nfeatures=log10(200)
+min_nfeatures=log10(200) #be carefull how you set the threshold for number of features. For functions where the scale is log, the threshold is interpreted directly as a logarithm. However, when the scale is not log, you will need to pass a normal value.
 ```
 
 
-doublet finder
 
 # QC metrics visualization
 
 An image is worth a thousand words...
 
-```{r}
+For that reason visualizing the QC  metrics which were added before are useful to check the quality of our cells.
+
+```{r include=FALSE}
 
 #' @title plot_QC_Violin
 #' @description plot_QC_Violin generates a violin + scatter + box plot for the variable desired.
@@ -207,7 +223,7 @@ An image is worth a thousand words...
 #' @return A graphic display of the variable specified.
 
 plot_QC_Violin <- function(sce_object, y="sum", ylab="nCount_RNA", title="Number of UMIs", ...){
-  p <- scater::plotColData(sce_object, y=y, ...) +
+  p <- plotColData(sce_object, y=y, ...) +
     geom_point(size=0.25, alpha=0.5, position = position_jitter(width=0.25,seed = 12345))+
     geom_boxplot(width=0.025, outlier.size = 0.5, outlier.alpha = 0.8)+
     xlab(NULL)+
@@ -218,9 +234,9 @@ plot_QC_Violin <- function(sce_object, y="sum", ylab="nCount_RNA", title="Number
   }
 ```
 
-`plot_QC_Violin()` can be used to visualize added by the previous function.
+`plot_QC_Violin()` is the function designed to visualize those QC metrics.
 
-To know more, run ?scuttle::addPerCellQCMetrics.
+
 
 ## Examples visualizing univariate QC metrics
 
@@ -234,6 +250,7 @@ To know more about what can be plotted:
 colnames(colData(sce))
 ```
 
+
 ```{r}
 plot_QC_Violin(sce_object = sce, y = "subsets_Mito_percent", ylab = "percent_mito", title = NULL)
 ```
@@ -241,7 +258,7 @@ plot_QC_Violin(sce_object = sce, y = "subsets_Mito_percent", ylab = "percent_mit
 
 ## Relation between nUMIs and nGenes
 
-```{r}
+```{r include=FALSE}
 
 #' @title plot_UMIvsGene
 #' @description plot_UMIvsGene displays a scatter plot of the relations between log10(UMI) on X axis and log10(genes)  on Y axis. #' a linear regression is fitted to the data and displayed.
@@ -252,7 +269,7 @@ plot_QC_Violin(sce_object = sce, y = "subsets_Mito_percent", ylab = "percent_mit
 #' @return A  ggplot figure.
 
 plot_UMIvsGene <- function(sce_object, colour_by = NULL, size_by=NULL, ...){
-  require(scater)
+  
   p <- plotColData(sce, x="sum", y="detected",
                            colour_by=colour_by,
                            size_by=size_by, ...) +
@@ -274,6 +291,7 @@ plot_UMIvsGene <- function(sce_object, colour_by = NULL, size_by=NULL, ...){
 ```
 
 
+`plot_UMIvsGene` is meant to facilitate the visualization of log-transformed UMI and detected genes. It will produce a customized scatter pot, for instance axis labels. However, as it returns a ggplot object, one can override these customization.
 
 
 ```{r}
@@ -282,59 +300,41 @@ plot_UMIvsGene(sce_object = sce)
 
 
 
+To plot a scatter pot, with different information, one can call ?scater::plotColData 
 
-To plot a scatter pot, with different information, one can call scater::plotColData. 
+## Plotting a scatter plot of Genes vs percentage mitochondial
 
-## Example plotting a scatter plot of QC metrics
-
-
-```{r}
-plotColData(sce, x="detected", y="subsets_Mito_percent")
-```
-
-Even color data points based on metadata in colData
-
-```{r}
-plotColData(sce, x="detected", y="subsets_Mito_percent", color_by = "consensus_call_global")
-```
+In this case it is useful to use the function `plot_QC_scatter` as one can pass thresholds for the metrics visualized. In this case, the function adds a horizontal and/or vertical line marking the threshold(s) specified by the user.
 
 
-And fully customize by adding more layers:
+```{r include=FALSE}
+#' @title plot_QC_scatter
+#' @description plot_QC_scatter produces a fully customized scatter plot for two continuous variables. Furthermore, by passing 
+#' thresholds for the metrics of interest, the function will add either a vertical or horizontal line, intercepting either x-axis
+#' or y-axis at the specified threshold.
+#' @export
+#' @param sce_object A SingleCellExperiment object.
+#' @param x Continuous variable to be displayed in the x-axis.
+#' @param y Continuous variable to be displayed in the y-axis.
+#' @param xthreshold Value at which display a vertical line, marking the specified threshold.
+#' @param ythreshold Value at which display a horizontal line, marking the specified threshold.
+#' @return A customized scatter plot of class ggplot.
 
-
-```{r}
-p <- plotColData(sce, x="detected", y="subsets_Mito_percent",
-            color_by = "consensus_call_global")+
-  geom_hline(aes(yintercept = mito_max), colour = "red", linetype = 2) +
-  geom_vline(aes(xintercept = 10^min_nfeatures), colour = "red", linetype = 2) +
-  xlab("nFeature_RNA")+
-  ylab("percent.mito")+
-  annotate(geom = "text",size=4, 
-           label = paste0(as.numeric(table(sce$subsets_Mito_percent <= mito_max)[1]),"cells removed\n",
-                          as.numeric(table(sce$subsets_Mito_percent <= mito_max)[2]), "cells remain"),
-           x = max(sce$detected)-1000, y = mito_max+5)
-p <- ggMarginal(p, type = "densigram",bins=100, fill="grey",  alpha=0.3)
-
-p
-```
-
-
-```{r}
 plot_QC_scatter <- function(sce_object, x, y, xthreshold=NULL, ythreshold=NULL, ...){
   p <- plotColData(sce_object, x=x, y=y, ...)
-  if (!is.null(yintercept)){p <- p + geom_hline(aes(yintercept = ythreshold), colour = "red", linetype = 2)}
-  if(!is.null(xintercept)){p <- p + geom_vline(aes(xintercept = xthreshold), colour = "red", linetype = 2)}
+  if (!is.null(ythreshold)){p <- p + geom_hline(aes(yintercept = ythreshold), colour = "red", linetype = 2)}
+  if(!is.null(xthreshold)){p <- p + geom_vline(aes(xintercept = xthreshold), colour = "red", linetype = 2)}
   if(!is.null(c(xthreshold, ythreshold))) {
     annotations <- data.frame(
       xpos = c(-Inf,-Inf,Inf,Inf),
       ypos =  c(-Inf, Inf,-Inf,Inf),
       annotateText = c(
-        as.character(table(sce_object$subsets_Mito_percent <= xthreshold & sce_object$detected <= 10^ythreshold)[2]), #BL:6
-        as.character(table(sce_object$subsets_Mito_percent >= xthreshold & sce_object$detected <= 10^ythreshold)[2]), #TL:5
-        as.character(table(sce_object$subsets_Mito_percent <= xthreshold & sce_object$detected >= 10^ythreshold)[2]), #BR: 19547
-        as.character(table(sce_object$subsets_Mito_percent <= xthreshold & sce_object$detected >= 10^ythreshold)[2])), #TR: 442
-      hjustvar = c(0,0,1,1),
-      vjustvar = c(0,1,0,1)
+        as.character(table(sce_object$subsets_Mito_percent <= ythreshold & sce_object$detected <= xthreshold)[2]), #BL:6
+        as.character(table(sce_object$subsets_Mito_percent >= ythreshold & sce_object$detected <= xthreshold)[2]), #TL:5
+        as.character(table(sce_object$subsets_Mito_percent <= ythreshold & sce_object$detected >= xthreshold)[2]), #BR: 19547
+        as.character(table(sce_object$subsets_Mito_percent >= ythreshold & sce_object$detected >= xthreshold)[2])), #TR: 442
+      hjustvar = c(-1,-1,5,10),
+      vjustvar = c(-5,10,-5,10)
     )
     p <- p + geom_text(data = annotations, aes(x=xpos,y=ypos,hjust=hjustvar,vjust=vjustvar,label=annotateText))
   }
@@ -343,15 +343,18 @@ plot_QC_scatter <- function(sce_object, x, y, xthreshold=NULL, ythreshold=NULL, 
 
 ```
 
+
+As seen below, when passed two thresholds, the function displays the number of cells that lied at each side of the line.
+
 ```{r}
 plot_QC_scatter(sce, x="detected", y="subsets_Mito_percent",
-            color_by = "consensus_call_global", xthreshold = )
+            color_by = "consensus_call_global", xthreshold = 200, ythreshold = mito_max)
 ```
 
 
 # Set QC status
 
-Here we want to determine what cells has:
+Here we want to determine what cells has (**in this specific order**):
 
 + More percentage of mitochondrial genes than the threshold
 + Lower number of detected genes than the threshold
@@ -360,7 +363,7 @@ Here we want to determine what cells has:
 We save this information into a single column, `qc`, which can be used for statistics, plotting and filtering.
 
 
-```{r}
+```{r include=FALSE}
 
 #' @title set_QC_status
 #' @description set_QC_status Created a column in colData indicating whether cells passed or failed three QC criterias: maximum #' mitochondrial gene percentage, minimum features (detected RNA) and laying above a linear regression line with an offset of 
@@ -405,7 +408,7 @@ set_QC_status <- function(sce_object=NULL,
 }
 ```
 
-
+`set_QC_status` functions was designed to handle all that operations for you and return the information in the column `qc`. This column can be used for different statistics. It is important to take into account that once a cell fails a criteria, it is excluded from next operations.
 
 ```{r}
 sce <- set_QC_status(sce_object = sce, mito_percent_column = "subsets_Mito_percent")
@@ -422,9 +425,11 @@ table(sce$qc)
 ```
 
 
-Now, the visualizations can be redone based on what cells to display.
+Now, the visualizations can be redone, to check the characteristics of the cells when filtering by QC criteria.
 
-"I wan to see the number of genes for the wells which passed all the quality control"
+Let's imagine: 
+
+*"I wan to see the number of genes for the wells which passed all the quality control"*
 
 ```{r}
 plot_QC_Violin(sce_object = sce[, sce$qc == "passed"],
@@ -432,22 +437,32 @@ plot_QC_Violin(sce_object = sce[, sce$qc == "passed"],
 ```
 
 
-One might be interested in having a look at a particular QC metric for a particular condition. It can be easily done by passing that particular condition to the parameter *others_field* and doing a `facet_wrap()` making use of that field.
+One might be interested in having a look at a particular QC metric for a particular condition. It can be easily done by passing that particular condition as `x` parameter to our function `plot_QC_Violin()`.
 
 For more information, run `?scater::plotColData`. Or check this [tutorial](http://bioconductor.org/books/3.16/OSCA.basic/quality-control.html#common-choices-of-qc-metrics)
 
 
 
 ```{r}
-plot_QC_Violin(sce_object = sce, y = "subsets_Mito_percent",
+plot_QC_Violin(sce_object = sce, x="consensus_call", y = "subsets_Mito_percent",
                ylab = "percent_mito", title = NULL, 
-               other_fields="consensus_call") + 
-  facet_wrap(~consensus_call)
+               colour_by="consensus_call") +
+  geom_boxplot(alpha=.05) +
+  coord_flip() + scale_x_discrete(limits=rev)
 ```
 
 
 
 # Count matrix normalization
+
+Once the QC metrics had been check, and cell had been filtered. It is time to normalize the count matrix.
+
+To do so, one can use simple approach, such as using the log-normalize the matrix. Or, more sophisticated method such as Variance Stabilizing transformation or Analytic Pearson Residual transformation.
+
+In the following sections, it is shown how ot proceed for all this three methods and how to visualized using UMAP representation.
+
+Notice that all normalized counts are included in the same SCE object, allowing to have all-in-one.
+
 
 ## Log-normalized counts
 
@@ -456,8 +471,10 @@ For a simple normalization of our count matrix, one can use `logNormCounts()` fr
 ```{r eval=FALSE}
 ?scuttle::logNormCounts
 
+# filtering by cell which passed all my QC criteria.
 sce <- logNormCounts(sce[, sce$qc == "passed"])
 ```
+
 
 This functions adds  second assay named as `logcounts`
 
@@ -468,7 +485,8 @@ assays(sce)
 
 
 This assay can be used to call dimensionality reduction techniques, such as UMAP.
-Since computing UMAP might take several minutes for large datasets, a good idea is to set a BiocParallel object to passed to the BPPARAM parameter in runUMAP.
+
+Since computing UMAP might take several minutes for large datasets, a good idea is to set a BiocParallel object to passed to the BPPARAM parameter in runUMAP. Just modify `workers` parameter according to your machine.
 
 ```{r eval=FALSE}
 ?BiocParallel::MulticoreParam
@@ -494,15 +512,17 @@ plotUMAP(sce[, sce$qc == "passed"], point_size=.05, colour_by="Sox10") +
 ![](umap_logNorm.png)
 
 
-To know more about parameter one can tune, run ?scater::plotUMAP
+To know more about what parameters one can tune, run ?scater::plotUMAP
 
 
 
 
 ## Variance Stabilizing transformation, a.k.a SCTransform()
 
+For information about this technique, visit this [vignette](https://satijalab.org/seurat/articles/sctransform_vignette.html).
 
-```{r}
+
+```{r include=FALSE}
 #' @title do_vst_transform
 #' @description do_vst_transform Calls sctransform::vst on the count matrix, asking for returning the correct UMI matrix.
 #' The corrected UMI matrix is then log transformed. The matrix can be obtained as it is or within a SCE object, by passing TRUE
@@ -550,9 +570,9 @@ plotUMAP(sce, colour_by="Sox10", point_size=.05, by_exprs_values="count_vst") +
 ![](umap_vst.png)
 
 
-## Analytical Pearson Normalization
+## Analytic Pearson Residuals Normalization
 
-
+To know more about this technique, check out the [publication](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-021-02451-7)
 
 ```{r eval=FALSE}
 sce <- swapAltExp(sce, "Gene Expression")
@@ -564,7 +584,7 @@ sce <- readRDS("sce_qc.rds")
 ```
 
 
-```{r}
+```{r include=FALSE}
 #' @title do_AnPearson_transform
 #' @description do_AnPearson_transform carries out Analytical Pearson Residuals Normalization for UMI count matrix,
 #' doi.org/10.1186/s13059-021-02451-7 .
