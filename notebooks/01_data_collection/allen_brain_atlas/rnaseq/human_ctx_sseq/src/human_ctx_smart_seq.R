@@ -13,6 +13,6 @@ human_ctx_smart_seq <- function(h5_file="out/mat.h5") {
     rowData = rd,
     colData = h5read(h5_file,"/cell_meta"),
     metadata = List(dendrogram=h5read(h5_file,"/dendrogram"))
-  )  
+  )
 }
 
