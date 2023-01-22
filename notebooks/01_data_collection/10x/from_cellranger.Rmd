@@ -260,6 +260,19 @@ ggcells(o) +
   coord_equal()
 ```
 
+
+
+
+
+# Save object
+```{r}
+source("../lib_sce.R")
+saveHDF5SingleCellExperiment(o,"qc_filtered_exp")
+```
+
+
+
+
 ------------EOF-----------------
 
 # PARKING
