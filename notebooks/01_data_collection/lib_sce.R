@@ -11,31 +11,37 @@ library(HDF5Array)
 #' @param h5_file name of the h5 file to create or update
 #' @param group name of the group to create within the h5
 #' @param force a logical if FALSE an error is raised whrn the h5 file already exists
+#' @param sparse.assays name of the assays to store as sparse in the H5. If TRUE, all assays are stored as sparse; 
+#'        if FALSE all assay are stored as dense; if NA sparsity is determined with a call to is_sparse()
 #' @return undefined
-saveHDF5SingleCellExperiment <- function(x,h5_file,group="/main",force=FALSE) {
+saveHDF5SingleCellExperiment <- function(x,h5_file,group="/main",force=FALSE,sparse.assays=c("counts","logcounts")) {
   
   # Helper which can save a list of array in H5
   .h5_save_array_list <- function(l,h5_file,group,as.sparse=NA) {
     h5createGroup(h5_file,group) |> stopifnot()
     if (length(l)>0L && is.null(names(l))) stop("array list must be named")
     h5write(as.character(names(l)),h5_file,paste0(group,"/names"))
+    
+    if (is.character(as.sparse)) as.sparse <- names(l) %in% as.sparse
+    as.sparse <- rep_len(as.sparse,length(l))
+    as.sparse[is.na(as.sparse)] <- as.logical(sapply(l[is.na(as.sparse)],is_sparse))
     for(i in seq_along(l)) {
       elt_path <- paste0(group,"/element_",i)
-      if ((!is.na(as.sparse) & as.sparse) | (is.na(as.sparse) & is_sparse(l[[i]]))) {
+      if (as.sparse[i]) {
         l[[i]] <- writeTENxMatrix(l[[i]],h5_file,elt_path)
       } else {
-        l[[i]] <- writeHDF5Array(l[[i]],h5_file,elt_path)
+        l[[i]] <- writeHDF5Array(l[[i]],h5_file,elt_path,with.dimnames = TRUE)
       }
     }
     l
   }
   
   # Helper which can save a list of SummarizedExperiment with a recursive call
-  .save_sce_list <- function(l,h5_file,group) {
+  .save_sce_list <- function(l,h5_file,group,sparse.assays) {
     h5createGroup(h5_file,group) |> stopifnot()
     h5write(as.character(names(l)),h5_file,paste0(group,"/names"))
     for(i in seq_along(l)) {
-      saveHDF5SingleCellExperiment(l[[i]],h5_file,paste0(group,"/element_",i),force=TRUE)
+      saveHDF5SingleCellExperiment(l[[i]],h5_file,paste0(group,"/element_",i),force=TRUE,sparse.assays=sparse.assays)
     }
   }
 
@@ -49,7 +55,7 @@ saveHDF5SingleCellExperiment <- function(x,h5_file,group="/main",force=FALSE) {
   h5createGroup(h5_file,group) || stop("cannot create main h5 group")
   
   # Save assays to H5 and remove them from the SCE object
-  .h5_save_array_list(assays(x),h5_file,paste0(group,'/assays'))
+  .h5_save_array_list(assays(x),h5_file,paste0(group,'/assays'),as.sparse = sparse.assays)
   assays(x) <- list()
   
   if (is(x,"SingleCellExperiment")) {
@@ -58,7 +64,7 @@ saveHDF5SingleCellExperiment <- function(x,h5_file,group="/main",force=FALSE) {
     reducedDims(x) <- list()
     
     # Save altExps to H5 and remove from the SCE object
-    .save_sce_list(altExps(x),h5_file,paste0(group,'/altExps'))
+    .save_sce_list(altExps(x),h5_file,paste0(group,'/altExps'),sparse.assays)
     altExps(x) <- list()
   }
   

@@ -1,19 +1,17 @@
 
-library(IRanges)
-library(HDF5Array)
-library(SingleCellExperiment)
-source("../lib_allen.R")
+
+source("src/lib_allen.R")
+source("../lib_sce.R")
 
 
-
-read_human_ctx_sseq <- function(dir="data") {
+read_human_m1_10x <- function(dir="data/human_m1_10x") {
   # Process dendrogram
   dend <- read_dend_json(file.path(dir,"dend.json"))
   
   # Process cells meta-data
   meta <- read.csv(file.path(dir,"metadata.csv.gz"),check.names = FALSE,stringsAsFactors = FALSE,row.names=NULL)
   meta <- meta[sapply(meta,function(x) length(unique(x)))>1]
-  stopifnot(all(meta$cell_type_accession_label %in% c("",dend$cell_set_accession)))
+  stopifnot(all(meta$cell_type_accession_label %in% dend$cell_set_accession))
   rownames(meta) <- meta$sample_name
   
   # Add tsne coordinates
@@ -21,7 +19,7 @@ read_human_ctx_sseq <- function(dir="data") {
     data.matrix()
   tsne <- tsne[match(meta$sample_name,rownames(tsne)),]
   rownames(tsne) <- meta$sample_name
-
+  
   # Process medians and trimmed means
   medians <- data.matrix(read.csv(file.path(dir,"medians.csv.gz"),check.names = FALSE,stringsAsFactors = FALSE,row.names="feature"))
   trimmed_means <- data.matrix(read.csv(file.path(dir,"trimmed_means.csv.gz"),check.names = FALSE,stringsAsFactors = FALSE,row.names="feature"))
@@ -31,11 +29,12 @@ read_human_ctx_sseq <- function(dir="data") {
   M <- read_sparseMatrix_from_csv(file.path(dir,"matrix.csv.gz"))
   M <- t(M)
   
+
   # check data alignment
   stopifnot(all(rownames(M) == rownames(medians)))
   stopifnot(all(rownames(M) == rownames(trimmed_means)))
   stopifnot(all(colnames(M) == rownames(meta)))
-
+  
   # Build the object  
   e <- SingleCellExperiment(
     list(counts = M),
@@ -47,10 +46,14 @@ read_human_ctx_sseq <- function(dir="data") {
   e
 }
 
-E <- e[1:100,1:100]
-assay(E) <- as(assay(E),"TENxMatrix")
-saveHDF5SummarizedExperiment(E,"out/test1",replace=TRUE)
-h5ls("out/test1/assays.h5")
+e <- read_human_m1_10x()
+saveHDF5SingleCellExperiment(e,"out/human_m1_10x.h5")
+loadHDF5SingleCellExperiment("out/human_m1_10x.h5")
+
+
+
+
+
 
 
 
