@@ -295,7 +295,9 @@ plot_UMIvsGene <- function(sce_object, colour_by = NULL, size_by=NULL, ...){
 
 
 ```{r}
-plot_UMIvsGene(sce_object = sce)
+plot_UMIvsGene(sce_object = sce,
+               colour_by = "subsets_Mito_percent",
+               size_by = "subsets_Ribo_percent")
 ```
 
 
@@ -641,7 +643,50 @@ plotUMAP(sce, colour_by="Sox10", point_size=.05, by_exprs_values="count_AP") +
 ![](umap_AnPearson.png)
 
 
+# All-in-One
 
+```{r}
+source("src/lib_QC.R")
+```
+
+Another option is to call the holistic function `QC` which will handle everything for you. Just make sure to pass the appropriate parameters:
+
+- sce_objec is a SingleCellExperiment object containing your count matrix as main experiment.
+
+- organism, either "mouse" or "human", to target mitochondrial genes accordingly.
+
+- hto, either `TRUE` or `FALSE` according to whether you have HTO tags on your experiment.
+
+- methods, list of methods which can be passed to `GenerateCellHashingCalls()` to carry out demultiplexing.
+
+- project, character string indicating the subfolder where to store graphical outputs. As default it is set to "New_folder", generating the path `pdf/1-Loading/New_project`.
+
+- HTO_tag is a list containing the HTO tags one wants to keep.
+
+- filter_singlet, either `TRUE` or `FALSE` to whether keep solely cell barcodes identified as singlet or not.
+
+- mito_max, numeric value indicating the maximum cutoff for percentage of mitochondrial genes.
+
+- min_nfeatures, numeric value indicating the minimum cutoff for number of features in log10 scale.
+
+- normalization_method, method to choose as normalization strategy. The options are `logNorm`, `SCTransform` and `AnPearson`.
+
+
+
+
+```{r warning=FALSE, message=FALSE, eval=FALSE}
+sce_2 <- QC(sce_object = sce,
+            organism = "mouse",
+            hto=TRUE,
+            methods=c("multiseq","gmm_demux", "htodemux", "dropletutils"),
+            project="New_project",
+            HTO_tag=HTO_tag,
+            filter_singlet=FALSE,
+            mito_max=15,
+            min_nfeatures=log10(200),
+            normalization_method="AnPearson",
+            seed=12 )
+```
 
 
 
