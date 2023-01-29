@@ -41,7 +41,7 @@ read_human_m1_10x <- function(dir="data/human_m1_10x") {
     colData = meta,
     rowData = DataFrame(symbol=rownames(M),medians=I(medians),trimmed_means=I(trimmed_means)),
     reducedDims = list(TSNE=tsne),
-    metadata = list(celltype_ontology=dend)
+    metadata = list(taxonomy=dend)
   )
   e
 }

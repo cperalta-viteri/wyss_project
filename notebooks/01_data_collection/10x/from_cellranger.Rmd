@@ -192,6 +192,17 @@ ggcells(o) +
   xlab("Num. detected gene") + ylab("Num. ATAC peak")
 ```
 
+## Peak size distribution
+
+## TSS
+
+## see https://stuartlab.org/signac/articles/pbmc_vignette.html
+
+
+# MERGIN OBJECT:
+ see https://stuartlab.org/signac/articles/merging.html
+
+
 
 ## Run doublet finder
 

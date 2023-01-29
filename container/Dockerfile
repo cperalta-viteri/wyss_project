@@ -30,6 +30,7 @@ RUN R -q -e " \
     BiocManager::install(c('DropletUtils','scuttle','scran','scater','uwot','AUCell','SingleR')); \
     BiocManager::install(c('biomaRt')); \
     BiocManager::install(c('edgeR','GEOquery','zellkonverter','sceasy')); \
+    BiocManager::install(c('splatter')); \
 \
     # github packages \
     devtools::install_github(repo = 'bimberlab/cellhashR', ref = 'master', dependencies = TRUE, upgrade = 'always') \
