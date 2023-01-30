@@ -1,3 +1,11 @@
+library(HDF5Array)
+library(SingleCellExperiment)
+library(cellhashR)
+library(DropletUtils)
+library(scater)
+library(scuttle)
+library(scales)
+library(ggExtra)
 
 
 QC <- function(sce_object,
