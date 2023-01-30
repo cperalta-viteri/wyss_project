@@ -11,14 +11,18 @@ library(shiny)
 library(bs4Dash)
 library(rentrez)
 library(reactlog)
+source("../lib_querying.R")
 
 reactlogReset()
 reactlog_enable()
 
+
 create_ui <- function(name, n, title){
-    box(id = paste(name, "box", sep=""),
+    box(id = paste(name, sep=""),
         width=12,
-        textOutput(paste(name, n, sep = "")),
+        #textOutput(paste(name, n, sep = "")),
+        textOutput(paste(name, "summary", n, sep = "")),
+        uiOutput(paste0(name, "gds_link", n)),
         collapsible = T,
         collapsed =T,
         status = "success",
@@ -35,17 +39,21 @@ ui <- dashboardPage(
             label = "Select database"
 
         ),
-        textInput(
+        selectInput(
             inputId = "query",
-            label = "Enter your query",
-            value = "Mus musculus[Organism], brain, scRNA"
+            label = "Select your query",
+            choices = c("mouse", "human")
+        ),
+        textInput(
+            inputId = "term2",
+            label = "Opt terms",
+            value = NULL
         ),
         actionButton(inputId = "go", label = "Submit job")
         #menuItem("Match images", tabName = "match")
 
         ),
     dashboardBody(
-        #,
         uiOutput("body")
     )
 )
@@ -54,13 +62,13 @@ ui <- dashboardPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
+
     session$onSessionEnded(function() {
         stopApp()
     })
 
     sum_entrez <- reactive({
-        uids_entrez <- entrez_search(db="gds", term=input$query)
-        sum_entrez <- entrez_summary(db="gds", id=uids_entrez$ids)
+        sum_entrez <- investigator(db="gds", term1 = input$query, term2 = input$term2)
         sum_entrez
     })
 
@@ -69,8 +77,18 @@ server <- function(input, output, session) {
         for (i in 1:20) {
             local({
                 myi <- i
-                output[[paste("value", i, sep = "")]] <-
-                    renderText(unlist(sum_entrez()[[myi]]["summary"]))
+                output[[paste("value","summary", i, sep = "")]] <-
+                    renderText(
+                        sprintf("%s\n",unlist(sum_entrez()[[myi]]["summary"]))
+                        )
+                output[[paste0("value", "gds_link", i)]] <-
+                    renderUI(
+                        tags$a(href=
+                            sprintf("%s%s",gds_quey, unlist(sum_entrez()[[myi]]["accession"])),
+                            sprintf("GEO: %s", unlist(sum_entrez()[[myi]]["accession"])),
+                            target="_blank"
+                        )
+                        )
             })
         }
     }, priority = 5)
