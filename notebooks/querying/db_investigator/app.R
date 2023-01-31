@@ -11,6 +11,7 @@ library(shiny)
 library(bs4Dash)
 library(rentrez)
 library(reactlog)
+library(shinyjs)
 source("../lib_querying.R")
 
 reactlogReset()
@@ -29,6 +30,7 @@ create_ui <- function(name, n, title){
         #background = "lightblue",
         title = title)
 }
+
 
 ui <- dashboardPage(
     dashboardHeader(title = "Welcome to DB investigator"),
@@ -49,11 +51,21 @@ ui <- dashboardPage(
             label = "Opt terms",
             value = NULL
         ),
-        actionButton(inputId = "go", label = "Submit job")
-        #menuItem("Match images", tabName = "match")
+        actionButton(inputId = "go", label = "Submit job"),
+        uiOutput("count")
 
         ),
     dashboardBody(
+        # fluidRow(
+        #     tabBox(
+        #         #title = "Search",
+        #         id="tabset1",
+        #         tabPanel(
+        #             id="tab1",
+        #             uiOutput("body")
+        #         )
+        #     )
+        # )
         uiOutput("body")
     )
 )
@@ -67,14 +79,21 @@ server <- function(input, output, session) {
         stopApp()
     })
 
-    sum_entrez <- reactive({
-        sum_entrez <- investigator(db="gds", term1 = input$query, term2 = input$term2)
+    esearch <- eventReactive(input$go, {
+        esearch <- investigator(db="gds", term1 = input$query, term2 = input$term2,
+                                return_id = TRUE, do_search = FALSE)
+    })
+    #browser()
+    sum_entrez <- eventReactive(input$go,{
+
+        sum_entrez <- investigator(db="gds", term1 = input$query, term2 = input$term2,
+                                   return_id = FALSE, do_search = TRUE, indx = as.numeric(my_list$index))
         sum_entrez
     })
 
     observeEvent(input$go, {
         #browser()
-        for (i in 1:20) {
+        for (i in 1:length(esearch())) {
             local({
                 myi <- i
                 output[[paste("value","summary", i, sep = "")]] <-
@@ -92,12 +111,30 @@ server <- function(input, output, session) {
             })
         }
     }, priority = 5)
+
     observeEvent(input$go, {
         output$body <-
-            renderUI(Map(create_ui, n=1:20,
+            renderUI(Map(create_ui, n=1:length(esearch()),
                          name="value",
-                         title=Map("[[", sum_entrez()[1:20], "title")))
+                         title=Map("[[", sum_entrez()[1:length(esearch())], "title")))
     }, priority = 10)
+
+    my_list <- reactiveValues(index=1)
+
+    observeEvent(input$go, {
+        output$count <- renderUI(
+            selectInput("indices", "batches",
+                        c(1:length(esearch())),
+                        selected = my_list$index)
+        )
+    }, priority = 4)
+
+    observeEvent(input$indices, {
+        req(input$indices)
+        my_list$index <- input$indices
+        #browser()
+    })
+
 }
 
 # Run the application
