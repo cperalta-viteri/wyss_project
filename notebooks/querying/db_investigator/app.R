@@ -21,9 +21,10 @@ reactlog_enable()
 create_ui <- function(name, n, title){
     box(id = paste(name, sep=""),
         width=12,
-        #textOutput(paste(name, n, sep = "")),
+        #textOutput(paste(name, "summary", n, sep = "")),
         textOutput(paste(name, "summary", n, sep = "")),
         uiOutput(paste0(name, "gds_link", n)),
+        uiOutput(paste0(name, "check", n)),
         collapsible = T,
         collapsed =T,
         status = "success",
@@ -43,7 +44,7 @@ ui <- dashboardPage(
         ),
         selectInput(
             inputId = "query",
-            label = "Select your query",
+            label = "Select your organism",
             choices = c("mouse", "human")
         ),
         textInput(
@@ -56,17 +57,27 @@ ui <- dashboardPage(
 
         ),
     dashboardBody(
-        # fluidRow(
-        #     tabBox(
-        #         #title = "Search",
-        #         id="tabset1",
-        #         tabPanel(
-        #             id="tab1",
-        #             uiOutput("body")
-        #         )
-        #     )
-        # )
-        uiOutput("body")
+        fluidRow(
+            tabBox(width = 8,
+                #title = "Search",
+                id="tabset1",
+                tabPanel(
+                    id="tab1",
+                    title = "Search",
+                    uiOutput("body")
+                )),
+            tabBox(width = 4,
+                tabPanel(
+                    id="tab2",
+                    title = "Metadata",
+                    textInput(inputId = "in_organism", label = "Type the organism"),
+                    textInput(inputId = "in_organ", label = "Type the organ"),
+                    textInput(inputId = "in_DB", label = "Type the source DB"),
+                    textInput(inputId = "in_uid", label = "Type the accession nº")
+                )
+            )
+        )
+        #uiOutput("body")
     )
 )
 
@@ -91,6 +102,7 @@ server <- function(input, output, session) {
         sum_entrez
     })
 
+    #==== Output summary and GEO link ====
     observeEvent(input$go, {
         #browser()
         for (i in 1:length(esearch())) {
@@ -108,10 +120,18 @@ server <- function(input, output, session) {
                             target="_blank"
                         )
                         )
+                # output[[paste0("value", "check", i)]] <-
+                #     renderUI(
+                #         checkboxInput(
+                #             inputId = sprintf("checker_%s", unlist(sum_entrez()[[myi]]["accession"])),
+                #             label="check to download",
+                #             value = FALSE)
+                #     )
             })
         }
     }, priority = 5)
 
+    #==== Rendering boxes for hits ====
     observeEvent(input$go, {
         output$body <-
             renderUI(Map(create_ui, n=1:length(esearch()),
@@ -119,6 +139,7 @@ server <- function(input, output, session) {
                          title=Map("[[", sum_entrez()[1:length(esearch())], "title")))
     }, priority = 10)
 
+    #==== Setting reactive list for later queries ====
     my_list <- reactiveValues(index=1)
 
     observeEvent(input$go, {
@@ -132,8 +153,12 @@ server <- function(input, output, session) {
     observeEvent(input$indices, {
         req(input$indices)
         my_list$index <- input$indices
-        #browser()
+
     })
+
+    check_list <- reactive({grep("checker*", names(input), value = TRUE)})
+
+    check_values <- reactiveValues(item=reactive({grep("checker*", names(input), value = TRUE)}))
 
 }
 
