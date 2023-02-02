@@ -100,9 +100,12 @@ investigator <- function(db="gds",
 query_fun <- function(indx=NULL){
   if(is.null(term2)){query <- sprintf(organism)} else {query <- sprintf("%s, %s", organism, term2)}
   ids <- entrez_search(db=db, term=query, retmax=10000)
-  ids <- slicer(ids$ids, jump = 100)
+  if (length(ids$ids)>100) ids <- slicer(ids$ids, jump = 100) else ids <- ids$ids
+  #browser()
   if (return_id==TRUE) return(ids)
-  if(do_search==TRUE) return(smry <- entrez_summary(db=db, id=ids[[indx]]))
+  #browser()
+  if(do_search==TRUE  & is.list(ids)) return(smry <- entrez_summary(db=db, id=ids[[indx]]))
+  if(do_search==TRUE) return(smry <- entrez_summary(db=db, id=ids))
 }
 
 
@@ -119,8 +122,13 @@ slicer <- function(eid, jump=100){
 
 
 
-
-
+#
+# library(readxl)
+# astrocytes_df <- read_excel("Astrocytes_Transcriptomic_repository.xlsx")
+# astrocytes_ids <- (gsub("^(?!GSE)", NA ,astrocytes_df$`Data location`, perl = TRUE))
+# astrocytes_ids <- astrocytes_ids[-which(is.na(astrocytes_ids))]
+#
+# accession_list <- unlist(Map("[[", uids[1:length(uids)], "accession"))
 
 
 

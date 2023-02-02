@@ -34,14 +34,15 @@ create_ui <- function(name, n, title){
 
 
 ui <- dashboardPage(
-    dashboardHeader(title = "Welcome to DB investigator"),
+    dashboardHeader(title = "Welcome to GEO investigator"),
     dashboardSidebar(skin = "light",
-        selectInput(
-            inputId = "DB",
-            choices = "GEO",
-            label = "Select database"
-
-        ),
+        # selectInput(
+        #     inputId = "DB",
+        #     choices = "GEO",
+        #     label = "Select database"
+        #
+        # )
+        #dashboardHeader(title = "GEO Query", border = FALSE),
         selectInput(
             inputId = "query",
             label = "Select your organism",
@@ -71,9 +72,14 @@ ui <- dashboardPage(
                     id="tab2",
                     title = "Metadata",
                     textInput(inputId = "in_organism", label = "Type the organism"),
-                    textInput(inputId = "in_organ", label = "Type the organ"),
-                    textInput(inputId = "in_DB", label = "Type the source DB"),
-                    textInput(inputId = "in_uid", label = "Type the accession nº")
+                    textInput(inputId = "in_strain", label = "Type the strain"),
+                    textInput(inputId = "in_age", label = "Type the age range"),
+                    textInput(inputId = "in_organ", label = "Type the organ", value = "brain"),
+                    selectInput(inputId = "in_acq", label = "Select the data acquisition mode", choices = c("scRNA", "nucleai", "scATAC")),
+                    selectInput(inputId = "in_brainIn", label = "Select brain region injection", choices = c(NULL)),
+                    selectInput(inputId = "in_brainOut", label = "Select brain region collection", choices = c(NULL)),
+                    textInput(inputId = "in_uid", label = "Type the accession nº"),
+                    textInput(inputId = "in_cmatrix", label = "Type the matrix format")
                 )
             )
         )
@@ -86,19 +92,23 @@ ui <- dashboardPage(
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
 
-    session$onSessionEnded(function() {
-        stopApp()
-    })
-
     esearch <- eventReactive(input$go, {
         esearch <- investigator(db="gds", term1 = input$query, term2 = input$term2,
                                 return_id = TRUE, do_search = FALSE)
+        # esearch <- entrez_search(db="gds",
+        #                          term=sprintf("Mus musculus[Organism], %s", input$term2),
+        #                          retmax=10000)
     })
     #browser()
     sum_entrez <- eventReactive(input$go,{
+        if(length(esearch()) > 100){
 
-        sum_entrez <- investigator(db="gds", term1 = input$query, term2 = input$term2,
-                                   return_id = FALSE, do_search = TRUE, indx = as.numeric(my_list$index))
+            sum_entrez <- investigator(db="gds", term1 = input$query, term2 = input$term2,
+                                       return_id = FALSE, do_search = TRUE, indx = as.numeric(my_list$index))
+        } else {
+            sum_entrez <- investigator(db="gds", term1 = input$query, term2 = input$term2,
+                                       return_id = FALSE, do_search = TRUE)
+        }
         sum_entrez
     })
 
@@ -143,11 +153,13 @@ server <- function(input, output, session) {
     my_list <- reactiveValues(index=1)
 
     observeEvent(input$go, {
+        req(length(esearch()) > 100)
         output$count <- renderUI(
             selectInput("indices", "batches",
                         c(1:length(esearch())),
                         selected = my_list$index)
-        )
+            )
+
     }, priority = 4)
 
     observeEvent(input$indices, {
@@ -155,10 +167,9 @@ server <- function(input, output, session) {
         my_list$index <- input$indices
 
     })
+    #check_list <- reactive({grep("checker*", names(input), value = TRUE)})
 
-    check_list <- reactive({grep("checker*", names(input), value = TRUE)})
-
-    check_values <- reactiveValues(item=reactive({grep("checker*", names(input), value = TRUE)}))
+    #check_values <- reactiveValues(item=reactive({grep("checker*", names(input), value = TRUE)}))
 
 }
 
