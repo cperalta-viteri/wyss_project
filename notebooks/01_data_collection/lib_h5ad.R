@@ -28,9 +28,14 @@ readH5AD <- function(h5file,path="/") {
         A
       },
       "array=0.2.0" = {
-        A <- h5read(h5file,path)
-        if (length(dim(A))==1L) A <- as.vector(A)
-        A
+        tryCatch({
+          A <- HDF5Array(h5file,path)
+        },
+        error = function(e) {
+          A <- h5read(h5file,path)
+          if (length(dim(A))==1L) A <- as.vector(A)
+          A
+        })
       },
       "categorical=0.2.0" = {
         lev <- h5read(h5file,paste0(sub("/$","",path),"/categories"))
@@ -52,8 +57,8 @@ readH5AD <- function(h5file,path="/") {
       "anndata=0.1.0" = {
         L <- setNames(content$path,content$name)[content$group %in% path] |> 
           lapply(handle_h5ad_elt,h5file=h5file,content=content)
-        E <- SingleCellExperiment(list(X=L$X),colData=L$obs,rowData=L$var)
-        L$X <- L$obs <- L$var <- NULL
+        E <- SingleCellExperiment(list(X=L$X),colData=L$obs,rowData=L$var,reducedDims = lapply(L$obsm,t))
+        L$X <- L$obs <- L$var <- L$obsm <- NULL
         metadata(E) <- L
         E
       },
@@ -81,5 +86,5 @@ writeH5AD <- function(e,h5file) {
 
 
 
-
-
+#e <- readH5AD("../../01_data_collection/data_download/alz_excitatory.h5ad") 
+#metadata(e) -> m
