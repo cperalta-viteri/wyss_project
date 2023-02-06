@@ -71,15 +71,15 @@ ui <- dashboardPage(
                 tabPanel(
                     id="tab2",
                     title = "Metadata",
-                    textInput(inputId = "in_organism", label = "Type the organism"),
+                    textOutput(outputId = "disp_organism"),
+                    tags$head(tags$style("#disp_organism{color:blue; font-size: 20px}")),
                     textInput(inputId = "in_strain", label = "Type the strain"),
-                    textInput(inputId = "in_age", label = "Type the age range"),
-                    textInput(inputId = "in_organ", label = "Type the organ", value = "brain"),
-                    selectInput(inputId = "in_acq", label = "Select the data acquisition mode", choices = c("scRNA", "nucleai", "scATAC")),
-                    selectInput(inputId = "in_brainIn", label = "Select brain region injection", choices = c(NULL)),
-                    selectInput(inputId = "in_brainOut", label = "Select brain region collection", choices = c(NULL)),
-                    textInput(inputId = "in_uid", label = "Type the accession nº"),
-                    textInput(inputId = "in_cmatrix", label = "Type the matrix format")
+                    selectInput(inputId = "in_acq", label = "Select the data acquisition mode", choices = c("scRNA", "nuclei", "scATAC")),
+                    selectInput(inputId = "in_stage", label = "Select Organism Stage", choices = c("developing", "adult"), selected = NULL),
+                    uiOutput(outputId = "out_brainOri"),
+                    uiOutput(outputId = "out_brainIn"),
+                    textInput(inputId = "in_uid", label = "Type the accession number"),
+                    actionButton(inputId = "download", label = "Click to Download")
                 )
             )
         )
@@ -95,13 +95,10 @@ server <- function(input, output, session) {
     esearch <- eventReactive(input$go, {
         esearch <- investigator(db="gds", term1 = input$query, term2 = input$term2,
                                 return_id = TRUE, do_search = FALSE)
-        # esearch <- entrez_search(db="gds",
-        #                          term=sprintf("Mus musculus[Organism], %s", input$term2),
-        #                          retmax=10000)
     })
     #browser()
     sum_entrez <- eventReactive(input$go,{
-        if(length(esearch()) > 100){
+        if(is.list(esearch())){
 
             sum_entrez <- investigator(db="gds", term1 = input$query, term2 = input$term2,
                                        return_id = FALSE, do_search = TRUE, indx = as.numeric(my_list$index))
@@ -114,7 +111,7 @@ server <- function(input, output, session) {
 
     #==== Output summary and GEO link ====
     observeEvent(input$go, {
-        #browser()
+        output$disp_organism <- renderText(stringr::str_to_title(input$query))
         for (i in 1:length(esearch())) {
             local({
                 myi <- i
@@ -153,7 +150,7 @@ server <- function(input, output, session) {
     my_list <- reactiveValues(index=1)
 
     observeEvent(input$go, {
-        req(length(esearch()) > 100)
+        req(is.list(esearch()))
         output$count <- renderUI(
             selectInput("indices", "batches",
                         c(1:length(esearch())),
@@ -167,9 +164,56 @@ server <- function(input, output, session) {
         my_list$index <- input$indices
 
     })
-    #check_list <- reactive({grep("checker*", names(input), value = TRUE)})
 
-    #check_values <- reactiveValues(item=reactive({grep("checker*", names(input), value = TRUE)}))
+    df <- reactive(read.csv("../acronym_df.csv"))
+
+    observeEvent(input$query, {
+        switch(input$query,
+               mouse = {if(input$in_stage == "developing"){
+                   output$out_brainOri <- renderUI(selectizeInput(inputId = "in_brainOri",
+                                                              label = "Brain region of origin",
+                                                              choices = df()$mouse_developing))
+               }else{output$out_brainOri <- renderUI(selectizeInput(inputId = "in_brainOri",
+                                                                label = "Brain region of origin",
+                                                                choices = df()$mouse_adult))}
+                   },
+               human = {if(input$in_stage == "developing"){
+                   output$out_brainOri <- renderUI(selectizeInput(inputId = "in_brainIn",
+                                                                 label = "Brain region of origin",
+                                                                 choices = df()$human_developing))
+               }else{output$out_brainOri <- renderUI(selectizeInput(inputId = "in_brainIn",
+                                                                   label = "Brain region of origin",
+                                                                   choices = df()$human_adult))}
+
+               }
+               )
+        switch (input$query,
+                mouse = {if(input$in_stage == "developing"){
+                    output$out_brainIn <- renderUI(selectizeInput(inputId = "in_brainOri",
+                                                                  label = "Select brain region of injection",
+                                                                  choices = df()$mouse_developing))
+                }else{output$out_brainIn <- renderUI(selectizeInput(inputId = "in_brainOri",
+                                                                    label = "Select brain region of injection",
+                                                                    choices = df()$mouse_adult))}
+                },
+                human= {if(input$in_stage == "developing"){
+                    output$out_brainIn <- renderUI(selectizeInput(inputId = "in_brainIn",
+                                                                  label = "Select brain region of injection",
+                                                                  choices = df()$human_developing))
+                }else{output$out_brainIn <- renderUI(selectizeInput(inputId = "in_brainIn",
+                                                                    label = "Select brain region of injection",
+                                                                    choices = df()$human_adult))}
+
+                }
+        )
+    })
+
+    observeEvent(input$download, {
+        if(!dir.exists("geo_data")) dir.create("geo_data")
+        id <- NULL
+
+    })
+
 
 }
 

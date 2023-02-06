@@ -104,7 +104,7 @@ query_fun <- function(indx=NULL){
   #browser()
   if (return_id==TRUE) return(ids)
   #browser()
-  if(do_search==TRUE  & is.list(ids)) return(smry <- entrez_summary(db=db, id=ids[[indx]]))
+  if(do_search==TRUE && !is.null(indx)) return(smry <- entrez_summary(db=db, id=ids[[indx]]))
   if(do_search==TRUE) return(smry <- entrez_summary(db=db, id=ids))
 }
 
@@ -131,7 +131,7 @@ slicer <- function(eid, jump=100){
 # accession_list <- unlist(Map("[[", uids[1:length(uids)], "accession"))
 
 
-
+# system("wget -np -nd -r -P test_dir/ ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE206nnn/GSE206940/")
 
 
 
