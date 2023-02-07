@@ -79,12 +79,3 @@ readH5AD <- function(h5file,path="/") {
   handle_h5ad_elt(h5file,path,content)
 }
 
-
-writeH5AD <- function(e,h5file) {
-  stop("not implemented yet")
-}
-
-
-
-#e <- readH5AD("../../01_data_collection/data_download/alz_excitatory.h5ad") 
-#metadata(e) -> m

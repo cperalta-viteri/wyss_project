@@ -17,6 +17,8 @@ read_structure_ontology <- function(json_file) {
 }
 
 
+# Consult following page for a description
+# http://help.brain-map.org/display/api/Atlas+Drawings+and+Ontologies
 human_ontology <- read_structure_ontology("http://api.brain-map.org/api/v2/structure_graph_download/10.json")
 mouse_ontology <- read_structure_ontology("http://api.brain-map.org/api/v2/structure_graph_download/1.json")
 
