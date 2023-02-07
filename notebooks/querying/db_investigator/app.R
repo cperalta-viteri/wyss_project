@@ -178,10 +178,10 @@ server <- function(input, output, session) {
                                                                 choices = df()$mouse_adult))}
                    },
                human = {if(input$in_stage == "developing"){
-                   output$out_brainOri <- renderUI(selectizeInput(inputId = "in_brainIn",
+                   output$out_brainOri <- renderUI(selectizeInput(inputId = "in_brainOri", #in
                                                                  label = "Brain region of origin",
                                                                  choices = df()$human_developing))
-               }else{output$out_brainOri <- renderUI(selectizeInput(inputId = "in_brainIn",
+               }else{output$out_brainOri <- renderUI(selectizeInput(inputId = "in_brainOri",
                                                                    label = "Brain region of origin",
                                                                    choices = df()$human_adult))}
 
@@ -189,10 +189,10 @@ server <- function(input, output, session) {
                )
         switch (input$query,
                 mouse = {if(input$in_stage == "developing"){
-                    output$out_brainIn <- renderUI(selectizeInput(inputId = "in_brainOri",
+                    output$out_brainIn <- renderUI(selectizeInput(inputId = "in_brainIn",
                                                                   label = "Select brain region of injection",
                                                                   choices = df()$mouse_developing))
-                }else{output$out_brainIn <- renderUI(selectizeInput(inputId = "in_brainOri",
+                }else{output$out_brainIn <- renderUI(selectizeInput(inputId = "in_brainIn",
                                                                     label = "Select brain region of injection",
                                                                     choices = df()$mouse_adult))}
                 },
@@ -209,8 +209,22 @@ server <- function(input, output, session) {
     })
 
     observeEvent(input$download, {
-        if(!dir.exists("geo_data")) dir.create("geo_data")
-        id <- NULL
+
+        wd <- "../geo_data"
+        if(!dir.exists(wd)) dir.create(wd)
+        id <- input$in_uid
+        if(!dir.exists(file.path(wd, id))) dir.create(file.path(wd, id))
+        link <- sum_entrez()[[sub("GSE", "200", id)]][["ftplink"]]
+        # input$query, input$in_strain, input$in_acq, input$in_stage, input$in_brainOri, input$in_brainIn
+        l <- list(organism=input$query, strain=input$strain,
+                  acq_mode=input$in_acq, stage=input$in_stage,
+                  brain_orig=input$in_brainOri, brain_inject=input$in_brainIn)
+        #write(jsonlite::toJSON(l, pretty = TRUE, auto_unbox = TRUE), sprintf("%s/%s/metadata_%s.json", wd, id, id))
+        jsonlite::write_json(l, pretty = TRUE, auto_unbox = TRUE, path= sprintf("%s/%s/metadata_%s.json", wd, id, id))
+        system(sprintf("wget -np -nd -r -P %s %s", file.path(wd, id), file.path(link, "suppl")))
+
+        #system("wget -np -nd -r -P test_dir/ ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE206nnn/GSE206940/")
+        #sprintf("wget -np -nd -r -P %s %s", file.path(wd, id), file.path(link, "suppl"))
 
     })
 
@@ -221,7 +235,7 @@ server <- function(input, output, session) {
 shinyApp(ui = ui, server = server)
 
 
-
+#jsonlite::toJSON(list(organism="mouse", stage="adult", bla="blabla"), pretty = TRUE, auto_unbox = TRUE)
 
 
 
