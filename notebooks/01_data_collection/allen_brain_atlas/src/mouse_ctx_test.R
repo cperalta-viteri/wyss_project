@@ -3,6 +3,8 @@ library(scater)
 source("../lib_sce.R")
 
 
+
+h5ls("out/mouse_ctx_10x.h5")
 e10x <- loadHDF5SingleCellExperiment("out/mouse_ctx_10x.h5")
 essv4 <- loadHDF5SingleCellExperiment("out/mouse_ctx_ssv4.h5")
 

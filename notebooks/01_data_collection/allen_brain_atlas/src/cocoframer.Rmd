@@ -95,18 +95,6 @@ rgl::rglwidget()
 
 
 
-# Build expression array of available genes
-```{r}
-# List of available genes
-G <- get_exp_gene_relationships()
-G <- subset(G,gene_symbol!="")
-V <- lapply(G$id,get_aba_ish_data)
-V <- simplify2array(setNames(V,G$id))
-HDF5Array::writeHDF5Array(V,"ish.h5")
-```
-
-
-
 
 
 
