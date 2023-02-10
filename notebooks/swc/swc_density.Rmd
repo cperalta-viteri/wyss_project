@@ -1,0 +1,41 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(ggplot2)
+source("lib_swc.R")
+options(timeout=120)
+```
+
+
+# Load some morphologies
+```{r}
+swcs <- list(
+  read_swc("https://download.brainimagelibrary.org/3a/88/3a88a7687ab66069/excitatory/20171204_sample_2.SWC"),
+  read_swc("https://download.brainimagelibrary.org/3a/88/3a88a7687ab66069/excitatory/20171204_sample_4.SWC"),
+  read_swc("https://download.brainimagelibrary.org/3a/88/3a88a7687ab66069/excitatory/20171204_sample_5.SWC")
+)
+```
+
+# Compute density of 3 SWC, and display
+```{r}
+dens <- lapply(swcs,swc_density)
+for(d in dens) {
+  image(d,asp=1)  
+}
+# also display average
+image(Reduce(function(a,b){a$z <- a$z + b$z;a},dens),asp=1)
+```
+
+
+```{r}
+swcs[[2]] |>
+  within({p <- match(parent_id,sample_id);parent.x <- x[p];parent.y <- y[p];parent.z <- z[p]}) |>
+  ggplot() + 
+    geom_segment(aes(x=x,y=z,xend=parent.x,yend=parent.z,color=structure_label)) + 
+    coord_equal() + xlab("") + ylab("depth") +
+    theme_classic()
+```
+
