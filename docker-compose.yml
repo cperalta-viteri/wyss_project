@@ -1,19 +1,17 @@
 version: "3.9"
 
 services:
-  rstudio:
-    image: unigebsp/neurosuite
+  jupyter:
+    image: unigebsp/neurosuite:cuda11.6_focal_R4.2_BioC3.16_Py3.10
     build:
       context: "./container"
-    command: R
-    tty: true
     ports:
-      - "8787:8787" # Rstudio UI
+      - "8888:8888"
       #  - "3838:3838"  # Shiny server
       #environment:
       #- PASSWORD: "my_secret"
     volumes:
       - ./.rstudio_config:/home/rstudio/.config/rstudio
-      - $PWD:/home/rstudio/workspace
+      - ./:/home/user/workdir
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped

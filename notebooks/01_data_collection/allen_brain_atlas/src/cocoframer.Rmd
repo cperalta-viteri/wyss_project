@@ -4,7 +4,7 @@ output: html_notebook
 ---
 
 # load dependencies
-```{r}
+```{r,message=FALSE}
 library(cocoframer)
 library(igraph)
 library(ggraph)
@@ -12,7 +12,7 @@ library(ggraph)
 
 
 # retreive the structure ontology
-```{r}
+```{r,message=FALSE}
 o <- get_mba_ontology()
 o <- flatten_mba_ontology(o)
 o <- generate_taxons(o)
@@ -42,7 +42,7 @@ A <- get_ccf_grid_annotation()
 rgl::clear3d()
 plot_ccf_meshes(list(
   a=ccf_2017_mesh("root"),
-  b=ccf_2017_mesh("SS")
+  b=ccf_2017_mesh("HIP")
 ),c("b"),bg_structure="a",fg_alpha = 0.4)
 rgl::rgl.viewpoint(-40,phi = 50)
 rgl::rglwidget()
@@ -51,7 +51,7 @@ rgl::rglwidget()
 # Check alignment with annotation cube
 ```{r}
 local({
-  sub <- filter_mba_ontology_children(o,"SS",include_parent = TRUE)
+  sub <- filter_mba_ontology_children(o,"HIP",include_parent = TRUE)
   pos <- reshape2::melt(A) |>
     subset(value %in% sub$id)
   a <- 200;rgl::plot3d((pos$Var1-1)*a,(ncol(A)-pos$Var2)*a,(pos$Var3-1)*a,add = TRUE)
