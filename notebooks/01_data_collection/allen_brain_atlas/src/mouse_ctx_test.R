@@ -15,3 +15,8 @@ ggcells(e10x[,sample(ncol(e10x),50000)]) +
   theme(legend.position="none")
 
 
+ggcells(e10x[,sample(ncol(e10x),50000)],features = "Gad1",exprs_values = "counts") + 
+  geom_point(aes(x=UMAP.1,y=UMAP.2,color=Gad1),size=1) + 
+  coord_equal() + 
+  theme_classic() +
+  theme(legend.position="none")

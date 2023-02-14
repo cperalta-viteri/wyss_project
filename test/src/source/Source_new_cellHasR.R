@@ -408,7 +408,8 @@ Qc<-function(seurat,
       mytheme_classic +theme(legend.position = "left")
     p1<-ggMarginal(p1, type = "densigram",bins=100, fill="grey",  alpha=0.3)
     
-    ggsave(filename = paste0("pdf/1-Loading/",projet,"/nGenesvsnUMIs_beforefiltering.pdf"), plot = p1, device =cairo_pdf, width = 297, height = 210, units = "mm")
+    ggsave(filename = paste0("pdf/1-Loading/",projet,"/nGenesvsnUMIs_beforefiltering.pdf"),
+           plot = p1, device =cairo_pdf, width = 297, height = 210, units = "mm")
     
     ####### Filter cells base on both metrics
     Cell.QC.Stat <- Cell.QC.Stat %>%  filter(log10(nFeature_RNA) >= min.nFeature.thr)
@@ -427,7 +428,8 @@ Qc<-function(seurat,
     p2<-ggMarginal(p2, type = "densigram",bins=100, fill="grey", alpha=0.3)
     
     
-    ggsave(filename  = paste0("pdf/1-Loading/",projet,"/nGenesvsnUMIs_cutoff.pdf"), plot = p2, device =cairo_pdf, width = 297, height = 210, units = "mm")
+    ggsave(filename  = paste0("pdf/1-Loading/",projet,"/nGenesvsnUMIs_cutoff.pdf"),
+           plot = p2, device =cairo_pdf, width = 297, height = 210, units = "mm")
     
     
     Cell.QC.Stat$valideCells <- (log10(Cell.QC.Stat$nFeature_RNA) > (log10(Cell.QC.Stat$nCount_RNA) * lm.model$coefficients[2] + (lm.model$coefficients[1] - 0.09)))
@@ -444,7 +446,8 @@ Qc<-function(seurat,
                                                      as.numeric(table(Cell.QC.Stat$valideCells)[1]), " QC filtered"), x = 4, y = 3.8)+mytheme_classic
     p3<-ggMarginal(p3, type = "densigram",bins=100, fill="grey",  alpha=0.3)
     
-    ggsave(filename = paste0("pdf/1-Loading/",projet,"/nGenesvsnUMIs_validCells.pdf"), plot = p3, device =cairo_pdf, width = 297, height = 210, units = "mm")
+    ggsave(filename = paste0("pdf/1-Loading/",projet,"/nGenesvsnUMIs_validCells.pdf"), 
+           plot = p3, device =cairo_pdf, width = 297, height = 210, units = "mm")
     
   }
   
@@ -469,7 +472,8 @@ Qc<-function(seurat,
       mytheme_classic +theme(legend.position = "left")
     p1<-ggMarginal(p1, type = "densigram",bins=100, fill="grey",  alpha=0.3)
     
-    ggsave(filename = paste0("pdf/1-Loading/",projet,"/nGenesvsnUMIs_beforefiltering.pdf"), plot = p1, device =cairo_pdf, width = 297, height = 210, units = "mm")
+    ggsave(filename = paste0("pdf/1-Loading/",projet,"/nGenesvsnUMIs_beforefiltering.pdf"),
+           plot = p1, device =cairo_pdf, width = 297, height = 210, units = "mm")
     
     ####### Filter cells base on both metrics
     Cell.QC.Stat <- Cell.QC.Stat %>%  filter(log10(nFeature_RNA) >= min.nFeature.thr)
@@ -488,7 +492,8 @@ Qc<-function(seurat,
     p2<-ggMarginal(p2, type = "densigram",bins=100, fill="grey", alpha=0.3)
     
     
-    ggsave(filename  = paste0("pdf/1-Loading/",projet,"/nGenesvsnUMIs_cutoff.pdf"), plot = p2, device =cairo_pdf, width = 297, height = 210, units = "mm")
+    ggsave(filename  = paste0("pdf/1-Loading/",projet,"/nGenesvsnUMIs_cutoff.pdf"),
+           plot = p2, device =cairo_pdf, width = 297, height = 210, units = "mm")
     
     
     Cell.QC.Stat$valideCells <- (log10(Cell.QC.Stat$nFeature_RNA) > (log10(Cell.QC.Stat$nCount_RNA) * lm.model$coefficients[2] + (lm.model$coefficients[1] - 0.09)))
@@ -505,7 +510,8 @@ Qc<-function(seurat,
                                                      as.numeric(table(Cell.QC.Stat$valideCells)[1]), " QC filtered"), x = 4, y = 3.8)+mytheme_classic
     p3<-ggMarginal(p3, type = "densigram",bins=100, fill="grey",  alpha=0.3)
     
-    ggsave(filename = paste0("pdf/1-Loading/",projet,"/nGenesvsnUMIs_validCells.pdf"), plot = p3, device =cairo_pdf, width = 297, height = 210, units = "mm")
+    ggsave(filename = paste0("pdf/1-Loading/",projet,"/nGenesvsnUMIs_validCells.pdf"),
+           plot = p3, device =cairo_pdf, width = 297, height = 210, units = "mm")
     
   }
   
@@ -901,7 +907,8 @@ Qc<-function(seurat,
           mytheme_classic+expand_limits(x=c(min(umap.df$UMAP_1),max(umap.df$UMAP_1)),y=c(min(umap.df$UMAP_2),max(umap.df$UMAP_2)))
         
         
-        ggsave(filename = paste0("pdf/1-Loading/",projet,"/UMAP_Predicted_id.pdf"), plot = p1, device =cairo_pdf, width = 297, height = 210, units = "mm")
+        ggsave(filename = paste0("pdf/1-Loading/",projet,"/UMAP_Predicted_id.pdf"),
+               plot = p1, device =cairo_pdf, width = 297, height = 210, units = "mm")
         
         
         umap.df <- as.data.frame(Raw.data@reductions$umap@cell.embeddings)

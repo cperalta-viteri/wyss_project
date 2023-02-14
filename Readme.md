@@ -4,7 +4,9 @@
 
 2. In a terminal
 ```
-docker run --rm -p8888:8888 unigebsp/neurosuite
+
+docker run -it --rm --gpus all -p 8888:8888 -v $PWD:/home/user/workdir unigebsp/neurosuite:cuda11.6_focal_R4.2_BioC3.16_Py3.10
+
 ```
 
 3. In a web browser open the URL http://localhost:8888/
@@ -18,26 +20,10 @@ git clone git@github.com:Christ14n97/wyss_project.git
 docker-compose run --rm build
 ```
 
-# Rocket Project (peraltav)
-
-Currently, it only has RStudio as IDE. Python3 is available to use, though.
-
-Build the image:
-
-```bash
-docker build --cpuset-cpus 4 --rm -f "container/Dockerfile" -t unigebsp/neurosuite:latest "container"
-```
-
-Run container
-
-```bash
-# this is how I mount my directory on my container using simple repo2docker command
-docker run --rm -it -p 8787:8787 -v $PWD:/home/rstudio/workdir unigebsp/neurosuite:latest
-```
 
 ```bash
 # STILL TO TEST: how to mount a config file to save customization on RS IDE.
-docker run -it --rm -p 8787:8787 -v $PWD/.config:/user/rstudio/.config -v $PWD:/home/rstudio/workdir dockerenvi:latest 
+docker run -it --rm -p 8787:8787 -v $PWD/.config:/user/rstudio/.config -v $PWD:/home/user/workdir dockerenvi:latest 
 ```
 
 
