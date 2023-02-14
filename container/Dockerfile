@@ -120,7 +120,7 @@ RUN R -q -e " \
     devtools::install_github('cellgeni/sceasy')\
     "
 
-
+RUN apt-get update && apt-get install -y docker.io && rm -rf /var/cache/apt/* /var/lib/apt/lists/*
 
 #COPY requirements.txt /tmp
 #RUN pip install -r /tmp/requirements.txt
