@@ -684,7 +684,7 @@ sce_2 <- QC(sce_object = sce,
             filter_singlet=FALSE,
             mito_max=15,
             min_nfeatures=log10(200),
-            normalization_method="AnPearson",
+            normalization_method="logNorm",
             seed=12 )
 ```
 
