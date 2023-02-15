@@ -234,8 +234,7 @@ server <- function(input, output, session) {
 # Run the application
 shinyApp(ui = ui, server = server)
 
-
-#jsonlite::toJSON(list(organism="mouse", stage="adult", bla="blabla"), pretty = TRUE, auto_unbox = TRUE)
+#options(shiny.port=8888)
 
 
 
