@@ -123,6 +123,8 @@ RUN R -q -e "\
     devtools::install_github('cellgeni/sceasy')\
     "
 
+RUN R -q -e "\
+    install.packages(c('bs4Dash', 'reactlog', 'rentrez', 'httr2'))"
 
 USER user
 COPY requirements.txt /tmp
