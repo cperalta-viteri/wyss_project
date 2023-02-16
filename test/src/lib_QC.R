@@ -39,20 +39,36 @@ QC <- function(sce_object,
     if (!file.exists(file.path("pdf/1-Loading",project))){
       dir.create(file.path("pdf/1-Loading",project))
     }
+    if (!file.exists(file.path("out/1-Loading",project))){
+      dir.create(file.path("out/1-Loading",project))
+    }
+    
+    fileConn <- file(file.path("out/1-Loading", project, "cellbarcodeWhitelist.txt"))
+    writeLines(gsub("-", ".", colnames(sce_object)), fileConn)
+    close(fileConn)
+    
+    write.table(assay(swapAltExp(sce_object, "hto"))[rownames(assay(swapAltExp(sce_object, "hto"))) %in% HTO_tag, ],
+                file = file.path("out/1-Loading", project, "hto.txt"), sep = ",", col.names = TRUE, row.names = TRUE)
     
     
-    barcode_df <- as.data.frame(
-      assay(swapAltExp(sce_object, "hto"))[rownames(assay(swapAltExp(sce_object, "hto"))) %in% HTO_tag,])
+    # barcode_df <- as.data.frame(
+    #   assay(swapAltExp(sce_object, "hto"))[rownames(assay(swapAltExp(sce_object, "hto"))) %in% HTO_tag,])
     # demultiplexing
     pdf(file.path("pdf/1-Loading",project,"hto.pdf"), width = 20, height = 20)
-    calls <- GenerateCellHashingCalls(barcodeMatrix = barcode_df,
+    barcodeData <- ProcessCountMatrix(rawCountData = file.path("out/1-Loading", project, "hto.txt"),
+                                      minCountPerCell = 5,
+                                      simplifyBarcodeNames = FALSE,
+                                      cellbarcodeWhitelist = file.path("out/1-Loading", project, "cellbarcodeWhitelist.txt"),
+                                      barcodeWhitelist = HTO_tag)
+    calls <- GenerateCellHashingCalls(barcodeMatrix = barcodeData,
                                       methods = methods, 
                                       doTSNE = FALSE,
                                       majorityConsensusThreshold = 0.3)
     # create summary plots to contrast cells based on call-status. Help inform why some cells were not called
-    SummarizeCellsByClassification(calls = calls, barcodeMatrix = barcode_df)
+    SummarizeCellsByClassification(calls = calls, barcodeMatrix = barcodeData)
     dev.off()
     
+    calls$cellbarcode<-gsub("[.]","-",calls$cellbarcode)
     stopifnot(setequal(colnames(sce_object), calls$cellbarcode))
     colData(sce_object)$consensus_call <- calls$consensuscall
     colData(sce_object)$consensus_call_global <- calls$consensuscall.global
