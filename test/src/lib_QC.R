@@ -19,7 +19,7 @@ QC <- function(sce_object,
                min_nfeatures=log10(200),
                normalization_method="logNorm",
                seed=12,
-               workers=NULL){
+               workers=1){
   set.seed(seed = seed)
   Sys.setenv(RETICULATE_PYTHON="/usr/bin/python3")
   #' @title demultiplexer
@@ -36,13 +36,6 @@ QC <- function(sce_object,
   
   demultiplexer <- function(sce_object){
     require(cellhashR)
-    
-    if (!file.exists(file.path("pdf/1-Loading",project))){
-      dir.create(file.path("pdf/1-Loading",project))
-    }
-    if (!file.exists(file.path("out/1-Loading",project))){
-      dir.create(file.path("out/1-Loading",project))
-    }
     
     fileConn <- file(file.path("out/1-Loading", project, "cellbarcodeWhitelist.txt"))
     writeLines(gsub("-", ".", colnames(sce_object)), fileConn)
@@ -250,6 +243,13 @@ QC <- function(sce_object,
     altExp(sce_object, "Gene_Expression_PearNorm") <- 
       SingleCellExperiment(list(count_AP=z), colData = colData(sce_object))
     sce_object
+  }
+  
+  if (!file.exists(file.path("pdf/1-Loading",project))){
+    dir.create(file.path("pdf/1-Loading",project))
+  }
+  if (!file.exists(file.path("out/1-Loading",project))){
+    dir.create(file.path("out/1-Loading",project))
   }
   
   
@@ -564,10 +564,10 @@ QC <- function(sce_object,
       sce_object[, sce_object$qc == "passed"],
       y="subsets_Ribo_percent", ylab = "ribo percent", title = "Ribosomal Genes")
     
-    p <- cowplot::plot_grid(plotlist = list(p1, p2, p3, p4), ncol = 2, align = "hv",
+    p <- cowplot::plot_grid(plotlist = list(p3, p4, p1, p2), ncol = 2, align = "hv",
                             rel_widths = c(1, 1, 1, 1),rel_heights =  c(1, 1, 1, 1))
     
-    ggsave(filename = paste0("pdf/1-Loading/",project,"/violin QC_after filtering.pdf"),
+    ggsave(filename = paste0("pdf/1-Loading/",project,"/violin_plot_QC_after_filtering.pdf"),
            plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
     
     p1 <- plot_UMIvsGene(sce_object[, sce_object$qc == "passed"],
@@ -593,7 +593,7 @@ QC <- function(sce_object,
       # normalization
       sce_object <- scuttle::logNormCounts(sce_object[, sce_object$qc=="passed"])
       # UMAP computation
-      if (is.null(workers)) {
+      if (workers>1) {
         sce_object <- scater::runUMAP(sce_object[, sce_object$qc=="passed"])}
       else sce_object <- scater::runUMAP(sce_object[, sce_object$qc=="passed"], BPPARAM=bp)
       # color by consensus call individual
@@ -615,7 +615,7 @@ QC <- function(sce_object,
       sce_object <- do_vst_transform(sce_object[, sce_object$qc=="passed"])
       sce_object <- swapAltExp(sce_object, "Gene_Expression_VST")
       # UMAP computation
-      if (is.null(workers)){
+      if (workers>1){
         sce_object <- scater::runUMAP(sce_object, exprs_values="count_vst")
         
       } else sce_object <- scater::runUMAP(sce_object, exprs_values="count_vst", BPPARA=bp)
@@ -639,7 +639,7 @@ QC <- function(sce_object,
       sce_object <- do_AnPearson_transform(sce_object[, sce_object$qc=="passed"])
       sce_object <- swapAltExp(sce_object, "Gene_Expression_PearNorm")
       # UMAP computation
-      if (is.null(workers)){
+      if (workers>1){
         sce_object <- scater::runUMAP(sce_object, exprs_values="count_AP")
       } else sce_object <- scater::runUMAP(sce_object, exprs_values="count_AP", BPPARAM=bp)
       # color by consensus call individual
