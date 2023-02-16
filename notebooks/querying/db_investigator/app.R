@@ -236,7 +236,7 @@ shinyApp(ui = ui, server = server)
 
 #options(shiny.port=8888)
 
-
+#age and sex, genotype
 
 
 
