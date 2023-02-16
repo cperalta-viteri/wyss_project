@@ -18,7 +18,8 @@ QC <- function(sce_object,
                mito_max=15,
                min_nfeatures=log10(200),
                normalization_method="logNorm",
-               seed=12){
+               seed=12,
+               workers=NULL){
   set.seed(seed = seed)
   Sys.setenv(RETICULATE_PYTHON="/usr/bin/python3")
   #' @title demultiplexer
@@ -586,13 +587,15 @@ QC <- function(sce_object,
   }
   
   #### skipped scrublet == TRUE
-  
+  bp <- BiocParallel::MulticoreParam(workers = workers, RNGseed = 16, progressbar = TRUE)
   switch (normalization_method,
     "logNorm" = {
       # normalization
       sce_object <- scuttle::logNormCounts(sce_object[, sce_object$qc=="passed"])
       # UMAP computation
-      sce_object <- scater::runUMAP(sce_object[, sce_object$qc=="passed"])
+      if (is.null(workers)) {
+        sce_object <- scater::runUMAP(sce_object[, sce_object$qc=="passed"])}
+      else sce_object <- scater::runUMAP(sce_object[, sce_object$qc=="passed"], BPPARAM=bp)
       # color by consensus call individual
       p <- scater::plotUMAP(sce_object[, sce_object$qc=="passed"],
                             point_size=.05, colour_by="consensus_call")+
@@ -612,7 +615,10 @@ QC <- function(sce_object,
       sce_object <- do_vst_transform(sce_object[, sce_object$qc=="passed"])
       sce_object <- swapAltExp(sce_object, "Gene_Expression_VST")
       # UMAP computation
-      sce_object <- scater::runUMAP(sce_object, exprs_values="count_vst")
+      if (is.null(workers)){
+        sce_object <- scater::runUMAP(sce_object, exprs_values="count_vst")
+        
+      } else sce_object <- scater::runUMAP(sce_object, exprs_values="count_vst", BPPARA=bp)
       # color by consensus call individual
       p <- scater::plotUMAP(sce_object,
                             by_exprs_values="count_vst",
@@ -633,7 +639,9 @@ QC <- function(sce_object,
       sce_object <- do_AnPearson_transform(sce_object[, sce_object$qc=="passed"])
       sce_object <- swapAltExp(sce_object, "Gene_Expression_PearNorm")
       # UMAP computation
-      sce_object <- scater::runUMAP(sce_object, exprs_values="count_AP")
+      if (is.null(workers)){
+        sce_object <- scater::runUMAP(sce_object, exprs_values="count_AP")
+      } else sce_object <- scater::runUMAP(sce_object, exprs_values="count_AP", BPPARAM=bp)
       # color by consensus call individual
       p <- scater::plotUMAP(sce_object,
                             by_exprs_values="count_AP",

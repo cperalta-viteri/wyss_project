@@ -679,13 +679,14 @@ sce_2 <- QC(sce_object = sce,
             organism = "mouse",
             hto=TRUE,
             methods=c("multiseq","gmm_demux", "htodemux", "dropletutils"),
-            project="New_project",
+            project="test",
             HTO_tag=HTO_tag,
             filter_singlet=FALSE,
             mito_max=15,
             min_nfeatures=log10(200),
             normalization_method="logNorm",
-            seed=12 )
+            seed=12,
+            workers = 16)
 ```
 
 
