@@ -73,7 +73,7 @@ ui <- dashboardPage(
                     title = "Metadata",
                     textOutput(outputId = "disp_organism"),
                     tags$head(tags$style("#disp_organism{color:blue; font-size: 20px}")),
-                    textInput(inputId = "in_strain", label = "Type the strain"),
+                    textInput(inputId = "in_strain", label = "Type the genotype"),
                     selectInput(inputId = "in_acq", label = "Select the data acquisition mode", choices = c("scRNA", "nuclei", "scATAC")),
                     selectInput(inputId = "in_stage", label = "Select Organism Stage", choices = c("developing", "adult"), selected = NULL),
                     uiOutput(outputId = "out_brainOri"),
@@ -239,7 +239,7 @@ shinyApp(ui = ui, server = server)
 #age and sex, genotype
 
 
-
+#ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE190012nnn/GSE190012/
 
 
 
