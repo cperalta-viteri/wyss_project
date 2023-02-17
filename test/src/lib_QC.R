@@ -235,9 +235,9 @@ QC <- function(sce_object,
     counts_sum0 <- rowSums(assay(sce_object))
     counts_sum1 <- colSums(assay(sce_object))
     counts_sum <- sum(sce_object$sum)
-    
+    #browser()
     mu <- DelayedArray(crossprod(t(counts_sum0), counts_sum1) / counts_sum)
-    z <- DelayedArray((assay(sce_object) - mu) / sqrt(mu + (mu**2/theta)))
+    z <- DelayedArray((DelayedArray(assay(sce_object)) - mu) / sqrt(mu + (mu**2/theta)))
     z <- replace(z, is.na(z), c(0))
     z <- z[, order(match(colnames(sce_object[, sce_object$qc=="passed"]), colnames(z)))]
     altExp(sce_object, "Gene_Expression_PearNorm") <- 
@@ -591,23 +591,32 @@ QC <- function(sce_object,
   switch (normalization_method,
     "logNorm" = {
       # normalization
+      #browser()
       sce_object <- scuttle::logNormCounts(sce_object[, sce_object$qc=="passed"])
       # UMAP computation
       if (workers>1) {
         sce_object <- scater::runUMAP(sce_object[, sce_object$qc=="passed"])}
       else sce_object <- scater::runUMAP(sce_object[, sce_object$qc=="passed"], BPPARAM=bp)
-      # color by consensus call individual
-      p <- scater::plotUMAP(sce_object[, sce_object$qc=="passed"],
-                            point_size=.05, colour_by="consensus_call")+
-        coord_equal()+guides(colour=guide_legend(NULL, override.aes = list(size=2)))
-      ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP_Predicted_id.pdf"),
-                      plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
-      # color by consensus call global
-      p <- scater::plotUMAP(sce_object[, sce_object$qc=="passed"],
-                            point_size=.05, colour_by="consensus_call_global")+
-        coord_equal()+guides(colour=guide_legend(NULL, override.aes = list(size=2)))
-      ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP_Predicted_global.pdf"),
-                      plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
+      if (isTRUE("consensus_call" %in% colnames(colData(sce_object)))){
+        # color by consensus call individual
+        p <- scater::plotUMAP(sce_object[, sce_object$qc=="passed"],
+                              point_size=.05, colour_by="consensus_call")+
+          coord_equal()+guides(colour=guide_legend(NULL, override.aes = list(size=2)))
+        ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP_Predicted_id.pdf"),
+                        plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
+        # color by consensus call global
+        p <- scater::plotUMAP(sce_object[, sce_object$qc=="passed"],
+                              point_size=.05, colour_by="consensus_call_global")+
+          coord_equal()+guides(colour=guide_legend(NULL, override.aes = list(size=2)))
+        ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP_Predicted_global.pdf"),
+                        plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
+      } else{
+        p <- scater::plotUMAP(sce_object[, sce_object$qc=="passed"],
+                              point_size=.05)+
+          coord_equal()+guides(colour=guide_legend(NULL, override.aes = list(size=2)))
+        ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP.pdf"),
+                        plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
+      }
       
       },
     "SCTransform" = {
@@ -619,20 +628,29 @@ QC <- function(sce_object,
         sce_object <- scater::runUMAP(sce_object, exprs_values="count_vst")
         
       } else sce_object <- scater::runUMAP(sce_object, exprs_values="count_vst", BPPARA=bp)
-      # color by consensus call individual
-      p <- scater::plotUMAP(sce_object,
-                            by_exprs_values="count_vst",
-                            point_size=.05, colour_by="consensus_call")+
-        coord_equal()+guides(colour=guide_legend(NULL, override.aes = list(size=2)))
-      ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP_Predicted_id.pdf"),
-                      plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
-      # color by consensus call global
-      p <- scater::plotUMAP(sce_object,
-                            by_exprs_values="count_vst",
-                            point_size=.05, colour_by="consensus_call_global")+
-        coord_equal()+guides(colour=guide_legend(NULL, override.aes = list(size=2)))
-      ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP_Predicted_global.pdf"),
-                      plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
+      if (isTRUE("consensus_call" %in% colnames(colData(sce_object)))){
+        # color by consensus call individual
+        p <- scater::plotUMAP(sce_object,
+                              by_exprs_values="count_vst",
+                              point_size=.05, colour_by="consensus_call")+
+          coord_equal()+guides(colour=guide_legend(NULL, override.aes = list(size=2)))
+        ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP_Predicted_id.pdf"),
+                        plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
+        # color by consensus call global
+        p <- scater::plotUMAP(sce_object,
+                              by_exprs_values="count_vst",
+                              point_size=.05, colour_by="consensus_call_global")+
+          coord_equal()+guides(colour=guide_legend(NULL, override.aes = list(size=2)))
+        ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP_Predicted_global.pdf"),
+                        plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
+      } else {
+        p <- scater::plotUMAP(sce_object,
+                              by_exprs_values="count_vst",
+                              point_size=.05)+
+          coord_equal()+guides(colour=guide_legend(NULL, override.aes = list(size=2)))
+        ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP.pdf"),
+                        plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
+      }
       },
     "AnPearson" = {
       # normalization
@@ -642,20 +660,29 @@ QC <- function(sce_object,
       if (workers>1){
         sce_object <- scater::runUMAP(sce_object, exprs_values="count_AP")
       } else sce_object <- scater::runUMAP(sce_object, exprs_values="count_AP", BPPARAM=bp)
-      # color by consensus call individual
-      p <- scater::plotUMAP(sce_object,
-                            by_exprs_values="count_AP",
-                            point_size=.05, colour_by="consensus_call")+
-        coord_equal()+guides(colour=guide_legend(NULL, override.aes = list(size=2)))
-      ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP_Predicted_id.pdf"),
-                      plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
-      # color by consensus call global
-      p <- scater::plotUMAP(sce_object,
-                            by_exprs_values="count_AP",
-                            point_size=.05, colour_by="consensus_call_global")+
-        coord_equal()+guides(colour=guide_legend(NULL, override.aes = list(size=2)))
-      ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP_Predicted_global.pdf"),
-                      plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
+      if (isTRUE("consensus_call" %in% colnames(colData(sce_object)))){
+        # color by consensus call individual
+        p <- scater::plotUMAP(sce_object,
+                              by_exprs_values="count_AP",
+                              point_size=.05, colour_by="consensus_call")+
+          coord_equal()+guides(colour=guide_legend(NULL, override.aes = list(size=2)))
+        ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP_Predicted_id.pdf"),
+                        plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
+        # color by consensus call global
+        p <- scater::plotUMAP(sce_object,
+                              by_exprs_values="count_AP",
+                              point_size=.05, colour_by="consensus_call_global")+
+          coord_equal()+guides(colour=guide_legend(NULL, override.aes = list(size=2)))
+        ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP_Predicted_global.pdf"),
+                        plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
+      } else {
+        p <- scater::plotUMAP(sce_object,
+                              by_exprs_values="count_AP",
+                              point_size=.05)+
+          coord_equal()+guides(colour=guide_legend(NULL, override.aes = list(size=2)))
+        ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP.pdf"),
+                        plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
+      }
     }
   )
   
