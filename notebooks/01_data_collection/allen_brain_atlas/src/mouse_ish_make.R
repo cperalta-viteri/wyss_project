@@ -14,7 +14,7 @@ V <- with(
     setNames(paste0(gene_symbol,"/",id))
 )
 V <- simplify2array(V)
-HDF5Array::writeHDF5Array(V,"out/mouse_ish.h5","/ish",with.dimnames = TRUE)
+HDF5Array::writeHDF5Array(V,"../out/mouse_ish.h5","/ish",with.dimnames = TRUE)
 
 
 
