@@ -167,7 +167,7 @@ server <- function(input, output, session) {
 
     df <- reactive(read.csv("../acronym_df.csv"))
 
-    observeEvent(input$query, {
+    observeEvent(input$in_stage, {
         switch(input$query,
                mouse = {if(input$in_stage == "developing"){
                    output$out_brainOri <- renderUI(selectizeInput(inputId = "in_brainOri",
@@ -234,10 +234,9 @@ server <- function(input, output, session) {
 # Run the application
 shinyApp(ui = ui, server = server)
 
+#options(shiny.port=8888)
 
-#jsonlite::toJSON(list(organism="mouse", stage="adult", bla="blabla"), pretty = TRUE, auto_unbox = TRUE)
-
-
+#age and sex, genotype
 
 
 

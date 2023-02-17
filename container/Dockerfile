@@ -61,27 +61,32 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 
 #installing missing dependencies
-RUN aptitude -y install libcurl4-openssl-dev
-
+RUN aptitude -y install \
+    libcurl4-openssl-dev \
+    libfontconfig1-dev \
+    cmake \
+    libssl-dev \
+    libxml2-dev \
+    libmagick++-dev \
+    libharfbuzz-dev \
+    libfribidi-dev \
+    libgit2-dev \
+    libpoppler-cpp-dev
+    
 RUN R -q -e " \
     install.packages(c('Matrix','curl','XML','rjson','jsonlite','rhdf5','igraph','reshape2','Rcpp')); \
     install.packages(c('LowRankQP','bmrm','limma')); \
     install.packages(c('scales','RColorBrewer','wesanderson')); \
     "
-RUN aptitude -y install libfontconfig1-dev
+
 RUN R -q -e " \
-    install.packages(c('scales','RColorBrewer','wesanderson'));\
     install.packages(c('ggplot2','patchwork','ggrepel','ggraph','cowplot','ggnewscale'));"
 
-RUN aptitude -y install cmake
+
 RUN R -q -e "\
     install.packages(c('jpeg','png','ggpubr')); \
     install.packages(c('irlba', 'umap', 'Rtsne')); \
     "
-RUN aptitude -y install libssl-dev
-# line 83 is duplicated (also line 73)
-RUN R -q -e "\
-    install.packages(c('umap', 'Rtsne'))"
 
 # setting environmental variables (add before, at line 62)
 ENV PATH="/usr/local/cuda-11.6/bin${PATH:+:${PATH}}"
@@ -90,17 +95,12 @@ ENV PATH="$HOME/.local/bin:$PATH"
 RUN R -q -e " \
     install.packages(c('torch','luz'));torch::install_torch();"
 
-RUN aptitude -y install libxml2-dev
+
 RUN R -q -e "\
     install.packages(c('tidyverse','tidygraph')); \
     install.packages(c('reticulate','Seurat')); \
     "
-RUN aptitude -y install \
-    libmagick++-dev \
-    libharfbuzz-dev \
-    libfribidi-dev \
-    libgit2-dev \
-    libpoppler-cpp-dev
+
 
 RUN R -q -e " \
     # bioconductor packages \
@@ -113,20 +113,24 @@ RUN R -q -e " \
     BiocManager::install(c('DropletUtils','scuttle','scran','scater','uwot','AUCell','SingleR')); \
     BiocManager::install(c('biomaRt')); \
     BiocManager::install(c('edgeR','GEOquery','zellkonverter','sceasy')); \
-    BiocManager::install(c('splatter')); \
-    # github packages \
+    BiocManager::install(c('splatter'))"
+
+RUN R -q -e "BiocManager::install(c('demuxmix'))"
+
+RUN R -q -e "\
     install.packages(c('devtools')); \
     devtools::install_github(repo = 'bimberlab/cellhashR', ref = 'master', dependencies = TRUE, upgrade = 'always'); \
     devtools::install_github('cellgeni/sceasy')\
     "
 
-RUN apt-get update && apt-get install -y docker.io && rm -rf /var/cache/apt/* /var/lib/apt/lists/*
+RUN R -q -e "\
+    install.packages(c('bs4Dash', 'reactlog', 'rentrez', 'httr2'))"
 
-#COPY requirements.txt /tmp
-#RUN pip install -r /tmp/requirements.txt
+USER user
+COPY requirements.txt /tmp
+RUN pip install -r /tmp/requirements.txt
 
-#ENV DISABLE_AUTH=true
-
+RUN apt-get update && apt-get install -y docker.io
 
 USER root
 EXPOSE 8888
