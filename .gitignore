@@ -27,4 +27,13 @@ test/out/
 test/pdf/
 test/data_info
 test/peralta_qc/
-
+*.csv
+*.deb
+notebooks/01_data_collection/allen_brain_atlas/out/
+*.rds
+*.luz
+*.xlsx
+notebooks/querying/geo_data/
+*.RDataTmp
+*.png
+*.html
