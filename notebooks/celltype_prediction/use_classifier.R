@@ -1,8 +1,8 @@
 
 
 
-source("notebooks/01_data_collection/lib_sce.R")
-x <- loadHDF5SingleCellExperiment("notebooks/01_data_collection/allen_brain_atlas/out/mouse_ctx_ssv4.h5")
+source("../01_data_collection/lib_sce.R")
+x <- loadHDF5SingleCellExperiment("../01_data_collection/allen_brain_atlas/out/mouse_ctx_ssv4.h5")
 x <- logNormCounts(x)
 
 

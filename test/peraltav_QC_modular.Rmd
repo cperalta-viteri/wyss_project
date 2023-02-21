@@ -671,6 +671,8 @@ Another option is to call the holistic function `QC` which will handle everythin
 
 - normalization_method, method to choose as normalization strategy. The options are `logNorm`, `SCTransform` and `AnPearson`.
 
+- workers, set the number of CPU cores you would like to use. *Helpful for UMAP computation*.
+
 
 
 
@@ -688,6 +690,82 @@ sce_2 <- QC(sce_object = sce,
             seed=12,
             workers = 16)
 ```
+
+
+
+# Demo with GEO dataset GSE190012
+https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE213828 
+
+```{r}
+count_m <- read.delim("../notebooks/querying/geo_data/GSE213828/GSE213828_merged_counts.txt.gz")
+cellname <- colnames(count_m[,3:ncol(count_m)])
+
+gene_id <- count_m[,1]
+gene_name <- count_m[,2]
+
+count_m <- unname(count_m)
+```
+
+
+```{r}
+metaD <- read.delim("../notebooks/querying/geo_data/GSE213828/GSE213828_merged_sample_info.txt.gz")
+```
+
+
+```{r}
+demo_sce <- SingleCellExperiment(list(counts=as.matrix(count_m[,-c(1:2)])),
+                     #rownames=count_m[,2],
+                     rowData=list(ensembl_id=gene_id),
+                     colData=metaD)
+```
+
+
+```{r}
+colnames(demo_sce) <- cellname
+rownames(demo_sce) <- make.unique(gene_name)
+mainExpName(demo_sce) <- "Gene Expression"
+```
+
+
+```{r}
+demo_sce
+```
+
+
+
+```{r message=FALSE, warning=FALSE}
+demo_sce <- QC(sce_object = demo_sce,
+            organism = "mouse",
+            hto=FALSE,
+            methods=c("multiseq","gmm_demux", "htodemux", "dropletutils"),
+            project="demo_GSE213828",
+            HTO_tag=HTO_tag,
+            filter_singlet=FALSE,
+            mito_max=15,
+            min_nfeatures=log10(200),
+            normalization_method="AnPearson",
+            seed=12,
+            workers = 16)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
