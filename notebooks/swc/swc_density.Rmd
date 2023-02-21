@@ -39,3 +39,9 @@ swcs[[2]] |>
     theme_classic()
 ```
 
+
+```{r}
+rgl::plot3d(swcs[[2]]$x,swcs[[2]]$y,swcs[[2]]$z,col=as.integer(factor(swcs[[2]]$structure_label)),xlab="",ylab="",zlab="")
+rgl::rglwidget()
+```
+
