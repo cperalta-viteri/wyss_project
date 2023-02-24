@@ -5,38 +5,39 @@ library(torch)
 library(luz)
 source("notebooks/celltype_prediction/lib_cell_classifier.R")
 
-ds <- readRDS("notebooks/celltype_prediction/dataset.rds")
-fn <- colnames(ds$x)
-ml_ds <- tensor_dataset(
-  x = torch_tensor(ds$x),
-  y = torch_tensor(ds$y,dtype = torch_long())
+trn_ds <- readRDS("notebooks/celltype_prediction/data/allen_subclass_trn.rds")
+fn <- colnames(trn_ds$x)
+lev <- levels(trn_ds$y) 
+trn_ds <- tensor_dataset(
+  x = torch_tensor(as.matrix(trn_ds$x)),
+  y = torch_tensor(trn_ds$y,dtype = torch_long())
 )
 
 model <- advanced_cell_classifier |>
   setup(metrics = list(acc=luz_metric_accuracy())) |>
-  set_hparams(feature_names=fn,class_names=levels(ds$y)) |>
+  set_hparams(feature_names=fn,class_names=lev) |>
   set_opt_hparams(lr1=1e-6) |>
-  fit(ml_ds, epochs = 100L,valid_data = ml_ds,dataloader_options=list(batch_size=256L),callbacks = list(
-    luz_callback(on_fit_begin=function(){luz_load_model_weights(ctx,"model_best_valid_acc.luz")})(),
-    luz_callback_model_checkpoint("model_best_valid_acc.luz",monitor="valid_acc",mode="max",save_best_only=TRUE),
-    luz_callback_model_checkpoint("model_best_train_acc.luz",monitor="train_acc",mode="max",save_best_only=TRUE)
+  fit(trn_ds, epochs = 100L,valid_data = trn_ds,dataloader_options=list(batch_size=256L,shuffle=TRUE),callbacks = list(
+    luz_callback(on_fit_begin=function(){luz_load_model_weights(ctx,"notebooks/celltype_prediction/models/model_subclass_best_valid_acc.luz")})(),
+    luz_callback_model_checkpoint("notebooks/celltype_prediction/models/model_subclass_best_valid_acc.luz",monitor="valid_acc",mode="max",save_best_only=TRUE),
+    luz_callback_model_checkpoint("notebooks/celltype_prediction/models/model_subclass_best_train_acc.luz",monitor="train_acc",mode="max",save_best_only=TRUE)
   ))
-luz_load_model_weights(model,"model_best_train_acc.luz")
+luz_load_model_weights(model,"notebooks/celltype_prediction/models/model_subclass_best_valid_acc.luz")
 msk <- model$model$compute_prune_mask()
 
 model_pruned <- advanced_cell_classifier |>
   setup(metrics = list(acc=luz_metric_accuracy())) |>
   set_hparams(feature_names=model$model$feature_names,class_names=model$model$class_names,prune_mask=msk) |>
-  set_opt_hparams(lr1=1e-5) |>
-  fit(ml_ds, epochs = 20L,valid_data = ml_ds,dataloader_options=list(batch_size=128L),callbacks = list(
-    #luz_callback(on_fit_begin=function(){luz_load_model_weights(ctx,"model_best_valid_acc.luz")})(),    
-    luz_callback(on_fit_begin=function(){luz_load_model_weights(ctx,"model_pruned_best_train_acc.luz")})(),
-    luz_callback_model_checkpoint("model_pruned_best_train_acc.luz",monitor="train_acc",mode="max",save_best_only=TRUE),
-    luz_callback_model_checkpoint("model_pruned_best_valid_acc.luz",monitor="valid_acc",mode="max",save_best_only=TRUE)
+  set_opt_hparams(lr1=1e-6) |>
+  fit(trn_ds, epochs = 20L,valid_data = trn_ds,dataloader_options=list(batch_size=256L,shuffle=TRUE),callbacks = list(
+    luz_callback(on_fit_begin=function(){luz_load_model_weights(ctx,"notebooks/celltype_prediction/models/model_subclass_best_valid_acc.luz")})(),
+    #luz_callback(on_fit_begin=function(){luz_load_model_weights(ctx,"notebooks/celltype_prediction/models/model_subclass_pruned_best_train_acc.luz")})(),
+    luz_callback_model_checkpoint("notebooks/celltype_prediction/models/model_subclass_pruned_best_train_acc.luz",monitor="train_acc",mode="max",save_best_only=TRUE),
+    luz_callback_model_checkpoint("notebooks/celltype_prediction/models/model_subclass_pruned_best_valid_acc.luz",monitor="valid_acc",mode="max",save_best_only=TRUE)
   ))
 
-luz_load_model_weights(model_pruned,"model_pruned_best_train_acc.luz")
-torch_save(model_pruned$model,"model_pruned_best_train_acc.torch")
+luz_load_model_weights(model_pruned,"notebooks/celltype_prediction/models/model_subclass_pruned_best_valid_acc.luz")
+torch_save(model_pruned$model,"notebooks/celltype_prediction/models/model_subclass_pruned_best_valid_acc.torch")
 
 
 
