@@ -60,14 +60,14 @@ cell_encoder <- nn_module(
     return(log_pxz <- log_pxz$sum())
   },
   
-  kl_divergence = function(){
+  kl_divergence = function(preds){
     # 1. Getting the missing probability distribution
     p_z<-distr_normal(torch_zeros_like(self$mu), torch_ones_like(self$log_var))
     #q=distr_normal(self$mu, self$std)
 
     # 2. Computing probabilities
-    log_qzx<-self$q_z$log_prob(self$z)
-    log_pz <- p_z$log_prob(self$z)
+    log_qzx<-self$q_z$log_prob(preds)
+    log_pz <- p_z$log_prob(preds)
     kl <- log_qzx - log_pz
     kl <- kl$sum(-1)
     return(kl)
@@ -84,6 +84,9 @@ cell_encoder <- nn_module(
   
   set_optimizers= function(){
     optim_adam(self$parameters)
+  },
+  step = function(){
+    
   }
     
 )
@@ -107,7 +110,7 @@ cell_wise_model <- cell_encoder |>
 m <- cell_encoder()
 
 
-
+#step method
 
 
 
