@@ -22,34 +22,49 @@ cell_encoder <- nn_module(
   # will contain mu and sigma attributes for the model
   # contains encoder-decoder layers
   initialize = function(){
-    #self$q_z <- NULL
-    #self$z <- NULL
-    #self$enc <- NULL
     self$log_scale <- nn_parameter(torch_tensor(0.0))
-    self$layer1 <- nn_linear(in_features = 52739L, out_features = 50L)
-    self$layer_mu <-    nn_linear(in_features = 50L, out_features = 2L)
-    self$layer_sigma <- nn_linear(in_features = 50L, out_features = 2L)
-    self$layer2 <- nn_linear(in_features = 2L, out_features = 50L)
-    self$layer3 <- nn_linear(in_features = 50L, out_features = 52739L)
+    # --- layers ---
+    # self$layer1 <- nn_linear(in_features = 52739L, out_features = 50L)
+    self$l_encoder <- nn_sequential(
+      nn_linear(in_features = 52739L, out_features = 1000L),
+      nn_relu(),
+      nn_linear(in_features = 1000L, out_features = 100L),
+      nn_relu()
+    )
+    # self$layer_mu <-    nn_linear(in_features = 50L, out_features = 2L)
+    # self$layer_sigma <- nn_linear(in_features = 50L, out_features = 2L)
+    self$l_embedding <- nn_linear(in_features = 100L, out_features = 2L)
+    
+    # self$layer2 <- nn_linear(in_features = 2L, out_features = 50L)
+    # self$layer3 <- nn_linear(in_features = 50L, out_features = 52739L)
+    self$l_decoder <- nn_sequential(
+      nn_linear(in_features = 2L, out_features = 100L),
+      nn_relu(),
+      nn_linear(in_features = 100L, out_features = 1000L),
+      nn_relu(),
+      nn_linear(in_features = 1000L, out_features = 52739L)
+    )
   },
   
   #---- encoder ----
   # computes mu and sigma layers
   encode = function(x){
     # applies relu function on first layer
-    #browser()
-    r1 <- nnf_relu(self$layer1(x))
+    ##r1 <- nnf_relu(self$layer1(x))
     # computes mu & std values, updating attributes
-    list(mu=self$layer_mu(r1),log_var=self$layer_sigma(r1))
+    ##list(mu=self$layer_mu(r1),log_var=self$layer_sigma(r1))
+    list(mu=self$l_encoder(x) |> self$l_embedding(),
+         log_var=self$l_encoder(x) |> self$l_embedding())
   },
   
   #---- decoder ----
   # generation part, layer 3
   decode = function(z){
     # applies relu function from latent space
-    r2 <- nnf_relu(self$layer2(z))
+    ##r2 <- nnf_relu(self$layer2(z))
     # updates layer 3, generating original data
-    self$layer3(r2)
+    ##self$layer3(r2)
+    self$l_decoder(z)
   },
   
   forward = function(x){
