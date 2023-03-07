@@ -66,36 +66,36 @@ cell_encoder <- nn_module(
     
   },
   
-  gaussian_likelihood = function(preds, logscale, x){
-    scale <- torch_exp(logscale)
-    mean <- preds
-    dist <- distr_normal(mean, scale)
-    
-    # computing probability p(x|z)
-    log_pxz <- dist$log_prob(x)
-    log_pxz <- log_pxz$sum()
-  },
-  
-  kl_divergence = function(q, z, mu, log_var){
-    # 1. Getting the missing probability distribution
-    p_z<-distr_normal(torch_zeros_like(mu), torch_ones_like(log_var))
-    #q=distr_normal(self$mu, self$std)
-
-    # 2. Computing probabilities
-    log_qzx <- q$log_prob(z)
-    log_pz <- p_z$log_prob(z)
-    kl_d <- log_qzx - log_pz
-    kl_d <- kl_d$sum(-1)
-    kl_d
-  },
-  
-  elbo_loss = function(pred, target, enc, std, q, z){
-    recon_loss <- self$gaussian_likelihood(pred, self$log_scale, target)
-    kl <- self$kl_divergence(q, z, enc$mu, std)
-    elbo <- kl-recon_loss
-    elbo <- elbo$mean()
-    elbo
-  },
+  # gaussian_likelihood = function(preds, logscale, x){
+  #   scale <- torch_exp(logscale)
+  #   mean <- preds
+  #   dist <- distr_normal(mean, scale)
+  #   
+  #   # computing probability p(x|z)
+  #   log_pxz <- dist$log_prob(x)
+  #   log_pxz <- log_pxz$sum()
+  # },
+  # 
+  # kl_divergence = function(q, z, mu, log_var){
+  #   # 1. Getting the missing probability distribution
+  #   p_z<-distr_normal(torch_zeros_like(mu), torch_ones_like(log_var))
+  #   #q=distr_normal(self$mu, self$std)
+  # 
+  #   # 2. Computing probabilities
+  #   log_qzx <- q$log_prob(z)
+  #   log_pz <- p_z$log_prob(z)
+  #   kl_d <- log_qzx - log_pz
+  #   kl_d <- kl_d$sum(-1)
+  #   kl_d
+  # },
+  # 
+  # elbo_loss = function(pred, target, enc, std, q, z){
+  #   recon_loss <- self$gaussian_likelihood(pred, self$log_scale, target)
+  #   kl <- self$kl_divergence(q, z, enc$mu, std)
+  #   elbo <- kl-recon_loss
+  #   elbo <- elbo$mean()
+  #   elbo
+  # },
   
   set_optimizers= function(){
     optim_adam(self$parameters)
@@ -105,31 +105,31 @@ cell_encoder <- nn_module(
     #ctx$loss <- list()
     opt <- ctx$optimizers[[1]]
     
-    x <- ctx$batch
-    enc <- self$encode(x$x)
+    x <- ctx$input
+    enc <- self$encode(x)
     std <- enc$log_var$exp()$pow(0.5)
     q <- distr_normal(enc$mu, std)
     z <- q$rsample()
     
-    x_hat <- z |> self$decode()
-    
-    #pred <- ctx$pred
+    ctx$pred <- z |> self$decode()
     
     # ---- loss computation ----
     # recon_loss <- self$gaussian_likelihood(x_hat, self$log_scale, x$y)
     # kl <- self$kl_divergence(q, z, enc$mu, std)
     # elbo <- kl - recon_loss
     # loss <- elbo$mean()
-    #browser()
-    loss <- self$elbo_loss(pred=x_hat, target = x$y, enc, std, q, z)
-    #ctx$loss <- loss
+    loss <- elbo_loss(pred=ctx$pred, target = ctx$target, enc, std, q, z, self$log_scale)
+    ctx$loss <- list(elbo=loss)
+    ###
+    #ctx$loss <- ctx$loss_fn(pred=ctx$pred, target = ctx$target, enc, std, q, z, self$log_scale)
+    #ctx$loss <- loss #function(pred, target, enc, std, q, z, log_scale)
     
     if (ctx$training){
       opt$zero_grad()
-      loss$backward()
+      ctx$loss[[1]]$backward()
       opt$step()
     }
-    #ctx$loss <- loss$detach() #this line i giving problems
+    ctx$loss[[1]] <- loss$detach() #ctx$loss does not exist
     #browser()
   }
 )
@@ -138,7 +138,7 @@ cell_encoder <- nn_module(
 
 cell_wise_model <- cell_encoder |>
   setup() |>
-  fit(ml_ds, epochs=2L, dataloader_options=list(batch_size=30L))
+  fit(ml_ds, epochs=100L, dataloader_options=list(batch_size=30L))
 
 
 
@@ -149,6 +149,35 @@ cell_wise_model <- cell_encoder |>
 
 
 
+gaussian_likelihood <- function(preds, logscale, x){
+  scale <- torch_exp(logscale)
+  mean <- preds
+  dist <- distr_normal(mean, scale)
+  
+  # computing probability p(x|z)
+  log_pxz <- dist$log_prob(x)
+  log_pxz <- log_pxz$sum()
+}
 
+kl_divergence <- function(q, z, mu, log_var){
+  # 1. Getting the missing probability distribution
+  p_z<-distr_normal(torch_zeros_like(mu), torch_ones_like(log_var))
+  #q=distr_normal(self$mu, self$std)
+  
+  # 2. Computing probabilities
+  log_qzx <- q$log_prob(z)
+  log_pz <- p_z$log_prob(z)
+  kl_d <- log_qzx - log_pz
+  kl_d <- kl_d$sum(-1)
+  kl_d
+}
+
+elbo_loss <- function(pred, target, enc, std, q, z, log_scale){
+  recon_loss <- gaussian_likelihood(pred, log_scale, target)
+  kl <- kl_divergence(q, z, enc$mu, std)
+  elbo <- kl-recon_loss
+  elbo <- elbo$mean()
+  elbo
+}
 
 
