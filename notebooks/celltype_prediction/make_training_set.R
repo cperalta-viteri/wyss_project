@@ -32,12 +32,20 @@ make_celltype_ds <- function() {
   allen$y_true <- paste(allen$class_label,allen$neighborhood_label,allen$subclass_label,sep=" --- ")
   allen$y_true <- factor(allen$y_true)
   stopifnot(all(!is.na(allen$y_true)))
+
+  # Compute QC metrics and deduce size factors
+  #allen <- addPerCellQCMetrics(allen,BPPARAM=BiocParallel::SerialParam(progressbar = TRUE))
+
+  A <- allen[,1:16]
+  sizeFactors(A) <- 1:16
+  A <- logNormCounts(A,center_size_factors=FALSE)
+  
   
   # Split cells into 3 datasets (trn/val/tst)
   set.seed(12345L)
   allen$mlset <- sample(factor(c("trn","val","tst"),c("trn","val","tst")),size = ncol(allen),replace = TRUE,prob = c(0.7,0.15,0.15))
-
   
+
   # Balance train and validation sets
   local({
     val_ds <- allen[,allen$mlset %in% "val"]
@@ -54,6 +62,12 @@ make_celltype_ds <- function() {
   local({
     trn_ds <- allen[,allen$mlset %in% "trn"]
     trn_ds <- trn_ds[,sample(seq(ncol(trn_ds)),size = 15000,replace = TRUE,prob = 1/(1+table(trn_ds$y_true,trn_ds$source))[cbind(trn_ds$y_true,trn_ds$source)])]
+    counts(trn_ds) <- counts(trn_ds) |> as("Matrix")
+    
+    # Only keep genes expressed in 1% of the cells in one of the technology
+    n <- t(rowsum(t(counts(trn_ds)>0)+0,trn_ds$source) / tabulate(trn_ds$source))
+    #trn_ds <- trn_ds[rowMins(n)>0.01,]
+    
     table(trn_ds$y_true,trn_ds$source)
     trn_ds <- scuttle::logNormCounts(trn_ds)
     trn_ds <- trn_ds[,sample(ncol(trn_ds))]

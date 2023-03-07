@@ -1,0 +1,133 @@
+---
+title: "Cell type atlas"
+output: html_notebook
+---
+  
+# Load dependencies
+```{r message=FALSE}
+library(scater)
+library(ggplot2)
+source("notebooks/01_data_collection/lib_sce.R")
+```
+
+
+# Load object containg Cell type atlas
+```{r}
+x <- loadHDF5SingleCellExperiment("notebooks/01_data_collection/allen_brain_atlas/out/human_m1_10x.h5")
+x <- scuttle::logNormCounts(x)
+#x$y_true <- paste0(x$class_label,"///",x$subclass_label,"///",x$cluster_label)
+x$y_true <- paste0(x$class_label,"///",x$subclass_label)
+```
+
+
+
+
+# Display the umap and some markers
+```{r eval=FALSE}
+ggcells(x) + 
+  geom_point(aes(x=TSNE.1,y=TSNE.2,color=class_label),size=1) + 
+  coord_equal() +
+  theme_classic()
+ggcells(x,features = "GAD1") + 
+  geom_point(aes(x=TSNE.1,y=TSNE.2,color=GAD1),size=1) + 
+  coord_equal() +
+  theme_classic()
+ggcells(x,features = "NEUROD1") + 
+  geom_point(aes(x=TSNE.1,y=TSNE.2,color=NEUROD1),size=1) + 
+  coord_equal() +
+  theme_classic()
+```
+
+
+
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# Extract a balanced taining set from the whole dataset
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+```{r}
+trn <- x
+trn <- trn[,!is.na(trn$y_true)]
+set.seed(1234L)
+trn <- local({
+  trn_cells <- splitAsList(colnames(trn),trn$y_true) |>
+    lapply(sample,size=100,replace=TRUE) |>
+    unlist() |>
+    sample()
+  trn[,trn_cells]
+})
+trn <- local({
+  n <- t(rowsum(t(assay(trn)>0)+0,trn$y_true)) # Count number of cell
+  trn[rowMaxs(n)>=5]
+})
+```
+
+
+
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# TRIAL1: Extract global marker genes with PCA
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+```{r}
+set.seed(3210)
+pca <- runPCA(t(logcounts(trn)),rank=10,center = TRUE,scale = FALSE)
+pca_markers <- local({
+  D <- apply(+pca$rotation,2,rank,ties.method="first")
+  U <- apply(-pca$rotation,2,rank,ties.method="first")
+  M <- pmin(U,D)<=10
+  M <- which(M,arr.ind = TRUE)
+  splitAsList(rownames(trn)[M[,1]],colnames(U)[M[,2]])
+})
+```
+
+
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# Check performance of selected marker genes
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+```{r}
+set.seed(54321)
+TRN <- trn[unique(unlist(pca_markers))]
+TST <- x[rownames(TRN),sample(setdiff(colnames(x),colnames(TRN)))]
+
+rf <- randomForest::randomForest(
+  x = as.matrix(t(logcounts(TRN))),
+  y = factor(TRN$y_true)
+)
+TST$rf_pred <- predict(rf,as.matrix(t(logcounts(TST))))
+```
+
+
+```{r}
+table(sub("///.*","",TST$y_true),sub("///.*","",TST$rf_pred))
+table(TST$y_true,TST$rf_pred)
+perf <- tapply(TST$y_true != TST$rf_pred,TST$y_true,mean)
+data.frame(type=names(perf),err=unname(perf)) |>
+  ggplot() +
+  geom_col(aes(y=type,x=err),color="black") + 
+  scale_x_continuous(labels = scales::percent) + xlab("error rate")
+```
+
+```{r}
+x <- loadHDF5SingleCellExperiment("notebooks/01_data_collection/allen_brain_atlas/out/human_m1_10x.h5")
+#writeHDF5Array(counts(x),"x_assay.h5","/counts")
+assay(x,withDimnames=FALSE) <- HDF5Array("x_assay.h5","/counts")
+x <- addPerCellQCMetrics(x,BPPARAM=BiocParallel::SerialParam(progressbar = TRUE))
+x <- addPerFeatureQCMetrics(x,BPPARAM=BiocParallel::SerialParam(progressbar = TRUE))
+
+sseq <- loadHDF5SingleCellExperiment("notebooks/01_data_collection/allen_brain_atlas/out/human_ctx_sseq.h5")
+#writeHDF5Array(counts(sseq),"sseq_assay.h5","/counts")
+assay(sseq,withDimnames=FALSE) <- HDF5Array("sseq_assay.h5","/counts")
+sseq <- addPerCellQCMetrics(sseq,BPPARAM=BiocParallel::SerialParam(progressbar = TRUE))
+sseq <- addPerFeatureQCMetrics(sseq,BPPARAM=BiocParallel::SerialParam(progressbar = TRUE))
+sseq <- sseq[rownames(x)]
+
+plot(rowData(x)$mean,rowData(sseq)$mean,log="xy",asp=1,cex=0.3);abline(0,1)
+
+```
+
+
+
+
+
+
+
+
+
