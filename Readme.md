@@ -5,7 +5,7 @@
 2. In a terminal
 ```
 
-docker run -it --rm --gpus all -p 8888:8888 -v $PWD:/home/user/workdir unigebsp/neurosuite:cuda11.6_focal_R4.2_BioC3.16_Py3.10
+docker run -it --rm --gpus all -p 8888:8888 -v $PWD:/home/user/workdir unigebsp/neurosuite:cuda11.6_focal_R4.2_BioC3.16_Py3.10_latest
 
 ```
 

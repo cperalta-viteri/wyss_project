@@ -3,7 +3,9 @@
 
 library(torch)
 library(luz)
-source("notebooks/celltype_prediction/lib_cell_classifier.R")
+source("lib_cell_classifier.R")
+
+
 
 trn_ds <- readRDS("notebooks/celltype_prediction/data/allen_subclass_trn.rds")
 fn <- colnames(trn_ds$x)
@@ -11,7 +13,7 @@ lev <- levels(trn_ds$y)
 trn_ds <- tensor_dataset(
   x = torch_tensor(as.matrix(trn_ds$x)),
   y = torch_tensor(trn_ds$y,dtype = torch_long())
-)
+)  
 
 model <- advanced_cell_classifier |>
   setup(metrics = list(acc=luz_metric_accuracy())) |>
@@ -24,6 +26,7 @@ model <- advanced_cell_classifier |>
   ))
 luz_load_model_weights(model,"notebooks/celltype_prediction/models/model_subclass_best_valid_acc.luz")
 msk <- model$model$compute_prune_mask()
+
 
 model_pruned <- advanced_cell_classifier |>
   setup(metrics = list(acc=luz_metric_accuracy())) |>

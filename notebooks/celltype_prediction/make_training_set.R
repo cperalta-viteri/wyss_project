@@ -2,7 +2,11 @@
 #Sys.getenv("PYTORCH_ENABLE_MPS_FALLBACK")
 
 
+#library(torch)
+#library(luz)
+source("lib_cell_classifier.R")
 source("notebooks/01_data_collection/lib_sce.R")
+
 
 
 make_celltype_ds <- function() {
@@ -77,5 +81,4 @@ make_celltype_ds <- function() {
     ) |> saveRDS("notebooks/celltype_prediction/allen_subclass_trn.rds")
   })
 }
-
 

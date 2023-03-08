@@ -1,7 +1,6 @@
 library(rgl)
 library(cocoframer)
 library(IRanges)
-library(raster)
 
 # to plot a mesh manually
 #shapelist3d(ccf_mesh)

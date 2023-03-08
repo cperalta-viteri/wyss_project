@@ -16,7 +16,7 @@ QC <- function(sce_object,
                HTO_tag=NULL,
                filter_singlet=FALSE,
                mito_max=15,
-               min_nfeatures=log10(200),
+               min_nfeatures=200,
                normalization_method="logNorm",
                seed=12,
                workers=1){
@@ -172,7 +172,7 @@ QC <- function(sce_object,
   
   set_QC_status <- function(sce_object=NULL,
                             mito_max=15,
-                            min_nfeatures=log10(200)){
+                            min_nfeatures=200){
     if(isTRUE("subsets_Mito_percent" %in% colnames(colData(sce_object)))){
       
       # Assessing what cells pass the threshold for mitochondrial gene percentage
@@ -189,7 +189,7 @@ QC <- function(sce_object,
               list=which(sce_object$qc == "passed"),
               values=gsub(
                 "TRUE", "passed", gsub("FALSE", "fails_minFeat",
-                                       log10(sce_object[,sce_object$qc == "passed"]$detected)>=min_nfeatures)))
+                                       sce_object[,sce_object$qc == "passed"]$detected>=min_nfeatures)))
     
     # fitting linear model with the formula log10(features) ~ log10(UMI)
     lm <- lm(log10(sce_object[, sce_object$qc == "passed"]$detected) ~ log10(sce_object[, sce_object$qc == "passed"]$sum))
@@ -297,7 +297,7 @@ QC <- function(sce_object,
         p <- plotColData(sce_object, x="detected", y="subsets_Mito_percent",
                          color_by = "consensus_call_global")+
           geom_hline(aes(yintercept = mito_max), colour = "red", linetype = 2) +
-          geom_vline(aes(xintercept = 10^min_nfeatures), colour = "red", linetype = 2) +
+          geom_vline(aes(xintercept = min_nfeatures), colour = "red", linetype = 2) +
           xlab("nFeature_RNA")+
           ylab("percent.mito")+
           annotate(geom = "text",size=4, 
@@ -315,7 +315,7 @@ QC <- function(sce_object,
         p <- plotColData(sce_object, x="detected", y="subsets_Mito_percent",
                          color_by = "consensus_call_global")+
           geom_hline(aes(yintercept = mito_max), colour = "red", linetype = 2) +
-          geom_vline(aes(xintercept = 10^min_nfeatures), colour = "red", linetype = 2) +
+          geom_vline(aes(xintercept = min_nfeatures), colour = "red", linetype = 2) +
           xlab("nFeature_RNA")+
           ylab("percent.mito")+
           annotate(geom = "text",size=4, 
@@ -335,7 +335,7 @@ QC <- function(sce_object,
         p <- plotColData(sce_object, x="detected", y="subsets_Mito_percent",
                          color_by = "consensus_call_global")+
           geom_hline(aes(yintercept = mito_max), colour = "red", linetype = 2) +
-          geom_vline(aes(xintercept = 10^min_nfeatures), colour = "red", linetype = 2) +
+          geom_vline(aes(xintercept = min_nfeatures), colour = "red", linetype = 2) +
           xlab("nFeature_RNA")+
           ylab("percent.mito")+
           annotate(geom = "text",size=4, 
@@ -354,7 +354,7 @@ QC <- function(sce_object,
       if (sum(sce_object$subsets_Mito_percent <= mito_max) == length(sce_object$subsets_Mito_percent <= mito_max)){
         p <- plotColData(sce_object, x="detected", y="subsets_Mito_percent")+
           geom_hline(aes(yintercept = mito_max), colour = "red", linetype = 2) +
-          geom_vline(aes(xintercept = 10^min_nfeatures), colour = "red", linetype = 2) +
+          geom_vline(aes(xintercept = min_nfeatures), colour = "red", linetype = 2) +
           xlab("nFeature_RNA")+
           ylab("percent.mito")+
           annotate(geom = "text",size=4, 
@@ -371,7 +371,7 @@ QC <- function(sce_object,
       if(sum(sce_object$subsets_Mito_percent > mito_max)==length(sce_object$subsets_Mito_percent <= mito_max)){
         p <- plotColData(sce_object, x="detected", y="subsets_Mito_percent")+
           geom_hline(aes(yintercept = mito_max), colour = "red", linetype = 2) +
-          geom_vline(aes(xintercept = 10^min_nfeatures), colour = "red", linetype = 2) +
+          geom_vline(aes(xintercept = min_nfeatures), colour = "red", linetype = 2) +
           xlab("nFeature_RNA")+
           ylab("percent.mito")+
           annotate(geom = "text",size=4, 
@@ -390,7 +390,7 @@ QC <- function(sce_object,
         
         p <- plotColData(sce_object, x="detected", y="subsets_Mito_percent")+
           geom_hline(aes(yintercept = mito_max), colour = "red", linetype = 2) +
-          geom_vline(aes(xintercept = 10^min_nfeatures), colour = "red", linetype = 2) +
+          geom_vline(aes(xintercept = min_nfeatures), colour = "red", linetype = 2) +
           xlab("nFeature_RNA")+
           ylab("percent.mito")+
           annotate(geom = "text",size=4, 
@@ -429,7 +429,7 @@ QC <- function(sce_object,
       scale_colour_gradient(aesthetics = c("colour"),low = "gray90", high = "black") +
       scale_size_area(max_size = 3)+
       geom_smooth(method = "lm", show.legend = FALSE)+
-      geom_hline(aes(yintercept = 10^min_nfeatures), colour = "darkgreen", linetype = 2)+
+      geom_hline(aes(yintercept = min_nfeatures), colour = "darkgreen", linetype = 2)+
       geom_abline(intercept = lm$coefficients[1] - 0.09, slope = lm$coefficients[2], color="orange") +
       xlab("log10(nCount_RNA)")+
       ylab("log10(nFeature_RNA)") +
@@ -479,7 +479,7 @@ QC <- function(sce_object,
     p1 <- plot_UMIvsGene(sce_object,
                          colour_by = "subsets_Mito_percent",
                          size_by = "subsets_Ribo_percent")
-    p1 <- p1 + geom_hline(aes(yintercept = min_nfeatures), colour = "darkgreen", linetype = 2)
+    p1 <- p1 + geom_hline(aes(yintercept = log10(min_nfeatures)), colour = "darkgreen", linetype = 2)
     p1 <- ggExtra::ggMarginal(p1, type = "densigram",bins=100, fill="grey",  alpha=0.3)
     
     ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/nGenesvsnUMIs_beforefiltering.pdf"),
@@ -499,7 +499,7 @@ QC <- function(sce_object,
       scale_colour_gradient(aesthetics = c("colour"),low = "gray90", high = "black") +
       scale_size_area(max_size = 3)+
       geom_smooth(method = "lm", show.legend = FALSE)+
-      geom_hline(aes(yintercept = 10^min_nfeatures), colour = "darkgreen", linetype = 2)+
+      geom_hline(aes(yintercept = min_nfeatures), colour = "darkgreen", linetype = 2)+
       geom_abline(intercept = lm$coefficients[1] - 0.09, slope = lm$coefficients[2], color="orange") +
       xlab("log10(nCount_RNA)")+
       ylab("log10(nFeature_RNA)") +
