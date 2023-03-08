@@ -3,15 +3,25 @@ version: "3.9"
 services:
   jupyter:
     image: unigebsp/neurosuite:cuda11.6_focal_R4.2_BioC3.16_Py3.10_latest
-    build:
-      context: "./container"
     ports:
       - "8888:8888"
-      #  - "3838:3838"  # Shiny server
-      #environment:
-      #- PASSWORD: "my_secret"
     volumes:
       - ./.rstudio_config:/home/user/.config/rstudio
       - ./:/home/user/workdir
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+  jpr:
+    image: nsv2
+    build:
+      context: "./container/v2"
+    platform: "linux/amd64"
+    ports:
+      - "8888:8888"
+    #environment:
+    #- PASSWORD: "my_secret"
+    volumes:
+      - ./.rstudio_config:/home/rstudio/.config/rstudio
+      - ./:/home/rstudio/workdir
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped

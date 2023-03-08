@@ -1,25 +1,84 @@
 #Sys.setenv(PYTORCH_ENABLE_MPS_FALLBACK=1)
 #Sys.getenv("PYTORCH_ENABLE_MPS_FALLBACK")
 
+
 #library(torch)
 #library(luz)
 source("lib_cell_classifier.R")
-source("../01_data_collection/lib_sce.R")
+source("notebooks/01_data_collection/lib_sce.R")
 
 
 
+make_celltype_ds <- function() {
+  # Load 10x and smart-seq cells
+  allen10x <- loadHDF5SingleCellExperiment("notebooks/01_data_collection/allen_brain_atlas/out/mouse_ctx_10x.h5");allen10x$source <- "10x"
+  allenSSq <- loadHDF5SingleCellExperiment("notebooks/01_data_collection/allen_brain_atlas/out/mouse_ctx_ssv4.h5");allenSSq$source <- "ssv4"
+  
+  # Subset to common genes only
+  #gplots::venn(list(SS=rownames(allenSSq),"10x"=rownames(allen10x)))
+  allen10x <- allen10x[intersect(rownames(allen10x),rownames(allenSSq))]
+  allenSSq <- allenSSq[rownames(allen10x)]
+  
+  # Merge 10x and SSq cells
+  allen <- SingleCellExperiment(
+    list(counts=cbind(counts(allen10x),counts(allenSSq))),
+    colData = local({
+      mcol <- setdiff(unique(c(names(colData(allen10x)),names(colData(allenSSq)))),"")
+      m10x <- cbind(NA_character_,colData(allen10x))[match(mcol,names(colData(allen10x)),nomatch = 0) + 1L]
+      mSSq <- cbind(NA_character_,colData(allenSSq))[match(mcol,names(colData(allenSSq)),nomatch = 0) + 1L]
+      names(m10x) <- names(mSSq) <- mcol
+      rbind(m10x,mSSq)
+    })
+  )
+  allen$source <- factor(allen$source)
+  
+  # Compute target labels to predict
+  allen$y_true <- paste(allen$class_label,allen$neighborhood_label,allen$subclass_label,sep=" --- ")
+  allen$y_true <- factor(allen$y_true)
+  stopifnot(all(!is.na(allen$y_true)))
 
-x <- loadHDF5SingleCellExperiment("../01_data_collection/allen_brain_atlas/out/mouse_ctx_ssv4.h5")
+  # Compute QC metrics and deduce size factors
+  #allen <- addPerCellQCMetrics(allen,BPPARAM=BiocParallel::SerialParam(progressbar = TRUE))
 
-x <- scuttle::logNormCounts(x)
+  A <- allen[,1:16]
+  sizeFactors(A) <- 1:16
+  A <- logNormCounts(A,center_size_factors=FALSE)
+  
+  
+  # Split cells into 3 datasets (trn/val/tst)
+  set.seed(12345L)
+  allen$mlset <- sample(factor(c("trn","val","tst"),c("trn","val","tst")),size = ncol(allen),replace = TRUE,prob = c(0.7,0.15,0.15))
+  
 
-# 10_Lamp5 | 100_Sst | 91_Sst | 70_Sst | 236_Car3 | 272_NP SUB
-#  125    |   97     |  126   |  119   | 191      |  80
-
-v <- c("10_Lamp5", "100_Sst", "91_Sst", "70_Sst", "236_Car3", "272_NP SUB")
-
-#X <- x[1:100,1:100]
-X <- x[, x$cluster_label %in% v]
-ds <- list(x=as.matrix(t(logcounts(X))),y=factor(X$cluster_label))
-saveRDS(ds,"dataset.rds")
+  # Balance train and validation sets
+  local({
+    val_ds <- allen[,allen$mlset %in% "val"]
+    val_ds <- val_ds[,sample(seq(ncol(val_ds)),size = 3000,replace = TRUE,prob = 1/(1+table(val_ds$y_true,val_ds$source))[cbind(val_ds$y_true,val_ds$source)])]
+    table(val_ds$y_true,val_ds$source)
+    val_ds <- scuttle::logNormCounts(val_ds)
+    val_ds <- val_ds[,sample(ncol(val_ds))]
+    list(
+      x = t(logcounts(val_ds)) |> as("Matrix"),
+      y = val_ds$y_true
+    ) |> saveRDS("notebooks/celltype_prediction/allen_subclass_val.rds")
+  })
+  
+  local({
+    trn_ds <- allen[,allen$mlset %in% "trn"]
+    trn_ds <- trn_ds[,sample(seq(ncol(trn_ds)),size = 15000,replace = TRUE,prob = 1/(1+table(trn_ds$y_true,trn_ds$source))[cbind(trn_ds$y_true,trn_ds$source)])]
+    counts(trn_ds) <- counts(trn_ds) |> as("Matrix")
+    
+    # Only keep genes expressed in 1% of the cells in one of the technology
+    n <- t(rowsum(t(counts(trn_ds)>0)+0,trn_ds$source) / tabulate(trn_ds$source))
+    #trn_ds <- trn_ds[rowMins(n)>0.01,]
+    
+    table(trn_ds$y_true,trn_ds$source)
+    trn_ds <- scuttle::logNormCounts(trn_ds)
+    trn_ds <- trn_ds[,sample(ncol(trn_ds))]
+    list(
+      x = t(logcounts(trn_ds)) |> as("Matrix"),
+      y = trn_ds$y_true
+    ) |> saveRDS("notebooks/celltype_prediction/allen_subclass_trn.rds")
+  })
+}
 

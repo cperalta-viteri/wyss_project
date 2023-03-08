@@ -9,6 +9,60 @@ knitr::opts_knit$set(root.dir = '.')
 ```
 
 
+
+# Reference genome from GENCODE
+```{bash,eval=FALSE}
+curl -LO --output-dir data/ 'https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_43/gencode.v43.annotation.gtf.gz'
+curl -LO --output-dir data/ 'https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_43/GRCh38.primary_assembly.genome.fa.gz'
+```
+
+
+# Reactome pathways
+```{bash,eval=FALSE}
+curl -LO --output-dir data/ 'https://reactome.org/download/current/Ensembl2Reactome.txt'
+curl -LO --output-dir data/ 'https://reactome.org/download/current/ReactomePathways.txt'
+curl -LO --output-dir data/ 'https://reactome.org/download/current/ReactomePathwaysRelation.txt'
+pigz data/*.txt
+```
+
+
+# IUPHAR categories
+```{bash,eval=FALSE}
+curl -LO --output-dir data/ 'https://www.guidetopharmacology.org/DATA/targets_and_families.tsv'
+pigz data/*.tsv
+```
+
+
+# KEGG
+```{bash,eval=FALSE}
+# Ontology
+#curl -L 'https://rest.kegg.jp/get/br:br08901/json' > 'data/kegg_brite_br08901_pathways.json'
+#curl -L 'https://rest.kegg.jp/get/br:ko00002/json' > 'data/kegg_brite_ko00002_modules.json'
+
+# Human annotations
+#curl -L "https://rest.kegg.jp/link/pathway/hsa" > "data/kegg_link_hsa_pathway.tsv"
+#curl -L "https://rest.kegg.jp/link/module/hsa" > "data/kegg_link_hsa_module.tsv"
+```
+
+
+# MsigDB (GSEA)
+warning: this chunk require user authentication to run => download the zip manually from the website.
+
+```{bash,eval=FALSE}
+curl -LO --output-dir data/ 'http://www.gsea-msigdb.org/gsea/msigdb/download_file.jsp?filePath=/msigdb/release/2023.1.Hs/msigdb_v2023.1.Hs_files_to_download_locally.zip'
+```
+
+
+# Gene Ontology
+```{bash,eval=FALSE}
+curl -LO --output-dir data/ 'http://purl.obolibrary.org/obo/go/go-basic.obo' 
+pigz data/*.obo
+```
+
+
+
+
+
 ```{r}
 library(biomaRt)
 source("../lib_obo.R")
@@ -62,23 +116,13 @@ gene_info$goslim_goa_accession <- local({
 })
 ```
 
-Also retreive the ontology
-```{r,eval=FALSE}
-download.file("http://purl.obolibrary.org/obo/go/go-basic.obo","data/go-basic.obo")
-```
 
-# Reactome pathways
-```{r,eval=FALSE}
-download.file("https://reactome.org/download/current/Ensembl2Reactome.txt","data/Ensembl2Reactome.txt")
-download.file("https://reactome.org/download/current/ReactomePathways.txt","data/ReactomePathways.txt")
-download.file("https://reactome.org/download/current/ReactomePathwaysRelation.txt","data/ReactomePathwaysRelation.txt")
-```
 
 
 ```{r}
 gene_info$reactom_id <- local({
   x <- read.table(
-    "data/Ensembl2Reactome.txt",sep = "\t",comment="",header=FALSE,quote="",
+    "data/Ensembl2Reactome.txt.gz",sep = "\t",comment="",header=FALSE,quote="",
     colClasses = c("character","character","NULL","NULL","character","character")
   )
   names(x) <- c("ensembl_id","reactome_id","evidence","organism")
@@ -92,10 +136,6 @@ gene_info$reactom_id <- local({
 
 
 
-# IUPHAR categories
-```{r,eval=FALSE}
-download.file("https://www.guidetopharmacology.org/DATA/targets_and_families.tsv","data/iuphar_targets_and_families.tsv")
-```
 
 
 ```{r}
@@ -116,54 +156,33 @@ gene_info$iuphar_family <- local({
 
 
 
-# KEGG
-```{r,eval=FALSE}
-# Ontology
-download.file("https://rest.kegg.jp/get/br:br08901/json","data/kegg_brite_br08901_pathways.json")
-download.file("https://rest.kegg.jp/get/br:ko00002/json","data/kegg_brite_ko00002_modules.json")
-
-# Human annotations
-download.file("https://rest.kegg.jp/link/pathway/hsa","data/kegg_link_hsa_pathway.tsv")
-download.file("https://rest.kegg.jp/link/module/hsa","data/kegg_link_hsa_module.tsv")
-```
-
-
-```{r}
-gene_info$kegg_pathway_id <- local({
-  p <- read_kegg_link("data/kegg_link_hsa_pathway.tsv")
-  p$locus_tag <- factor(p$locus_tag,unique(gene_info$entrezgene_id))
-  p <- splitAsList(p$pathway_id,p$locus_tag)
-  c(CharacterList(character()),p)[match(gene_info$entrezgene_id,names(p),nomatch = 0)+1L] |> unname() |> unique()
-})
-
-gene_info$kegg_module_id <- local({
-  p <- read_kegg_link("data/kegg_link_hsa_module.tsv")
-  p$locus_tag <- factor(p$locus_tag,unique(gene_info$entrezgene_id))
-  p <- splitAsList(p$pathway_id,p$locus_tag)
-  c(CharacterList(character()),p)[match(gene_info$entrezgene_id,names(p),nomatch = 0)+1L] |> unname() |> unique()
-})
-```
-
-
-
-
-# MsigDB (GSEA)
-
-warning: this chunk require user authentication to run => download the zip manually from the website.
 
 ```{r,eval=FALSE}
-download.file(
-  "http://www.gsea-msigdb.org/gsea/msigdb/download_file.jsp?filePath=/msigdb/release/2022.1.Hs/msigdb_v2022.1.Hs_files_to_download_locally.zip",
-  "msigdb_v2022.1.Hs_files_to_download_locally.zip"
-)
-unzip("data/msigdb_v2022.1.Hs_files_to_download_locally.zip","msigdb_v2022.1.Hs_files_to_download_locally/msigdb_v2022.1.Hs_GMTs/msigdb.v2022.1.Hs.entrez.gmt",exdir = "data")
+# gene_info$kegg_pathway_id <- local({
+#   p <- read_kegg_link("data/kegg_link_hsa_pathway.tsv")
+#   p$locus_tag <- factor(p$locus_tag,unique(gene_info$entrezgene_id))
+#   p <- splitAsList(p$pathway_id,p$locus_tag)
+#   c(CharacterList(character()),p)[match(gene_info$entrezgene_id,names(p),nomatch = 0)+1L] |> unname() |> unique()
+# })
+# 
+# gene_info$kegg_module_id <- local({
+#   p <- read_kegg_link("data/kegg_link_hsa_module.tsv")
+#   p$locus_tag <- factor(p$locus_tag,unique(gene_info$entrezgene_id))
+#   p <- splitAsList(p$pathway_id,p$locus_tag)
+#   c(CharacterList(character()),p)[match(gene_info$entrezgene_id,names(p),nomatch = 0)+1L] |> unname() |> unique()
+# })
 ```
+
+
 
 
 
 ```{r}
 gene_info$msigdb <- local({
-  gmt <- read_gmt("data/msigdb_v2022.1.Hs_files_to_download_locally/msigdb_v2022.1.Hs_GMTs/msigdb.v2022.1.Hs.entrez.gmt")
+  gmt <- unz(
+    'data/msigdb_v2023.1.Hs_files_to_download_locally.zip',
+    'msigdb_v2023.1.Hs_files_to_download_locally/msigdb_v2023.1.Hs_GMTs/msigdb.v2023.1.Hs.entrez.gmt'
+  ) |> read_gmt()
   gmt <- setNames(gmt$MEMBERS,gmt$STANDARD_NAME) |> 
     stack("msigdb","entrezgene_id")
   gmt$entrezgene_id <- factor(gmt$entrezgene_id,unique(gene_info$entrezgene_id))
@@ -178,12 +197,14 @@ gene_info$msigdb <- local({
 # binary version
 saveRDS(gene_info,"data/gene_info.rds")
 
+
 # text version
 local({
   gene_info <- readRDS("data/gene_info.rds")
   msk <- sapply(gene_info,is,"CharacterList")
   gene_info[msk] <- gene_info[msk] |> lapply(unstrsplit,";")
-  write.table(as(gene_info,"data.frame"),"data/gene_info.tsv",sep="\t",row.names = FALSE)
+  write.table(as(gene_info,"data.frame"),gzfile("data/gene_info.tsv.gz","w"),sep="\t",row.names = FALSE)
+  closeAllConnections()
 })
 ```
 
