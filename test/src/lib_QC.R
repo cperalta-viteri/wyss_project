@@ -594,7 +594,7 @@ QC <- function(sce_object,
       #browser()
       sce_object <- scuttle::logNormCounts(sce_object[, sce_object$qc=="passed"])
       # UMAP computation
-      if (workers>1) {
+      if (!workers>1) {
         sce_object <- scater::runUMAP(sce_object[, sce_object$qc=="passed"])}
       else sce_object <- scater::runUMAP(sce_object[, sce_object$qc=="passed"], BPPARAM=bp)
       if (isTRUE("consensus_call" %in% colnames(colData(sce_object)))){
@@ -624,7 +624,7 @@ QC <- function(sce_object,
       sce_object <- do_vst_transform(sce_object[, sce_object$qc=="passed"])
       sce_object <- swapAltExp(sce_object, "Gene_Expression_VST")
       # UMAP computation
-      if (workers>1){
+      if (!workers>1){
         sce_object <- scater::runUMAP(sce_object, exprs_values="count_vst")
         
       } else sce_object <- scater::runUMAP(sce_object, exprs_values="count_vst", BPPARA=bp)
@@ -657,7 +657,7 @@ QC <- function(sce_object,
       sce_object <- do_AnPearson_transform(sce_object[, sce_object$qc=="passed"])
       sce_object <- swapAltExp(sce_object, "Gene_Expression_PearNorm")
       # UMAP computation
-      if (workers>1){
+      if (!workers>1){
         sce_object <- scater::runUMAP(sce_object, exprs_values="count_AP")
       } else sce_object <- scater::runUMAP(sce_object, exprs_values="count_AP", BPPARAM=bp)
       if (isTRUE("consensus_call" %in% colnames(colData(sce_object)))){
