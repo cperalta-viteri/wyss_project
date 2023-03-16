@@ -4,21 +4,6 @@ source("src/lib_allen.R")
 source("../lib_sce.R")
 
 
-optimize_DF_size <- function(X) {
-  stopifnot(is(X,"DataFrame"))
-  X[] <- lapply(X,function(v) {
-    if (is.vector(v)) {
-      if (is.character(v)) {
-        f <- factor(v)
-        if (object.size(f) < object.size(v)) v <- f
-      }
-      f <- Rle(v)
-      if (object.size(f) < object.size(v)) v <- f
-    }
-    v
-  })
-  X
-}
 
 
 read_mouse_ctx_10x <- function(dir="data/GSE185862") {
@@ -107,13 +92,19 @@ read_mouse_ctx_ssv4 <- function(dir="data/GSE185862") {
 
 make_mouse_ctx_10x <- function() {
   e <- read_mouse_ctx_10x()
-  saveHDF5SingleCellExperiment(e,"out/mouse_ctx_10x.h5",sparse.assays = character())
+  #saveHDF5SingleCellExperiment(e,"out/mouse_ctx_10x.h5",sparse.assays = FALSE)
+  #e <- loadHDF5SingleCellExperiment("out/mouse_ctx_10x.h5")
+  e <- scuttle::addPerCellQCMetrics(e)
+  e <- scuttle::addPerFeatureQCMetrics(e)
+  saveHDF5SingleCellExperiment(e,"out/mouse_ctx_10x.h5",sparse.assays = FALSE)
 }
 
 make_mouse_ctx_ssv4 <- function() {
   e <- read_mouse_ctx_ssv4()
+  e <- scuttle::addPerCellQCMetrics(e)
+  e <- scuttle::addPerFeatureQCMetrics(e)
   assay(e,withDimnames = FALSE) <- writeHDF5Array(assay(e),H5type = "H5T_STD_I32LE",as.sparse = FALSE)
-  saveHDF5SingleCellExperiment(e,"out/mouse_ctx_ssv4.h5")
+  saveHDF5SingleCellExperiment(e,"out/mouse_ctx_ssv4.h5",sparse.assays = FALSE)
 }
 
 

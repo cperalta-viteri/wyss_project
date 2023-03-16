@@ -14,7 +14,7 @@ source("notebooks/01_data_collection/lib_sce.R")
 # Load object containg Cell type atlas
 ```{r}
 x <- loadHDF5SingleCellExperiment("notebooks/01_data_collection/allen_brain_atlas/out/human_m1_10x.h5")
-x <- scuttle::logNormCounts(x)
+x <- scuttle::logNormCounts(x,size.factors=x$sum)
 #x$y_true <- paste0(x$class_label,"///",x$subclass_label,"///",x$cluster_label)
 x$y_true <- paste0(x$class_label,"///",x$subclass_label)
 ```
@@ -68,7 +68,7 @@ trn <- local({
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 ```{r}
 set.seed(3210)
-pca <- runPCA(t(logcounts(trn)),rank=10,center = TRUE,scale = FALSE)
+pca <- runPCA(t(logcounts(trn)),rank=10,center = TRUE,scale = FALSE,BPPARAM=BiocParallel::MulticoreParam(5L))
 pca_markers <- local({
   D <- apply(+pca$rotation,2,rank,ties.method="first")
   U <- apply(-pca$rotation,2,rank,ties.method="first")
@@ -106,21 +106,16 @@ data.frame(type=names(perf),err=unname(perf)) |>
 ```
 
 ```{r}
-x <- loadHDF5SingleCellExperiment("notebooks/01_data_collection/allen_brain_atlas/out/human_m1_10x.h5")
-#writeHDF5Array(counts(x),"x_assay.h5","/counts")
-assay(x,withDimnames=FALSE) <- HDF5Array("x_assay.h5","/counts")
-x <- addPerCellQCMetrics(x,BPPARAM=BiocParallel::SerialParam(progressbar = TRUE))
-x <- addPerFeatureQCMetrics(x,BPPARAM=BiocParallel::SerialParam(progressbar = TRUE))
-
 sseq <- loadHDF5SingleCellExperiment("notebooks/01_data_collection/allen_brain_atlas/out/human_ctx_sseq.h5")
-#writeHDF5Array(counts(sseq),"sseq_assay.h5","/counts")
-assay(sseq,withDimnames=FALSE) <- HDF5Array("sseq_assay.h5","/counts")
-sseq <- addPerCellQCMetrics(sseq,BPPARAM=BiocParallel::SerialParam(progressbar = TRUE))
-sseq <- addPerFeatureQCMetrics(sseq,BPPARAM=BiocParallel::SerialParam(progressbar = TRUE))
 sseq <- sseq[rownames(x)]
+plot(rowData(x)$detected,rowData(sseq)$detected,asp=1,cex=0.3,pch=19,col="#00000010");abline(0,1)
 
-plot(rowData(x)$mean,rowData(sseq)$mean,log="xy",asp=1,cex=0.3);abline(0,1)
-
+data.frame(sseq=rowData(sseq)$detected,x=rowData(x)$detected) |>
+ggplot() + 
+  stat_bin_2d(aes(x=sseq,y=x)) + 
+  coord_equal() +
+  scale_fill_continuous(trans="log")
+  
 ```
 
 

@@ -91,7 +91,19 @@ read_human_m1_10x <- function(dir="data/human_m1_10x") {
 }
 
 
-saveHDF5SingleCellExperiment(read_human_ctx_sseq(),"out/human_ctx_sseq.h5")
-saveHDF5SingleCellExperiment(read_human_m1_10x(),"out/human_m1_10x.h5")
 
+make_human_ctx_sseq <- function() {
+  e <- read_human_ctx_sseq()
+  e <- scuttle::addPerCellQCMetrics(e,BPPARAM=BiocParallel::MulticoreParam(5L))
+  e <- scuttle::addPerFeatureQCMetrics(e,BPPARAM=BiocParallel::MulticoreParam(5L))
+  saveHDF5SingleCellExperiment(e,"out/human_ctx_sseq.h5",sparse.assays = FALSE)
+}
+
+make_human_m1_10x <- function() {
+  e <- read_human_m1_10x()
+  e <- scuttle::addPerCellQCMetrics(e,BPPARAM=BiocParallel::MulticoreParam(7L))
+  e <- scuttle::addPerFeatureQCMetrics(e,BPPARAM=BiocParallel::MulticoreParam(7L))
+  #assay(e,withDimnames = FALSE) <- writeHDF5Array(assay(e),H5type = "H5T_STD_I32LE",as.sparse = FALSE)
+  saveHDF5SingleCellExperiment(e,"out/human_m1_10x.h5",sparse.assays = FALSE)
+}
 

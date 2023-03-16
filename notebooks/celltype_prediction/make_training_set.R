@@ -2,9 +2,7 @@
 #Sys.getenv("PYTORCH_ENABLE_MPS_FALLBACK")
 
 
-#library(torch)
-#library(luz)
-source("lib_cell_classifier.R")
+source("notebooks/celltype_prediction/lib_cell_classifier.R")
 source("notebooks/01_data_collection/lib_sce.R")
 
 
@@ -37,13 +35,9 @@ make_celltype_ds <- function() {
   allen$y_true <- factor(allen$y_true)
   stopifnot(all(!is.na(allen$y_true)))
 
-  # Compute QC metrics and deduce size factors
-  #allen <- addPerCellQCMetrics(allen,BPPARAM=BiocParallel::SerialParam(progressbar = TRUE))
+  # Normalize counts
+  allen <- scuttle::logNormCounts(allen,center_size_factors=FALSE,size.factors=allen$sum/1e4)
 
-  A <- allen[,1:16]
-  sizeFactors(A) <- 1:16
-  A <- logNormCounts(A,center_size_factors=FALSE)
-  
   
   # Split cells into 3 datasets (trn/val/tst)
   set.seed(12345L)
@@ -81,4 +75,8 @@ make_celltype_ds <- function() {
     ) |> saveRDS("notebooks/celltype_prediction/allen_subclass_trn.rds")
   })
 }
+
+
+
+
 

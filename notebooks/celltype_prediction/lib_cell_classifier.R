@@ -79,20 +79,25 @@ advanced_cell_classifier <- nn_module(
 
 
 #' Predict cell type using given torch model
-#' @param N expression matrix, idealy RPM counts, but raw counts seems to work too
+#' @param N expression matrix, ideally log1p(RPM/100)/log(2) counts, but raw counts seems to work too
 #' @param model_file path to the file containng the model
+#' @param ignore.case if TRUE ignore case when aligning feature names (=gene names). It is useful for easy Human-Mouse gene-name matching.
 #' @return a prediction matrix giving each input cell a score for each cell type
-torch_predict_cell_type <- function(N,model_file="scripts/julien/final_model_prune.torch") {
+torch_predict_cell_type <- function(N,model_file,ignore.case=FALSE) {
   # Load the model
   model2 <- torch_load(model_file,device = "cpu")
   
   # Align the input matrix to desired matrix format, adding 0 when genes are missing
-  i <- match(model2$feature_names,rownames(N),nomatch = 0)
+  if (isTRUE(ignore.case)) {
+    i <- match(toupper(model2$feature_names),toupper(rownames(N)),nomatch = 0)  
+  } else {
+    i <- match(model2$feature_names,rownames(N),nomatch = 0)  
+  }
   stopifnot(mean(i>0)>=0.2) # check that 20% of model genes are in the input matrix
   m <- rbind(N[1,,drop=FALSE]*0,N)[i+1,]
   
-  # Compute prediction by batch of 100 cells
-  f <- factor((seq(ncol(m))-1L) %/% 100)
+  # Compute prediction by batch of 128 cells
+  f <- factor((seq(ncol(m))-1L) %/% 128L)
   P <- lapply(levels(f),function(i) {
     model2(torch_tensor(as.matrix(t(m[,f==i,drop=FALSE]))))
   })
