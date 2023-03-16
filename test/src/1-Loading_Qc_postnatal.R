@@ -43,7 +43,7 @@ dir.create("pdf/1-Loading/", recursive = TRUE)
 
 
 Telley_muA<-local({
-  Telley_muA_mrna<-Read10X_h5("data/muA/filtered_feature_bc_matrix.h5")
+  Telley_muA_mrna <- Read10X_h5("data/muA/filtered_feature_bc_matrix.h5")
   
   htos<-Read10X_h5("data/muA/muAh/raw_feature_bc_matrix.h5")
   
