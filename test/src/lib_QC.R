@@ -526,7 +526,6 @@ QC <- function(sce_object,
       sce_object <- scuttle::logNormCounts(sce_object[, sce_object$qc=="passed"])
       # UMAP computation
       sce_object <- scater::runUMAP(sce_object[, sce_object$qc=="passed"], BPPARAM=BPPARAM)
-      
       if (isTRUE("consensus_call" %in% colnames(colData(sce_object)))){
         # color by consensus call individual
         p <- scater::plotUMAP(sce_object[, sce_object$qc=="passed"],
@@ -610,7 +609,7 @@ QC <- function(sce_object,
     }
   )
   
-sce_object
+  sce_object
 }
 
 
