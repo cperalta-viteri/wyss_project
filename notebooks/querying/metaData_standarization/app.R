@@ -22,6 +22,7 @@ ui <- dashboardPage(
                selectInput(inputId = "in_file",
                               label="Select your metadata",
                            choices = ls(".GlobalEnv")[sapply(ls(".GlobalEnv"), function(i) class(get(i))) =="data.frame"]),
+               textInput(inputId = "in_project_name", label = "Introduce the name of this projec", value = "New"),
                actionButton(inputId = "in_go",
                             label = "Submit file"),
                DTOutput(outputId = "out_table")
@@ -34,7 +35,9 @@ ui <- dashboardPage(
       box(width = 4,
           title = "Modality",
           id="b_modality",
-          uiOutput("out_modality"))
+          uiOutput("out_modality"),
+          actionButton(inputId = "act_save",
+                       label = "Save metadata"))
     )
 ))
 
@@ -62,7 +65,7 @@ server <- function(input, output, session) {
                      choices=unlist(strsplit(gsub('["c(|)"]',"", levels(as.factor(f[input$in_sex_col]))), ",")))
          )
        output$out_sex_female <- renderUI(
-         selectizeInput(inputId = "in_sex_male", label = "What value refers to female?",
+         selectizeInput(inputId = "in_sex_female", label = "What value refers to female?",
                         choices=unlist(strsplit(gsub('["c(|)"]',"", levels(as.factor(f[input$in_sex_col]))), ",")))
        )
        })
@@ -81,13 +84,41 @@ server <- function(input, output, session) {
        )
      })
 
+     observeEvent(input$act_save, {
+       l <- list(sex_col=input$in_sex_col,
+                 sex_male_value=input$in_sex_male,
+                 sex_female_value=input$in_sex_female,
+                 modality_col=input$in_mod_col,
+                 modality=input$in_mod_type)
+       wd <- "../metadata"
+       if(!dir.exists(wd)) dir.create(wd)
+       jsonlite::write_json(l, pretty=TRUE, auto_unbox=TRUE, path = file.path(wd, input$in_project_name))
+     })
 
 
     })
-
-
 
 }
 
 # Run the application
 shinyApp(ui = ui, server = server)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
