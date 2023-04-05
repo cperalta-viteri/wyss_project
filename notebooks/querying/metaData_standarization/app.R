@@ -15,10 +15,13 @@ ui <- dashboardPage(
              tabPanel(
                id="tab_dt",
                title = "Data frame viz",
-               fileInput(inputId = "in_file",
-                         label = "Select your metadata file",
-                         buttonLabel = "Browse",
-                         placeholder = "No file selected"),
+               # fileInput(inputId = "in_file",
+               #           label = "Select your metadata file",
+               #           buttonLabel = "Browse",
+               #           placeholder = "No file selected"),
+               selectInput(inputId = "in_file",
+                              label="Select your metadata",
+                           choices = ls(".GlobalEnv")[sapply(ls(".GlobalEnv"), function(i) class(get(i))) =="data.frame"]),
                actionButton(inputId = "in_go",
                             label = "Submit file"),
                DTOutput(outputId = "out_table")
@@ -36,11 +39,12 @@ ui <- dashboardPage(
 ))
 
 
-server <- function(input, output) {
-   observeEvent(input$in_go, {
+server <- function(input, output, session) {
+
+  observeEvent(input$in_go, {
      #browser()
-     f <- input$in_file
-     f <- read.csv(f$datapath, sep = "\t")
+     f <- get(input$in_file)
+     #f <- read.csv(f$datapath, sep = "\t")
      output$out_table <- renderDT(head(f))
      # ==== sex ====
      output$out_sex <- renderUI(
