@@ -3,7 +3,7 @@
 library(shiny)
 library(bs4Dash)
 library(DT)
-
+source("../src/lib_standards.R")
 
 ui <- dashboardPage(
   dashboardHeader(),
@@ -14,7 +14,7 @@ ui <- dashboardPage(
              id="tabset1",
              tabPanel(
                id="tab_dt",
-               title = "Data frame viz",
+               title = "Raw data frame",
                # fileInput(inputId = "in_file",
                #           label = "Select your metadata file",
                #           buttonLabel = "Browse",
@@ -26,7 +26,8 @@ ui <- dashboardPage(
                actionButton(inputId = "in_go",
                             label = "Submit file"),
                DTOutput(outputId = "out_table")
-             )
+             ),
+             tabPanel(title = "Standardize data frame", DTOutput(outputId = "out_table_2"))
       ),
       box(id="b_donorInfo", title  = "Donor Information", width = 4,
              tabsetPanel(id="set_donorInfo", #title  = "Donor Information",
@@ -128,7 +129,7 @@ server <- function(input, output) {
            title = "Donor sex",
            collapsible = FALSE,
         selectizeInput(inputId = "in_sex_col", label = "What column refers to sex? (if none, type 'NA')", choices=colnames(f),
-                       options=list(create=TRUE)),
+                       options=list(create=TRUE), multiple=TRUE),
         uiOutput("out_sex_male"),
         uiOutput("out_sex_female")
         ))
@@ -138,7 +139,7 @@ server <- function(input, output) {
          output$out_sex_male <- renderUI(
            selectizeInput(inputId = "in_sex_male", label = "What value refers to male?",
                           choices=unlist(strsplit(gsub('["c(|)"]',"", levels(as.factor(f[input$in_sex_col]))), ",")),
-                          options=list(create=TRUE), selected="Select"))
+                          options=list(create=TRUE)))
 
          output$out_sex_female <- renderUI(
            selectizeInput(inputId = "in_sex_female", label = "What value refers to female?",
@@ -146,7 +147,7 @@ server <- function(input, output) {
                           options=list(create=TRUE)))
 
        } else {output$out_sex_male <- renderUI(textInput(inputId = "in_sex", label = "Type default donor sex:"))}
-       })
+       }, priority = 0)
 
      # ==== Age ====
      output$out_D_age <- renderUI(
@@ -155,17 +156,17 @@ server <- function(input, output) {
            id="box_age",
            title = "Donor age",
            collapsible = FALSE,
-           selectizeInput(inputId = "in_age_col", label = "Select the column or type the age", choices=colnames(f),
-                          options=list(create=TRUE))
-           ))
+           selectizeInput(inputId = "in_age_col", label = "Select the column (if none, type 'NA')", choices=colnames(f),
+                          options=list(create=TRUE)
+                          ),
+           uiOutput(outputId = "out_age_val")
+      ))
 
-     # observeEvent(input$in_mod_col, {
-     #   output$out_mod_type <- renderUI(
-     #     selectizeInput(inputId = "in_mod_type", label="Choose the modality:",
-     #                    choices = unlist(strsplit(gsub('["c(|)"]', "", levels(as.factor(f[input$in_mod_col]))), ",")),
-     #                    options=list(create=TRUE))
-     #   )
-     # })
+     observeEvent(input$in_age_col,{
+
+       if (!input$in_age_col %in% colnames(f)){
+         output$out_age_val <- renderUI(textInput(inputId = "in_age_value", label = "Type donor age"))}
+     })
 
      #-----------------------
      # Cell information
@@ -195,10 +196,19 @@ server <- function(input, output) {
 
      # === Cell type ====
      output$out_cellType_col <- renderUI(
-       selectizeInput(inputId = "in_cell_type", label="Select the column or type the cell type",
+       box(id = "box_cell_type",
+           width = 12,
+           selectizeInput(inputId = "in_cell_type_col", label="Select the column containing the cell type (if none, type 'NA')",
                       choices = colnames(f),
-                      options=list(create=TRUE))
+                      options=list(create=TRUE)),
+                      uiOutput(outputId = "out_cell_type")
+       )
      )
+
+     observeEvent(input$in_cell_type_col, {
+       if (!input$in_cell_type_col %in% colnames(f)) {
+         output$out_cell_type <- renderUI(textInput(inputId = "in_cell_type", label = "Type default cell type, if any"))}
+     })
 
 
      # === Barcode ====
@@ -216,29 +226,35 @@ server <- function(input, output) {
   #in_organism, in_id, in_sex_col, in_sex_male, in_sex_female, in_sex, in_age_col,in_acq,
   #in_brainOri, in_brainIn, in_cell_type, in_barcode_col, in_condition_col
 
-  #browser()
   observeEvent(input$act_save, {
+    #browser()
     l <- list(organism=input$in_organism,
               donor_id=input$in_id,
               sex_col=input$in_sex_col,
               sex_male_value=input$in_sex_male,
               sex_female_value=input$in_sex_female,
               sex_default=input$in_sex,
-              donor_age=input$in_age_col,
+              donor_age_col=input$in_age_col,
+              donor_age=input$in_age_value,
               data_mod=input$in_acq,
               brain_injec=input$in_brainIn,
               brain_origin=input$in_brainOri,
+              cell_type_col=input$in_cell_type_col,
               cell_type=input$in_cell_type,
-              barcode=input$in_barcode_col,
-              condition=input$in_condition_col
+              barcode_col=input$in_barcode_col,
+              condition_col=input$in_condition_col
     )
+    #browser()
 
+    out_df <- format_df(l, get(input$in_file))
+
+    output$out_table_2 <- renderDT(head(out_df))
 
     wd <- "../metadata"
     if(!dir.exists(wd)) dir.create(wd)
     jsonlite::write_json(l, pretty=TRUE, auto_unbox=TRUE, path = file.path(wd, input$in_project_name))
 
-
+    write.csv(out_df, file.path(wd, paste(input$in_project_name, ".tsv")), sep = "\t", row.names = FALSE)
 
      })
 
