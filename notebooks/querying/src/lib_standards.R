@@ -11,7 +11,10 @@
 
 
 format_df <- function(fields, dataframe) {
+  # filter out null and empty fields
   fields <- Filter(Negate(is.null), fields)
+  fields <- fields[!fields == ""]
+  #browser()
   # get fields containing columns names as mask
   msk <- grep("*_col$", names(fields), value = TRUE)
   #browser()

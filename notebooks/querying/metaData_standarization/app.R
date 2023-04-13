@@ -15,24 +15,19 @@ ui <- dashboardPage(
              tabPanel(
                id="tab_dt",
                title = "Raw data frame",
-               # fileInput(inputId = "in_file",
-               #           label = "Select your metadata file",
-               #           buttonLabel = "Browse",
-               #           placeholder = "No file selected"),
                selectInput(inputId = "in_file",
                               label="Select your metadata",
                            choices = ls(".GlobalEnv")[sapply(ls(".GlobalEnv"), function(i) class(get(i))) =="data.frame"]),
-               textInput(inputId = "in_project_name", label = "Introduce the name of this projec", value = "New"),
+               textInput(inputId = "in_project_name", label = "Introduce the name of this project", value = "New"),
                actionButton(inputId = "in_go",
                             label = "Submit file"),
                DTOutput(outputId = "out_table")
              ),
-             tabPanel(title = "Standardize data frame", DTOutput(outputId = "out_table_2"))
+             tabPanel(title = "Standardized data frame", DTOutput(outputId = "out_table_2"))
       ),
       box(id="b_donorInfo", title  = "Donor Information", width = 4,
-             tabsetPanel(id="set_donorInfo", #title  = "Donor Information",
+             tabsetPanel(id="set_donorInfo",
                          tabPanel(
-                                  #id="tab_1",
                                   title = "Organism & ID",
                                   uiOutput("out_D_org_id")
                                   ),
@@ -54,7 +49,9 @@ ui <- dashboardPage(
           tabsetPanel(id="exper_information",
                       tabPanel(
                         title = "Data acquisition mode",
-                        selectInput(inputId = "in_acq", label = "Select the data acquisition mode", choices = c("scRNA", "nuclei", "scATAC"))
+                        selectizeInput(inputId = "in_acq", label = "Select the data acquisition mode",
+                                    choices = c("scRNA", "nuclei", "scATAC"),
+                                    options=list(create=TRUE))
                         ),
                       tabPanel(
                         title = "Experimental conditions",
@@ -63,15 +60,14 @@ ui <- dashboardPage(
                       )
           ),
       box(width = 4,
-          #id="b_cellInfo",
           title = "Cell Information",
           tabsetPanel(id="set_cellInfo",
                       tabPanel(
                         title = "Brain Region",
-                        selectInput(inputId = "in_stage", label = "Select Organism Stage", choices = c("developing", "adult"), selected = NULL),
+                        selectInput(inputId = "in_stage", label = "Select Organism Stage",
+                                    choices = c("developing", "adult")),
                         uiOutput(outputId = "out_brainOri"),
                         uiOutput(outputId = "out_brainIn"),
-                        #actionButton(inputId = "act_save",label = "Save metadata")
                       ),
                       tabPanel(
                         title = "Cell type",
@@ -83,11 +79,12 @@ ui <- dashboardPage(
                       )
 
           )),
-      actionButton(status = "success",inputId = "act_save",label = "Standardize data")
-    #   box(width = 3,
-    #       status = "success", background = "success", solidHeader = TRUE,
-    #       id="action_button",
-    #       actionButton(status = "success",inputId = "act_save",label = "Standardize data"))
+      box(id = "bbb", width = 3,
+          textInput(inputId = "in_varName",
+                    label = "Introduce the name of the variable storing the generated data frame", value = "New"),
+          actionButton(status = "success",inputId = "act_save",label = "Standardize data")
+          )
+
     )
 ))
 
@@ -111,7 +108,7 @@ server <- function(input, output) {
                 box(width = 7,
                     id="box_organism",
                     title = "Organism",
-                    textInput(inputId = "in_organism", label = "Type donor organism"),
+                    selectInput(inputId = "in_organism", label = "Select donor organism", choices = c("human", "mouse")),
                     collapsible = FALSE
                     ),
                 box(width = 7,
@@ -128,7 +125,7 @@ server <- function(input, output) {
            id="box_Dsex",
            title = "Donor sex",
            collapsible = FALSE,
-        selectizeInput(inputId = "in_sex_col", label = "What column refers to sex? (if none, type 'NA')", choices=colnames(f),
+        selectizeInput(inputId = "in_sex_col", label = "Select the column that refers to sex (if none, type 'NA')", choices=colnames(f),
                        options=list(create=TRUE), multiple=TRUE),
         uiOutput("out_sex_male"),
         uiOutput("out_sex_female")
@@ -146,7 +143,9 @@ server <- function(input, output) {
                           choices=unlist(strsplit(gsub('["c(|)"]',"", levels(as.factor(f[input$in_sex_col]))), ",")),
                           options=list(create=TRUE)))
 
-       } else {output$out_sex_male <- renderUI(textInput(inputId = "in_sex", label = "Type default donor sex:"))}
+       } else {output$out_sex_male <- renderUI(selectizeInput(inputId = "in_sex",
+                                                              label = "Select default donor sex:",
+                                                              choices=c("female", "male")))}
        }, priority = 0)
 
      # ==== Age ====
@@ -176,22 +175,49 @@ server <- function(input, output) {
      df <- reactive(read.csv("../acronym_df.csv"))
 
 
-     observeEvent(input$in_stage,{
+     observeEvent(input$in_organism,{
 
-       if(input$in_stage == "developing"){
-         output$out_brainOri <- renderUI(selectizeInput(inputId = "in_brainOri",
-                                                        label = "Brain region of origin",
-                                                        choices = df()$human_developing))
-       }else{output$out_brainOri <- renderUI(selectizeInput(inputId = "in_brainOri",
-                                                            label = "Brain region of origin",
-                                                            choices = df()$human_adult))}
-       if(input$in_stage == "developing"){
-         output$out_brainIn <- renderUI(selectizeInput(inputId = "in_brainIn",
-                                                       label = "Select brain region of injection",
-                                                       choices = df()$human_developing))
-       }else{output$out_brainIn <- renderUI(selectizeInput(inputId = "in_brainIn",
-                                                           label = "Select brain region of injection",
-                                                           choices = df()$human_adult))}
+       observeEvent(input$in_stage, {
+         switch(input$in_organism,
+                mouse = {if(input$in_stage == "developing"){
+                  output$out_brainOri <- renderUI(selectizeInput(inputId = "in_brainOri",
+                                                                 label = "Brain region of origin",
+                                                                 choices = df()$mouse_developing))
+                }else{output$out_brainOri <- renderUI(selectizeInput(inputId = "in_brainOri",
+                                                                     label = "Brain region of origin",
+                                                                     choices = df()$mouse_adult))}
+                },
+                human = {if(input$in_stage == "developing"){
+                  output$out_brainOri <- renderUI(selectizeInput(inputId = "in_brainOri", #in
+                                                                 label = "Brain region of origin",
+                                                                 choices = df()$human_developing))
+                }else{output$out_brainOri <- renderUI(selectizeInput(inputId = "in_brainOri",
+                                                                     label = "Brain region of origin",
+                                                                     choices = df()$human_adult))}
+
+                }
+         )
+         switch (input$in_organism,
+                 mouse = {if(input$in_stage == "developing"){
+                   output$out_brainIn <- renderUI(selectizeInput(inputId = "in_brainIn",
+                                                                 label = "Select brain region of injection",
+                                                                 choices = df()$mouse_developing))
+                 }else{output$out_brainIn <- renderUI(selectizeInput(inputId = "in_brainIn",
+                                                                     label = "Select brain region of injection",
+                                                                     choices = df()$mouse_adult))}
+                 },
+                 human= {if(input$in_stage == "developing"){
+                   output$out_brainIn <- renderUI(selectizeInput(inputId = "in_brainIn",
+                                                                 label = "Select brain region of injection",
+                                                                 choices = df()$human_developing))
+                 }else{output$out_brainIn <- renderUI(selectizeInput(inputId = "in_brainIn",
+                                                                     label = "Select brain region of injection",
+                                                                     choices = df()$human_adult))}
+
+                 }
+         )
+
+       })
      })
 
      # === Cell type ====
@@ -213,14 +239,14 @@ server <- function(input, output) {
 
      # === Barcode ====
      output$out_barcode_col <- renderUI(
-       selectizeInput(inputId = "in_barcode_col", label="Select the column containing barcodes",
-                      choices=colnames(f))
+       selectizeInput(inputId = "in_barcode_col", label="Select the column containing barcodes (if none, type 'NA')",
+                      choices=colnames(f), options=list(create=TRUE))
      )
 
      # === Condition ====
      output$out_condition_col <- renderUI(
        selectizeInput(inputId = "in_condition_col", label="Select the column containing the experimental conditions",
-                      choices=colnames(f))
+                      choices=colnames(f), options=list(create=TRUE))
      )
     })
   #in_organism, in_id, in_sex_col, in_sex_male, in_sex_female, in_sex, in_age_col,in_acq,
@@ -250,12 +276,13 @@ server <- function(input, output) {
 
     output$out_table_2 <- renderDT(head(out_df))
 
-    wd <- "../metadata"
+    wd <- "../metadata_processed"
     if(!dir.exists(wd)) dir.create(wd)
-    jsonlite::write_json(l, pretty=TRUE, auto_unbox=TRUE, path = file.path(wd, input$in_project_name))
+    jsonlite::write_json(l, pretty=TRUE, auto_unbox=TRUE, path = file.path(wd, paste(input$in_project_name, ".json", sep = "")))
 
-    write.csv(out_df, file.path(wd, paste(input$in_project_name, ".tsv")), sep = "\t", row.names = FALSE)
-
+    write.csv(out_df, file.path(wd, paste0(input$in_project_name, ".csv")), row.names = FALSE)
+    assign(input$in_varName, out_df, envir = .GlobalEnv)
+    #test <<- out_df
      })
 
 
