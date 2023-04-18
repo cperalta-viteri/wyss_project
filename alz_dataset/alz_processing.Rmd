@@ -1,0 +1,232 @@
+---
+title: "alzheimer prediction model"
+author: "Peralta Viteri Christian"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+```{r message=FALSE}
+library(SingleCellExperiment)
+library(scater)
+library(scran)
+library(DelayedArray)
+
+pacman::p_load(torch, luz)
+```
+
+\# mse loss | marginrankingloss
+
+```{r}
+
+e <- readRDS("data/sce.EC.scAlign.assigned.rds")
+s <- readRDS("data/sce.SFG.scAlign.assigned.rds")
+
+colData(e)$source <- "EC"
+colData(s)$source <- "SFG"
+
+sce_merged <- cbind(e,s)
+```
+
+
+```{r}
+bp <-BiocParallel::MulticoreParam(workers = 10)
+```
+
+
+```{r}
+sce_merged <- runUMAP(sce_merged, name = "UMAP_merged", n_threads=10)
+```
+
+
+
+```{r}
+plotReducedDim(sce_merged, dimred = "UMAP_merged",colour_by="source")
+```
+
+# Scoring markers by pairwise comparisons
+
+```{r}
+# marker information per cluster
+marker_info <- scoreMarkers(sce_merged, sce_merged$seurat.clusters)
+```
+
+
+```{r}
+nrow(marker_info[[1]]); nrow(marker_info[[2]])
+```
+
+
+```{r}
+# selecting cluster 1
+chosen <- marker_info[[1]]
+chosen <- chosen[order(chosen$mean.AUC, decreasing = TRUE), ]
+```
+
+
+
+```{r}
+plotExpression(sce_merged, features = head(rownames(chosen)), x = "seurat.clusters", colour_by = "seurat.clusters")
+```
+
+
+
+# Model
+
+
+
+
+```{r}
+ordinal_classifier <- nn_module(
+  "ordinal_classifier",
+  initialize = function(){
+    #browser()
+    # self$gene_names
+    self$layers <- nn_sequential(
+      nn_dropout(),
+      nn_linear(in_features = 33694L, out_features = 5120L), nn_tanh(),
+      nn_linear(in_features = 5120L, out_features = 1024L), nn_relu(),
+      nn_linear(in_features = 1024L, out_features = 1L)
+    ) 
+  },
+  
+  forward = function(x){
+    x |> self$layers()
+  }
+)
+```
+
+
+
+```{r}
+#torch_set_default_dtype(torch_float())
+fitted <- ordinal_classifier |>
+  setup(loss = nn_mse_loss(),
+        optimizer = optim_adam) |>
+  # set_hparams() |>
+  fit(train_ds,
+      epochs=2L,
+      dataloader_options=list(batch_size=100L)
+      #, accelerator=accelerator(cpu = TRUE)
+      )
+
+
+      # callbacks=list(luz_callback_model_checkpoint("models/model_stage_class_best_valid_acc.luz", monitor="valid_acc", mode = "max", save_best_only=TRUE),
+      #                luz_callback_model_checkpoint("models/model_stage_class_best_train_acc.luz", monitor="train_acc", mode = "max", save_best_only=TRUE))
+```
+
+```{r}
+luz_save(fitted, "models/ord_class_mse.luz")
+```
+
+
+batch=100, epoch=2, L2 4096 nodes:
+
+- CPU: time= 5m 26s, avg time/batch 2.3s tLOSS: 0.0027
+- GPU: time= 1m 24s, avg time/batch 599ms tLOSS: 0.0035
+
+batch=100, epoch=2, L2 5120 nodes:
+
+- CPU: time= 6m 50s, avg time/batch 2.9s tLOSS: 0.0081
+- GPU: time= 1m 26s, avg time/batch 618ms tLOSS: 0.0019
+
+## Data prep
+
+```{r}
+sce_sampled <- sce_merged[, sample(seq(1:dim(sce_merged)[2]), size = 10e3)]
+
+train <- sce_sampled[, sample(seq(1:dim(sce_sampled)[2]), size = dim(sce_sampled)[2]*.7)]
+test <- sce_sampled[, !colnames(sce_sampled) %in% colnames(train)]
+
+```
+
+
+
+
+```{r}
+train_ds <- tensor_dataset(
+  x=torch_tensor(t(as.matrix(logcounts(train)))),
+  y=torch_tensor(as.matrix(as.numeric(train$BraakStage), ncol=1), dtype=torch_float())
+)
+```
+
+
+
+```{r prados_list_dataset}
+delayed_ds <- dataset(
+  name = "DelayedArray_dataset",
+  initialize = function(arrays) {
+      self$arrays <- arrays
+      #self$dtypes <- dtypes
+  },
+  .length = function() {nrow(self$arrays[[1]])},
+  .getbatch = function(index) {
+      Map(function(x) {
+        # browser()
+        x <- as.matrix(x[index, , drop=FALSE])
+        y <- as.matrix(x[index,drop=FALSE])
+        torch_tensor(x)
+      },self$arrays)
+  }
+  # .getitem = function(index) {
+  #     if (is.list(index)) {index <- unlist(index)}
+  #     self$.getbatch(index)
+  # }
+)
+```
+
+
+```{r prados_delayed_ds}
+
+delayed_ds <- dataset(
+  name = "sce_dataset",
+ 
+  initialize = function(x,y) {
+    self$x <- x;self$y <- y
+    stopifnot(identical(length(y),nrow(x)))
+  },
+ 
+  .length = function() {length(self$y)},
+ 
+  .getbatch = function(index) { list(
+    x = torch_tensor(as.matrix(self$x[index, ,drop=FALSE]), torch_float()),
+    y = torch_tensor(as.matrix(self$y[index], ncol=1), torch_float())
+  )},
+ 
+  .getitem = function(index) {
+    if (is.list(index)) {index <- unlist(index)}
+    self$.getbatch(index)
+  }
+)
+```
+
+
+
+```{r}
+train_ds <- delayed_ds(x=t(logcounts(train)), y=as.numeric(train$BraakStage))
+```
+
+
+## Loss function
+
+
+```{r}
+l <- nnf_margin_ranking_loss(input1 = pred[ij[,1]], input2= pred[ij[,2]], target = sign(target[ij[,1]] - target[ij[,2]]),reduction = "none",margin = 1)
+
+cbind(as_array(ij), as_array(pred[ij[,1]]), as_array(pred[ij[,2]]),as_array(target[ij[,1]]) ,as_array(target[ij[,2]]) ,as_array(l))
+```
+
+
+
+```{r}
+pred <- torch_tensor(as.numeric(as.character(train$BraakStage[1:10])))
+target <- torch_tensor(as.numeric(as.character(train$BraakStage[5:14])))
+```
+
+
+```{r}
+ij <- torch_combinations(torch_arange(1,length(pred), dtype = torch_long()))
+```
+
+
+
