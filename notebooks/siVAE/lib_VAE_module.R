@@ -14,16 +14,16 @@ pacman::p_load(torch, luz)
 
 #==== demo geo ====
 
-demo_geo <- demo_geo[, sample(colnames(demo_geo))]
+#demo_geo <- demo_geo[, sample(colnames(demo_geo))]
 # to reduce n of genes
-demo_geo <- demo_geo[((counts(demo_geo)>0) |> rowMeans()) > 0.01]
+#demo_geo <- demo_geo[((counts(demo_geo)>0) |> rowMeans()) > 0.01]
 
-device <- torch_device("cuda")
-
-ml_ds <- tensor_dataset(
-  x = torch_tensor(t(assay(demo_geo, "logcounts")), device = device),
-  y = torch_tensor(t(assay(demo_geo, "logcounts")), device = device)
-)
+# device <- torch_device("cuda")
+# 
+# ml_ds <- tensor_dataset(
+#   x = torch_tensor(t(assay(demo_geo, "logcounts")), device = device),
+#   y = torch_tensor(t(assay(demo_geo, "logcounts")), device = device)
+# )
 
 #==== allen subclass ====
 
@@ -130,7 +130,7 @@ cell_encoder <- nn_module(
 cw_fitted <- cell_encoder |>
   setup() |>
   set_hparams(gene_names=colnames(rds$x)) |>
-  fit(ml_ds, epochs=1L, dataloader_options=list(batch_size=70L))
+  fit(ml_ds, epochs=2L, dataloader_options=list(batch_size=70L))
 
 
 gaussian_likelihood <- function(preds, logscale, x){
