@@ -79,19 +79,36 @@ plotExpression(sce_merged, features = head(rownames(chosen)), x = "seurat.cluste
 ```{r}
 ordinal_classifier <- nn_module(
   "ordinal_classifier",
-  initialize = function(){
+  initialize = function(c=NULL){
+    self$c <- c
     #browser()
     # self$gene_names
     self$layers <- nn_sequential(
       nn_dropout(),
-      nn_linear(in_features = 33694L, out_features = 5120L), nn_tanh(),
-      nn_linear(in_features = 5120L, out_features = 1024L), nn_relu(),
+      nn_linear(in_features = 33694L, out_features = 3072L), nn_tanh(), #
+      nn_linear(in_features = 3072L, out_features = 2048L), nn_relu(),
+      nn_linear(in_features = 2048L, out_features = 1024L), nn_relu(),
       nn_linear(in_features = 1024L, out_features = 1L)
     ) 
   },
   
   forward = function(x){
     x |> self$layers()
+  },
+  
+  step = function(){
+    ctx$pred <- ctx$input |> self$forward()
+    
+    opt <- ctx$optimizers[[1]]
+    ctx$loss <- list(ordinalReg_loss=nnf_ordinal_regression_loss(ctx$pred, ctx$target, c = self$c))
+    
+    if (ctx$training){
+      #browser()
+      opt$zero_grad()
+      ctx$loss[[1]]$backward()
+      opt$step()
+    }
+     #ctx$loss[[1]] <- loss$detach()
   }
 )
 ```
@@ -101,13 +118,13 @@ ordinal_classifier <- nn_module(
 ```{r}
 #torch_set_default_dtype(torch_float())
 fitted <- ordinal_classifier |>
-  setup(loss = nn_mse_loss(),
+  setup(#loss = nn_ordinal_regression_loss(),
         optimizer = optim_adam) |>
-  # set_hparams() |>
+  set_hparams(c=c) |>
   fit(train_ds,
       epochs=2L,
       dataloader_options=list(batch_size=100L)
-      #, accelerator=accelerator(cpu = TRUE)
+      , accelerator=accelerator(cpu = TRUE)
       )
 
 
@@ -115,20 +132,23 @@ fitted <- ordinal_classifier |>
       #                luz_callback_model_checkpoint("models/model_stage_class_best_train_acc.luz", monitor="train_acc", mode = "max", save_best_only=TRUE))
 ```
 
+
 ```{r}
-luz_save(fitted, "models/ord_class_mse.luz")
+#luz_save(fitted, "models/ord_class_mse.luz")
 ```
 
 
-batch=100, epoch=2, L2 4096 nodes:
+batch=100, epoch=2
 
-- CPU: time= 5m 26s, avg time/batch 2.3s tLOSS: 0.0027
-- GPU: time= 1m 24s, avg time/batch 599ms tLOSS: 0.0035
+* MSE loss *
 
-batch=100, epoch=2, L2 5120 nodes:
+- Loss: 1.5471 (previous architecture)
+- Loss: 1.4279 (dropout - tanh)
 
-- CPU: time= 6m 50s, avg time/batch 2.9s tLOSS: 0.0081
-- GPU: time= 1m 26s, avg time/batch 618ms tLOSS: 0.0019
+* Ordinal regression *
+
+- 0.438 w/o C
+- 3.1063 with C
 
 ## Data prep
 
@@ -211,22 +231,139 @@ train_ds <- delayed_ds(x=t(logcounts(train)), y=as.numeric(train$BraakStage))
 
 
 ```{r}
-l <- nnf_margin_ranking_loss(input1 = pred[ij[,1]], input2= pred[ij[,2]], target = sign(target[ij[,1]] - target[ij[,2]]),reduction = "none",margin = 1)
-
-cbind(as_array(ij), as_array(pred[ij[,1]]), as_array(pred[ij[,2]]),as_array(target[ij[,1]]) ,as_array(target[ij[,2]]) ,as_array(l))
-```
-
-
-
-```{r}
-pred <- torch_tensor(as.numeric(as.character(train$BraakStage[1:10])))
-target <- torch_tensor(as.numeric(as.character(train$BraakStage[5:14])))
+pred <- torch_tensor(as.numeric(train$BraakStage[1:10]))
+target <- torch_tensor(as.numeric(train$BraakStage[5:14]))
 ```
 
 
 ```{r}
 ij <- torch_combinations(torch_arange(1,length(pred), dtype = torch_long()))
 ```
+
+
+
+
+```{r}
+l <- nnf_margin_ranking_loss(input1 = pred[ij[,1]], input2= pred[ij[,2]], target = sign(target[ij[,1]] - target[ij[,2]]),reduction = "none",margin = 1)
+
+m <- cbind(as_array(ij), as_array(pred[ij[,1]]), as_array(pred[ij[,2]]),as_array(target[ij[,1]]) ,as_array(target[ij[,2]]) ,as_array(l))
+```
+
+
+
+```{r}
+m <- torch_tensor(m[-which(m[,5]==m[,6]),], dtype = torch_long())
+```
+
+
+
+```{r}
+c <- torch_tensor(matrix(c(0,2,6, 2,0,4, 6,4,0), nrow = 3, ncol = 3,
+       dimnames = list(c("1", "2", "3"),
+                       c("1", "2", "3"))), dtype = torch_long())
+```
+
+
+
+```{r}
+p <- torch_diag(c[m[,c(4,6)][,1], m[,c(4,6)][,2]])
+```
+
+
+
+```{r}
+nnf_ordinal_regression_loss <- function(pred,target,c=NULL){
+  # combinations
+  #browser()
+  ij <- torch_combinations(torch_arange(1,length(pred), dtype = torch_long()))
+  # margin ranking loss
+  l <- nnf_margin_ranking_loss(input1 = pred[ij[,1]], input2= pred[ij[,2]], target = sign(target[ij[,1]] - target[ij[,2]]),
+                               reduction = "none",margin = 1)
+  
+  #browser()
+  if (!is.null(c)){
+    # matrix
+    m <- cbind(as_array(ij), as_array(pred[ij[,1]]), as_array(pred[ij[,2]]), as_array(target[ij[,1]]),
+             as_array(target[ij[,2]]) ,as_array(l))
+    # removing equal predictions
+    #browser()
+    m <- m[-which(m[,5]==m[,6]),]
+    pj <- as.integer(m[,4]); tj <- as.integer(m[,6])
+    ind <- which(pj==0)
+    if (length(ind)>=1) pj[ind] <- 1
+    # f <- function(x,y){
+    #   if(x==0) x<-x+1
+    #   p <- torch_diag(c[m[,c(4,6)][,1], m[,c(4,6)][,2]])
+    # }
+    # p <- unlist(Map(f, m[,4], m[,6]))[[1]]
+    # gathering cost values for predicted values
+    p <- torch_diag(c[pj, tj])
+    #browser()
+    # weighted loss
+    loss <- torch_tensor(torch_mean(m[,7]*p), requires_grad = TRUE)
+  } else {loss <- l$mean()}
+  
+}
+```
+
+
+
+```{r}
+nn_ordinal_regression_loss <- nn_module(
+  "nn_ordinal_regression_loss",
+  initialize = function(c=NULL){
+    self$c <- c
+  },
+  forward = function(input, target){
+    nnf_ordinal_regression_loss(input, target, c = self$c)
+  }
+  
+)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
