@@ -8,15 +8,32 @@ pacman::p_load(torch, luz)
 #GGally, ggfortify, fastDummies, purrr,dplyr
 
 
-# --- data prep ----
-demo_geo <- demo_geo[, sample(colnames(demo_geo))]
+# ---------------------
+#       data prep
+# ---------------------
+
+#==== demo geo ====
+
+#demo_geo <- demo_geo[, sample(colnames(demo_geo))]
 # to reduce n of genes
-demo_geo <- demo_geo[((counts(demo_geo)>0) |> rowMeans()) > 0.01]
+#demo_geo <- demo_geo[((counts(demo_geo)>0) |> rowMeans()) > 0.01]
+
+# device <- torch_device("cuda")
+# 
+# ml_ds <- tensor_dataset(
+#   x = torch_tensor(t(assay(demo_geo, "logcounts")), device = device),
+#   y = torch_tensor(t(assay(demo_geo, "logcounts")), device = device)
+# )
+
+#==== allen subclass ====
+
+rds <- readRDS("allen_subclass_trn.rds")
 
 ml_ds <- tensor_dataset(
-  x = torch_tensor(t(assay(demo_geo, "logcounts"))),
-  y = torch_tensor(t(assay(demo_geo, "logcounts")))
+  x = torch_tensor(as.array(rds$x)),
+  y = torch_tensor(as.array(rds$x))
 )
+
 
 
 # ---------------------
@@ -30,9 +47,9 @@ cell_encoder <- nn_module(
   # contains encoder-decoder layers
   initialize = function(gene_names, embedding_size=2L){
     self$gene_names <- gene_names
+    # log_scale is the error we learn to accept for the reconstruction
     self$log_scale <- nn_parameter(torch_tensor(0.0))
     # --- layers ---
-    # self$layer1 <- nn_linear(in_features = 52739L, out_features = 50L)
     self$l_encoder <- nn_sequential(
       nn_linear(in_features = length(gene_names), out_features = 1024L),
       nn_relu(),
@@ -40,11 +57,8 @@ cell_encoder <- nn_module(
       nn_relu()
     )
     self$layer_mu <-    nn_linear(in_features = 128L, out_features = embedding_size)
-    self$layer_sigma <- nn_linear(in_features = 128L, out_features = embedding_size)
-    #self$l_embedding <- nn_linear(in_features = 100L, out_features = embedding_size)
+    self$layer_sigma <- nn_linear(in_features = 128L, out_features = 1L)
     
-    # self$layer2 <- nn_linear(in_features = 2L, out_features = 50L)
-    # self$layer3 <- nn_linear(in_features = 50L, out_features = 52739L)
     self$l_decoder <- nn_sequential(
       nn_linear(in_features = embedding_size, out_features = 128L),
       nn_relu(),
@@ -73,10 +87,9 @@ cell_encoder <- nn_module(
       self$encode(x)
     
     # Define the approximated posterior probability q(z)
-    q_z <- distr_normal(enc$mu, enc$std) #attribute
+    q_z <- distr_normal(enc$mu, enc$std) ## instead of normal
     
     # reparametrization trick
-    ####z=self$mu+(self$std*torch_rand_like(self$std))
     q_z$rsample() |>
       self$decode()
     
@@ -97,7 +110,7 @@ cell_encoder <- nn_module(
     z <- q$rsample()
     
     ctx$pred <- z |> self$decode()
-    #browser()
+
     # ---- loss computation ----
     loss <- elbo_loss(pred=ctx$pred, target = ctx$target, enc$mu, enc$std, q, z, self$log_scale)
     ctx$loss <- list(elbo=loss)
@@ -114,34 +127,29 @@ cell_encoder <- nn_module(
 
 
 
-cell_wise_model <- cell_encoder |>
+cw_fitted <- cell_encoder |>
   setup() |>
-  set_hparams(gene_names=rownames(demo_geo)) |>
-  fit(ml_ds, epochs=10L, dataloader_options=list(batch_size=30L))
-# 3h of training for siVAE v2
-
-
-
-
-#p=distr_normal(torch_zeros_like(0), torch_ones_like(1))
-#q=distr_normal(torch_zeros_like(0), torch_ones_like(2))
-
+  set_hparams(gene_names=colnames(rds$x)) |>
+  fit(ml_ds, epochs=2L, dataloader_options=list(batch_size=70L))
 
 
 gaussian_likelihood <- function(preds, logscale, x){
   scale <- torch_exp(logscale)
   mean <- preds
-  dist <- distr_normal(mean, scale)
+  dist <- distr_normal(mean, scale) 
   
   # computing probability p(x|z)
   log_pxz <- dist$log_prob(x)
-  log_pxz <- log_pxz$sum()
+  log_pxz <- log_pxz$mean() ## mean
 }
 
 kl_divergence <- function(q, z, mu, std){
-  # 1. Getting the missing probability distribution
-  #p_z<-distr_normal(torch_zeros_like(mu), torch_ones_like(std))
-  p_z<-distr_normal(mu, std)
+  #-----------------------
+  # Montecarlo KL divergence
+  #-----------------------
+  
+  # 1. Define the missing probability distribution as normal
+  p_z<-distr_normal(torch_zeros_like(mu), torch_ones_like(std))
   
   # 2. Computing probabilities
   log_qzx <- q$log_prob(z)
@@ -154,13 +162,58 @@ kl_divergence <- function(q, z, mu, std){
 # enc to mu
 elbo_loss <- function(pred, target, mu, std, q, z, log_scale){
   recon_loss <- gaussian_likelihood(pred, log_scale, target)
-  kl <- kl_divergence(q, z, mu, std)
-  elbo <- kl - recon_loss
+  kl <- kl_divergence(q, z, mu, std) / ncol(target)
+  elbo <- - recon_loss - kl
   elbo <- elbo$mean()
+  # if (is.nan(elbo$item())) {
+  #   print(kl)
+  #   print(recon_loss)
+  # }
   elbo
 }
 
 
 #loss = 0.5 * ((logvar2 - logvar_1) - 1 + var_1 / var_2 + (mu_2 - mu_1)**2 / var_2)
+
+#cell_wise_model$model$encode(ml_ds$tensors$x)
+
+
+
+
+
+#luz_save(cw_fitted, "vae_cell-wise.luz")
+
+#cw_fitted <- luz_load("vae_cell-wise.luz")
+
+
+plot(cw_fitted)
+plot(as_array(cw_fitted$model$encode(ml_ds$tensors$x)$mu), col=factor(sub(" --- .*","",rds$y)))
+#legend("topleft", legend=factor(sub(" --- .*","",rds$y)))
+
+
+
+#m2 <- luz_load("vae_cell-wise.luz")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

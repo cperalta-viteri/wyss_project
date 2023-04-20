@@ -12,7 +12,7 @@ library(bs4Dash)
 library(rentrez)
 library(reactlog)
 library(shinyjs)
-source("../lib_querying.R")
+source("../src/lib_querying.R")
 
 reactlogReset()
 reactlog_enable()

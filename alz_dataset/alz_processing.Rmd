@@ -1,0 +1,340 @@
+---
+title: "alzheimer prediction model"
+author: "Peralta Viteri Christian"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+```{r message=FALSE}
+library(SingleCellExperiment)
+library(scater)
+library(scran)
+library(DelayedArray)
+
+pacman::p_load(torch, luz)
+```
+
+\# mse loss | marginrankingloss
+
+```{r}
+
+e <- readRDS("data/sce.EC.scAlign.assigned.rds")
+s <- readRDS("data/sce.SFG.scAlign.assigned.rds")
+
+sce_merged <- cbind(e,s)
+```
+
+
+```{r}
+bp <-BiocParallel::MulticoreParam(workers = 10)
+```
+
+
+```{r}
+sce_merged <- runUMAP(sce_merged, name = "UMAP_merged", n_threads=10)
+```
+
+
+
+```{r}
+plotReducedDim(sce_merged, dimred = "UMAP_merged",colour_by="source")
+```
+
+# Scoring markers by pairwise comparisons
+
+```{r}
+# marker information per cluster
+marker_info <- scoreMarkers(sce_merged, sce_merged$seurat.clusters)
+```
+
+
+```{r}
+nrow(marker_info[[1]]); nrow(marker_info[[2]])
+```
+
+
+```{r}
+# selecting cluster 1
+chosen <- marker_info[[1]]
+chosen <- chosen[order(chosen$mean.AUC, decreasing = TRUE), ]
+```
+
+
+
+```{r}
+plotExpression(sce_merged, features = head(rownames(chosen)), x = "seurat.clusters", colour_by = "seurat.clusters")
+```
+
+
+
+# Model
+
+
+
+
+```{r}
+ordinal_classifier <- nn_module(
+  "ordinal_classifier",
+  initialize = function(){
+    #browser()
+    # self$gene_names
+    self$layers <- nn_sequential(
+      nn_dropout(),
+      nn_linear(in_features = 33694L, out_features = 3072L), nn_tanh(), 
+      nn_linear(in_features = 3072L, out_features = 2048L), nn_relu(),
+      nn_linear(in_features = 2048L, out_features = 1024L), nn_relu(),
+      nn_linear(in_features = 1024L, out_features = 1L)
+    ) 
+  },
+  
+  forward = function(x){
+    x |> self$layers()
+  }
+)
+```
+
+
+
+```{r}
+#torch_set_default_dtype(torch_float())
+fitted <- ordinal_classifier |>
+  setup(loss = nn_ordinal_regression_loss(c=c),
+        optimizer = optim_adam) |>
+  #set_opt_hparams(lr=1) |>
+  fit(train_ds,
+      epochs=5L,
+      dataloader_options=list(batch_size=100L),
+      valid_data=test_ds
+      #, accelerator=accelerator(cpu = TRUE)
+      # ,
+      # callbacks=list(luz_callback_model_checkpoint("models/model_stage_class_best_valid_acc.luz", monitor="valid_acc", mode = "max",
+      #                                              save_best_only=TRUE),
+      # luz_callback_model_checkpoint("models/model_stage_class_best_train_acc.luz", monitor="train_acc", mode = "max", save_best_only=TRUE))
+      )
+```
+
+
+
+```{r}
+plot(fitted)
+```
+
+
+```{r}
+model <- ordinal_classifier |> setup(loss = nn_ordinal_regression_loss(c=c), optimizer = optim_adam)
+rates_and_losses <- model |> lr_finder(train_ds)
+
+rates_and_losses |> plot()
+```
+
+
+
+```{r}
+y_hat <- predict(fitted, test_ds)
+
+boxplot(as_array(y_hat$to(device="cpu")) ~ test_ds$y)
+```
+
+
+
+```{r}
+#luz_save(fitted, "models/ord_class_OR_loss.luz")
+```
+
+
+
+
+## Data prep
+
+```{r}
+sce_sampled <- sce_merged[, sample(seq(1:dim(sce_merged)[2]), size = 10e3)]
+
+train <- sce_sampled[, sample(seq(1:dim(sce_sampled)[2]), size = dim(sce_sampled)[2]*.7)]
+test <- sce_sampled[, !colnames(sce_sampled) %in% colnames(train)]
+
+```
+
+
+
+```{r prados_delayed_ds}
+
+delayed_ds <- dataset(
+  name = "sce_dataset",
+ 
+  initialize = function(x,y) {
+    self$x <- x;self$y <- y
+    stopifnot(identical(length(y),nrow(x)))
+  },
+ 
+  .length = function() {length(self$y)},
+ 
+  .getbatch = function(index) { list(
+    x = torch_tensor(as.matrix(self$x[index, ,drop=FALSE]), torch_float()),
+    y = torch_tensor(as.matrix(self$y[index], ncol=1), torch_long())
+  )},
+ 
+  .getitem = function(index) {
+    if (is.list(index)) {index <- unlist(index)}
+    self$.getbatch(index)
+  }
+)
+```
+
+
+
+```{r}
+train_ds <- delayed_ds(x=t(logcounts(train)), y=as.integer(train$BraakStage))
+```
+
+
+```{r}
+test_ds <- delayed_ds(t(logcounts(test)), as.integer(test$BraakStage))
+```
+
+
+
+## Loss function
+
+
+```{r}
+pred <- torch_tensor(as.numeric(train$BraakStage[1:10]))
+target <- torch_tensor(as.numeric(train$BraakStage[5:14]))
+```
+
+
+```{r}
+ij <- torch_combinations(torch_arange(1,length(pred), dtype = torch_long()))
+```
+
+
+
+
+```{r}
+l <- nnf_margin_ranking_loss(input1 = pred[ij[,1]], input2= pred[ij[,2]], target = sign(target[ij[,1]] - target[ij[,2]]),reduction = "none",margin = 1)
+
+m <- cbind(as_array(ij), as_array(pred[ij[,1]]), as_array(pred[ij[,2]]),as_array(target[ij[,1]]) ,as_array(target[ij[,2]]) ,as_array(l))
+```
+
+
+
+```{r}
+m <- torch_tensor(m[-which(m[,5]==m[,6]),], dtype = torch_long())
+```
+
+
+```{r}
+scaling_factor <- function(ranks){
+  m_2 <- length(ranks)**2 
+  m_sum <- sum(table(ranks)**2)
+  (m_2-m_sum)*0.5
+}
+
+sf <- scaling_factor(train_ds$y)
+```
+
+
+
+```{r}
+c <- torch_tensor(matrix(c(0,2,6, 2,0,4, 6,4,0), nrow = 3, ncol = 3,
+       dimnames = list(c("1", "2", "3"),
+                       c("1", "2", "3"))), dtype = torch_long(), device = "cuda")
+c <- c/sf
+```
+
+
+
+```{r}
+p <- torch_diag(c[m[,c(4,6)][,1], m[,c(4,6)][,2]])
+```
+
+
+
+```{r}
+nnf_ordinal_regression_loss <- function(pred,target,c=NULL){
+  # combinations
+  ij <- torch_combinations(torch_arange(1,length(pred)+1, dtype = torch_long()))
+  # margin ranking loss
+  l <- nnf_margin_ranking_loss(input1 = pred[ij[,1]]$squeeze(-1L),
+                               input2= pred[ij[,2]]$squeeze(-1L),
+                               target = sign(target[ij[,1]] - target[ij[,2]])$squeeze(-1L),
+                               reduction = "none",margin = 1)
+  
+  if (!is.null(c)){
+    # removing equal predictions
+    # yi <- target[ij[,1]]; yj <- target[ij[,2]]
+    # msk <- yi!=yj
+    # yi <- yi[msk]; yj <- yj[msk]
+    
+    # gathering cost values for predicted values
+    #browser()
+    #browser()
+    p <- torch_diag(c[target[ij[,1]]$squeeze(-1L), target[ij[,2]]$squeeze(-1L)])
+    # weighted loss
+    loss <- l$dot(p$squeeze(-1L))
+  } else {loss <- l$sum()}
+  
+}
+```
+
+
+
+```{r}
+nn_ordinal_regression_loss <- nn_module(
+  "nn_ordinal_regression_loss",
+  initialize = function(c=NULL){
+    self$c <- c
+  },
+  forward = function(input, target){
+    nnf_ordinal_regression_loss(input, target, c = self$c)
+  }
+  
+)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
