@@ -23,7 +23,7 @@ ae <- nn_module(
   
   initialize = function(feature_names,latent_dims=2L) {
     self$input_dropout <- nn_dropout()
-    
+    self$lambda <- nn_buffer(torch_tensor(0.01))
     self$encoder <- nn_sequential(
       nn_linear(in_features = length(feature_names), out_features = 512L),
       nn_relu(),
@@ -53,7 +53,7 @@ ae <- nn_module(
   
   loss = function(y_pred,y_true) {
     z2 <- torch_cat(list(y_pred$z,y_true),-1)
-    l <- nnf_mse_loss(y_pred$x,self$decoder(z2)) + y_pred$z$norm()/100
+    l <- nnf_mse_loss(y_pred$x,self$decoder(z2)) + y_pred$z$norm()*self$lambda
     l
   }
 )
@@ -63,8 +63,8 @@ model <- ae |>
   setup(optimizer = optim_adam) |>
   set_opt_hparams(lr=1e-4) |>
   set_hparams(colnames(x),latent_dims=3L) |>
-  fit(ml_ds, epochs=300L, dataloader_options=list(batch_size=256L,shuffle=TRUE),callbacks = list(
-    luz_callback(on_fit_begin=function(){luz_load_model_weights(ctx,"ae_last.luz")})(),
+  fit(ml_ds, epochs=5L, dataloader_options=list(batch_size=256L,shuffle=TRUE),callbacks = list(
+    # luz_callback(on_fit_begin=function(){luz_load_model_weights(ctx,"ae_last.luz")})(),
     luz_callback_model_checkpoint("ae_best.luz",monitor="train_loss",save_best_only=TRUE),
     luz_callback_model_checkpoint("ae_last.luz",monitor="train_loss")
   ))
