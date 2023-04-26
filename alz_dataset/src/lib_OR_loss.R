@@ -12,6 +12,7 @@ nnf_ordinal_regression_loss <- function(pred,target,c=NULL){
 
   if (!is.null(c)){
     # gathering the penalty
+    #browser()
     p <- torch_diag(c[target[ij[,1]]$squeeze(-1L), target[ij[,2]]$squeeze(-1L)])
     # weighted loss
     loss <- l$dot(p$squeeze(-1L))

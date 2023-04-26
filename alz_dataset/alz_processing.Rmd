@@ -119,14 +119,35 @@ test <- readRDS("data/test_50p.rds")
 ```
 
 
+
 ```{r}
-train_ds <- delayed_ds(x=t(logcounts(train)), y=as.integer(train$BraakStage))
+metaD <- data.frame(list(PatientID=c(seq(1:10)),
+                         age=c(50,60,71,72, 77, 87, 91, 72, 82, 82),
+                         PTI=c(13, 12, 12, 15, 4.9, 30, 50, 6.9, 6.7, 9)))
 ```
 
 
 ```{r}
-test_ds <- delayed_ds(t(logcounts(test)), as.integer(test$BraakStage))
+train$PatientID <- as.integer(train$PatientID)
+test$PatientID <- as.integer(test$PatientID)
+colData(train) <- DataFrame(dplyr::inner_join(dplyr::as_tibble(colData(train)), metaD))
+colData(test) <- DataFrame(dplyr::inner_join(dplyr::as_tibble(colData(test)), metaD))
+
+train$PatientID <- as.factor(train$PatientID)
+test$PatientID <- as.factor(test$PatientID)
+
+train$age <- as.factor(train$age)
+test$age <- as.factor(test$age)
 ```
+
+
+```{r}
+train_ds <- delayed_ds(x=t(logcounts(train)), y=as.integer(train$age))
+
+test_ds <- delayed_ds(x=t(logcounts(test)), y=as.integer(test$age))
+```
+
+
 
 
 
@@ -135,7 +156,8 @@ test_ds <- delayed_ds(t(logcounts(test)), as.integer(test$BraakStage))
 
 ```{r}
 scaling_factor <- function(ranks){
-  m_2 <- length(ranks)**2 
+  m_2 <- length(ranks)**2
+  #browser()
   m_sum <- sum(table(ranks)**2)
   (m_2-m_sum)*0.5
 }
@@ -148,11 +170,17 @@ sf <- scaling_factor(train_ds$y)
 ```{r}
 c <- torch_tensor(matrix(c(0,2,6, 2,0,4, 6,4,0), nrow = 3, ncol = 3,
        dimnames = list(c("1", "2", "3"),
-                       c("1", "2", "3"))), dtype = torch_long(), device = "cuda")
-c <- c/sf
+                       c("1", "2", "3"))), dtype = torch_float(), device = "cpu")
+
 ```
 
 
+```{r}
+cost_age <- matrix(rep(seq(1,8), 8), nrow = 8, ncol = 8, dimnames = list(c(seq(1,8)), c(seq(1,8)))) |>
+  dist(method = "maximum", diag = TRUE, upper = TRUE) |> 
+  as.matrix() |> 
+  torch_tensor(dtype = torch_float(), device="cuda")
+```
 
 
 
@@ -160,18 +188,22 @@ c <- c/sf
 
 
 
-```{r}
+```{r ordinal_classifier}
 ordinal_classifier <- nn_module(
   "ordinal_classifier",
-  initialize = function(class_names){
+  initialize = function(feature_names, class_names){
     #browser()
-    # self$feature_names
+    self$feature_names <- feature_names
+    self$class_names <- class_names
     self$layers <- nn_sequential(
       nn_dropout(),
-      nn_linear(in_features = 33694L, out_features = 3072L), nn_tanh(), 
+      nn_linear(in_features = length(self$feature_names), out_features = 3072L), nn_tanh(), 
       nn_linear(in_features = 3072L, out_features = 2048L), nn_relu(),
-      nn_linear(in_features = 2048L, out_features = 1024L), nn_relu(),
-      nn_linear(in_features = 1024L, out_features = 1L)
+      nn_dropout(),
+      nn_linear(in_features = 2048L, out_features = 1024L), nn_tanh(),
+      nn_dropout(),
+      nn_linear(in_features = 1024L, out_features = 128L), nn_relu(),
+      nn_linear(in_features = 128L, out_features = 1L)
     ) 
   },
   
@@ -183,38 +215,60 @@ ordinal_classifier <- nn_module(
 
 
 
-```{r}
-#torch_set_default_dtype(torch_float())
-fitted <- ordinal_classifier |>
+```{r braak_stage_model}
+fitted_stage <- ordinal_classifier |>
   setup(loss = nn_ordinal_regression_loss(c=c),
         optimizer = optim_adam) |>
+  set_hparams(feature_names=rownames(train),
+              class_names=train_ds$y) |>
   set_opt_hparams(weight_decay=.7) |>
   fit(train_ds,
-      epochs=10L,
+      epochs=100L,
       dataloader_options=list(batch_size=100L),
       valid_data=test_ds, verbose=TRUE,
       #, accelerator=accelerator(cpu = TRUE)
       # ,
-      callbacks=list(luz_callback_early_stopping(monitor="valid_loss", mode = "min", patience = 2))
+      callbacks=list(luz_callback_early_stopping(monitor="valid_loss", mode = "min", patience = 5))
+      )
+```
+
+
+```{r age_model}
+fitted_age <- ordinal_classifier |>
+  setup(loss = nn_ordinal_regression_loss(c = cost_age),
+        optimizer = optim_adam) |>
+  set_hparams(feature_names=rownames(train),
+              class_names=train_ds$y) |>
+  set_opt_hparams(weight_decay=1, lr=3e-4) |>
+  fit(train_ds,
+      epochs=100L,
+      dataloader_options=list(batch_size=100L),
+      valid_data=test_ds, verbose=TRUE,
+      # accelerator=accelerator(cpu = TRUE),
+      #,
+      #callbacks=list(luz_callback_early_stopping(monitor="valid_loss", mode = "min", patience = 5))
       )
 ```
 
 
 ```{r}
-luz_save(fitted, "models/model_OR_best_valid_loss.luz")
+luz_save(fitted_age, "models/model_OR_age_wo_sf_Arch4.luz")
 #fitted <- luz_load("models/model_OR_best_valid_loss.luz")
 ```
 
 
 
 ```{r}
-plot(fitted)
+plot(fitted_age)
 ```
 
 
 ```{r}
-model <- ordinal_classifier |> setup(loss = nn_ordinal_regression_loss(c=c), optimizer = optim_adam)
-rates_and_losses <- model |> lr_finder(train_ds)
+rates_and_losses <- ordinal_classifier |> 
+  setup(loss = nn_ordinal_regression_loss(c=cost_age), optimizer = optim_adam) |>
+  set_hparams(feature_names=rownames(train),
+              class_names=train_ds$y) |>
+  lr_finder(train_ds, start_lr = 1e-4, end_lr = 1e-3, steps = 200)
 
 rates_and_losses |> plot()
 ```
@@ -240,7 +294,7 @@ table(train[grep("*Exc.*", train$clusterAssignment), ]$clusterAssignment, train[
 
 
 ```{r}
-plotColData(test, "clusterCellType", "pred", color_by = "BraakStage")
+#plotColData(test, "clusterCellType", "pred", color_by = "BraakStage")
 
 ggcells(test, aes(x=pred, y=clusterCellType, fill=BraakStage)) + geom_boxplot() + facet_wrap(~BrainRegion, nrow =1)
 
