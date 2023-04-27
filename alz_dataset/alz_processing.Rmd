@@ -13,6 +13,10 @@ library(scran)
 library(DelayedArray)
 
 pacman::p_load(torch, luz)
+
+source("src/lib_OR_loss.R")
+
+set.seed(12)
 ```
 
 \# mse loss | marginrankingloss
@@ -24,7 +28,6 @@ s <- readRDS("data/sce.SFG.scAlign.assigned.rds")
 
 sce_merged <- cbind(e,s)
 ```
-
 
 ```{r}
 bp <-BiocParallel::MulticoreParam(workers = 10)
@@ -38,124 +41,52 @@ sce_merged <- runUMAP(sce_merged, name = "UMAP_merged", n_threads=10)
 
 
 ```{r}
-plotReducedDim(sce_merged, dimred = "UMAP_merged",colour_by="source")
-```
-
-# Scoring markers by pairwise comparisons
-
-```{r}
-# marker information per cluster
-marker_info <- scoreMarkers(sce_merged, sce_merged$seurat.clusters)
+plotReducedDim(sce_merged, dimred = "UMAP_merged",colour_by="BrainRegion")
 ```
 
 
-```{r}
-nrow(marker_info[[1]]); nrow(marker_info[[2]])
-```
-
+## Train - test splitting
 
 ```{r}
-# selecting cluster 1
-chosen <- marker_info[[1]]
-chosen <- chosen[order(chosen$mean.AUC, decreasing = TRUE), ]
-```
-
-
-
-```{r}
-plotExpression(sce_merged, features = head(rownames(chosen)), x = "seurat.clusters", colour_by = "seurat.clusters")
-```
-
-
-
-# Model
-
-
-
-
-```{r}
-ordinal_classifier <- nn_module(
-  "ordinal_classifier",
-  initialize = function(){
-    #browser()
-    # self$gene_names
-    self$layers <- nn_sequential(
-      nn_dropout(),
-      nn_linear(in_features = 33694L, out_features = 3072L), nn_tanh(), 
-      nn_linear(in_features = 3072L, out_features = 2048L), nn_relu(),
-      nn_linear(in_features = 2048L, out_features = 1024L), nn_relu(),
-      nn_linear(in_features = 1024L, out_features = 1L)
-    ) 
-  },
-  
-  forward = function(x){
-    x |> self$layers()
-  }
-)
-```
-
-
-
-```{r}
-#torch_set_default_dtype(torch_float())
-fitted <- ordinal_classifier |>
-  setup(loss = nn_ordinal_regression_loss(c=c),
-        optimizer = optim_adam) |>
-  #set_opt_hparams(lr=1) |>
-  fit(train_ds,
-      epochs=5L,
-      dataloader_options=list(batch_size=100L),
-      valid_data=test_ds
-      #, accelerator=accelerator(cpu = TRUE)
-      # ,
-      # callbacks=list(luz_callback_model_checkpoint("models/model_stage_class_best_valid_acc.luz", monitor="valid_acc", mode = "max",
-      #                                              save_best_only=TRUE),
-      # luz_callback_model_checkpoint("models/model_stage_class_best_train_acc.luz", monitor="train_acc", mode = "max", save_best_only=TRUE))
-      )
-```
-
-
-
-```{r}
-plot(fitted)
-```
-
-
-```{r}
-model <- ordinal_classifier |> setup(loss = nn_ordinal_regression_loss(c=c), optimizer = optim_adam)
-rates_and_losses <- model |> lr_finder(train_ds)
-
-rates_and_losses |> plot()
-```
-
-
-
-```{r}
-y_hat <- predict(fitted, test_ds)
-
-boxplot(as_array(y_hat$to(device="cpu")) ~ test_ds$y)
-```
-
-
-
-```{r}
-#luz_save(fitted, "models/ord_class_OR_loss.luz")
-```
-
-
-
-
-## Data prep
-
-```{r}
-sce_sampled <- sce_merged[, sample(seq(1:dim(sce_merged)[2]), size = 10e3)]
+sce_sampled <- sce_merged[, sample(seq(1:dim(sce_merged)[2]), size = dim(sce_merged)[2]*0.5)]
 
 train <- sce_sampled[, sample(seq(1:dim(sce_sampled)[2]), size = dim(sce_sampled)[2]*.7)]
 test <- sce_sampled[, !colnames(sce_sampled) %in% colnames(train)]
 
 ```
 
+```{r}
+saveRDS(train, "data/train_50p.rds")
+saveRDS(test, "data/test_50p.rds")
+```
 
+
+```{r}
+plotReducedDim(train, dimred = "UMAP_merged",colour_by="BraakStage")
+```
+
+```{r}
+plotReducedDim(test, dimred = "UMAP_merged",colour_by="BraakStage")
+```
+
+
+```{r}
+table(train$BrainRegion) ; table(train$BraakStage)
+table(test$BrainRegion) ; table(test$BraakStage)
+table(train$BraakStage,train$clusterCellType)
+```
+
+
+```{r save_rds}
+# saveRDS(train, "data/train_set_7000.rds")
+# saveRDS(test, "data/test_set_3000.rds")
+```
+
+
+
+
+
+## Torch import
 
 ```{r prados_delayed_ds}
 
@@ -182,50 +113,51 @@ delayed_ds <- dataset(
 ```
 
 
-
 ```{r}
-train_ds <- delayed_ds(x=t(logcounts(train)), y=as.integer(train$BraakStage))
-```
-
-
-```{r}
-test_ds <- delayed_ds(t(logcounts(test)), as.integer(test$BraakStage))
-```
-
-
-
-## Loss function
-
-
-```{r}
-pred <- torch_tensor(as.numeric(train$BraakStage[1:10]))
-target <- torch_tensor(as.numeric(train$BraakStage[5:14]))
-```
-
-
-```{r}
-ij <- torch_combinations(torch_arange(1,length(pred), dtype = torch_long()))
-```
-
-
-
-
-```{r}
-l <- nnf_margin_ranking_loss(input1 = pred[ij[,1]], input2= pred[ij[,2]], target = sign(target[ij[,1]] - target[ij[,2]]),reduction = "none",margin = 1)
-
-m <- cbind(as_array(ij), as_array(pred[ij[,1]]), as_array(pred[ij[,2]]),as_array(target[ij[,1]]) ,as_array(target[ij[,2]]) ,as_array(l))
+train <- readRDS("data/train_50p.rds")
+test <- readRDS("data/test_50p.rds")
 ```
 
 
 
 ```{r}
-m <- torch_tensor(m[-which(m[,5]==m[,6]),], dtype = torch_long())
+metaD <- data.frame(list(PatientID=c(seq(1:10)),
+                         age=c(50,60,71,72, 77, 87, 91, 72, 82, 82),
+                         PTI=c(13, 12, 12, 15, 4.9, 30, 50, 6.9, 6.7, 9)))
 ```
+
+
+```{r}
+train$PatientID <- as.integer(train$PatientID)
+test$PatientID <- as.integer(test$PatientID)
+colData(train) <- DataFrame(dplyr::inner_join(dplyr::as_tibble(colData(train)), metaD))
+colData(test) <- DataFrame(dplyr::inner_join(dplyr::as_tibble(colData(test)), metaD))
+
+train$PatientID <- as.factor(train$PatientID)
+test$PatientID <- as.factor(test$PatientID)
+
+train$age <- as.factor(train$age)
+test$age <- as.factor(test$age)
+```
+
+
+```{r}
+train_ds <- delayed_ds(x=t(logcounts(train)), y=as.integer(train$age))
+
+test_ds <- delayed_ds(x=t(logcounts(test)), y=as.integer(test$age))
+```
+
+
+
+
+
+## Cost matrix
 
 
 ```{r}
 scaling_factor <- function(ranks){
-  m_2 <- length(ranks)**2 
+  m_2 <- length(ranks)**2
+  #browser()
   m_sum <- sum(table(ranks)**2)
   (m_2-m_sum)*0.5
 }
@@ -238,60 +170,157 @@ sf <- scaling_factor(train_ds$y)
 ```{r}
 c <- torch_tensor(matrix(c(0,2,6, 2,0,4, 6,4,0), nrow = 3, ncol = 3,
        dimnames = list(c("1", "2", "3"),
-                       c("1", "2", "3"))), dtype = torch_long(), device = "cuda")
-c <- c/sf
+                       c("1", "2", "3"))), dtype = torch_float(), device = "cpu")
+
+```
+
+
+```{r}
+cost_age <- matrix(rep(seq(1,8), 8), nrow = 8, ncol = 8, dimnames = list(c(seq(1,8)), c(seq(1,8)))) |>
+  dist(method = "maximum", diag = TRUE, upper = TRUE) |> 
+  as.matrix() |> 
+  torch_tensor(dtype = torch_float(), device="cuda")
 ```
 
 
 
-```{r}
-p <- torch_diag(c[m[,c(4,6)][,1], m[,c(4,6)][,2]])
-```
+# Model
 
 
 
-```{r}
-nnf_ordinal_regression_loss <- function(pred,target,c=NULL){
-  # combinations
-  ij <- torch_combinations(torch_arange(1,length(pred)+1, dtype = torch_long()))
-  # margin ranking loss
-  l <- nnf_margin_ranking_loss(input1 = pred[ij[,1]]$squeeze(-1L),
-                               input2= pred[ij[,2]]$squeeze(-1L),
-                               target = sign(target[ij[,1]] - target[ij[,2]])$squeeze(-1L),
-                               reduction = "none",margin = 1)
-  
-  if (!is.null(c)){
-    # removing equal predictions
-    # yi <- target[ij[,1]]; yj <- target[ij[,2]]
-    # msk <- yi!=yj
-    # yi <- yi[msk]; yj <- yj[msk]
-    
-    # gathering cost values for predicted values
+```{r ordinal_classifier}
+ordinal_classifier <- nn_module(
+  "ordinal_classifier",
+  initialize = function(feature_names, class_names){
     #browser()
-    #browser()
-    p <- torch_diag(c[target[ij[,1]]$squeeze(-1L), target[ij[,2]]$squeeze(-1L)])
-    # weighted loss
-    loss <- l$dot(p$squeeze(-1L))
-  } else {loss <- l$sum()}
-  
-}
-```
-
-
-
-```{r}
-nn_ordinal_regression_loss <- nn_module(
-  "nn_ordinal_regression_loss",
-  initialize = function(c=NULL){
-    self$c <- c
+    self$feature_names <- feature_names
+    self$class_names <- class_names
+    self$layers <- nn_sequential(
+      nn_dropout(),
+      nn_linear(in_features = length(self$feature_names), out_features = 3072L), nn_tanh(), 
+      nn_linear(in_features = 3072L, out_features = 2048L), nn_relu(),
+      nn_dropout(),
+      nn_linear(in_features = 2048L, out_features = 1024L), nn_tanh(),
+      nn_dropout(),
+      nn_linear(in_features = 1024L, out_features = 128L), nn_relu(),
+      nn_linear(in_features = 128L, out_features = 1L)
+    ) 
   },
-  forward = function(input, target){
-    nnf_ordinal_regression_loss(input, target, c = self$c)
-  }
   
+  forward = function(x){
+    x |> self$layers()
+  }
 )
 ```
 
+
+
+```{r braak_stage_model}
+fitted_stage <- ordinal_classifier |>
+  setup(loss = nn_ordinal_regression_loss(c=c),
+        optimizer = optim_adam) |>
+  set_hparams(feature_names=rownames(train),
+              class_names=train_ds$y) |>
+  set_opt_hparams(weight_decay=.7) |>
+  fit(train_ds,
+      epochs=100L,
+      dataloader_options=list(batch_size=100L),
+      valid_data=test_ds, verbose=TRUE,
+      #, accelerator=accelerator(cpu = TRUE)
+      # ,
+      callbacks=list(luz_callback_early_stopping(monitor="valid_loss", mode = "min", patience = 5))
+      )
+```
+
+
+```{r age_model}
+fitted_age <- ordinal_classifier |>
+  setup(loss = nn_ordinal_regression_loss(c = cost_age),
+        optimizer = optim_adam) |>
+  set_hparams(feature_names=rownames(train),
+              class_names=train_ds$y) |>
+  set_opt_hparams(weight_decay=1, lr=3e-4) |>
+  fit(train_ds,
+      epochs=100L,
+      dataloader_options=list(batch_size=100L),
+      valid_data=test_ds, verbose=TRUE,
+      # accelerator=accelerator(cpu = TRUE),
+      #,
+      #callbacks=list(luz_callback_early_stopping(monitor="valid_loss", mode = "min", patience = 5))
+      )
+```
+
+
+```{r}
+luz_save(fitted_age, "models/model_OR_age_wo_sf_Arch4.luz")
+#fitted <- luz_load("models/model_OR_best_valid_loss.luz")
+```
+
+
+
+```{r}
+plot(fitted_age)
+```
+
+
+```{r}
+rates_and_losses <- ordinal_classifier |> 
+  setup(loss = nn_ordinal_regression_loss(c=cost_age), optimizer = optim_adam) |>
+  set_hparams(feature_names=rownames(train),
+              class_names=train_ds$y) |>
+  lr_finder(train_ds, start_lr = 1e-4, end_lr = 1e-3, steps = 200)
+
+rates_and_losses |> plot()
+```
+
+
+
+```{r}
+y_hat <- predict(fitted, test_ds)
+
+boxplot(as_array(y_hat$to(device="cpu")) ~ test_ds$y)
+```
+
+
+
+
+```{r}
+test$pred<-as_array(y_hat$to(device="cpu"))
+```
+
+```{r}
+table(train[grep("*Exc.*", train$clusterAssignment), ]$clusterAssignment, train[grep("*Exc.*", train$clusterAssignment),]$BraakStage)
+```
+
+
+```{r}
+#plotColData(test, "clusterCellType", "pred", color_by = "BraakStage")
+
+ggcells(test, aes(x=pred, y=clusterCellType, fill=BraakStage)) + geom_boxplot() + facet_wrap(~BrainRegion, nrow =1)
+
+# Excitatory neurons
+ggcells(test[,grep("*Exc.*", test$clusterAssignment)], aes(x=pred, y=clusterAssignment, fill=BraakStage)) + geom_boxplot() + facet_wrap(~BrainRegion, nrow =1)
+
+ggcells(test, aes(x=pred, y=BrainRegion, fill=BraakStage)) + geom_boxplot()
+ggcells(test, aes(x=pred, y=clusterCellType, fill=BrainRegion)) + geom_boxplot() + facet_wrap(~PatientID+BraakStage)
+ggcells(test, aes(x=pred, y=PatientID, fill=BrainRegion)) + geom_boxplot() + facet_wrap(~BraakStage)
+```
+
+
+
+```{r}
+p1 <- plotReducedDim(test, dimred = "UMAP_merged",colour_by="BraakStage", size_by = "pred") +
+  scale_size_area(max_size = 2) + coord_equal()
+
+p2 <- plotReducedDim(test, dimred = "UMAP_merged",colour_by="BrainRegion", size_by = "pred") +
+  scale_size_area(max_size = 2) + coord_equal()
+
+gridExtra::grid.arrange(
+  p1, p2,
+  ncol=2
+)
+
+```
 
 
 
