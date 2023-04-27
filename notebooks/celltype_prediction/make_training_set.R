@@ -1,5 +1,3 @@
-#Sys.setenv(PYTORCH_ENABLE_MPS_FALLBACK=1)
-#Sys.getenv("PYTORCH_ENABLE_MPS_FALLBACK")
 
 
 source("notebooks/celltype_prediction/lib_cell_classifier.R")
@@ -31,7 +29,7 @@ make_celltype_ds <- function() {
   allen$source <- factor(allen$source)
   
   # Compute target labels to predict
-  allen$y_true <- paste(allen$class_label,allen$neighborhood_label,allen$subclass_label,sep=" --- ")
+  allen$y_true <- paste(allen$class_label,allen$neighborhood_label,allen$subclass_label,allen$cluster_label,sep=" --- ")
   allen$y_true <- factor(allen$y_true)
   stopifnot(all(!is.na(allen$y_true)))
 
@@ -47,9 +45,12 @@ make_celltype_ds <- function() {
   # Balance train and validation sets
   local({
     val_ds <- allen[,allen$mlset %in% "val"]
-    val_ds <- val_ds[,sample(seq(ncol(val_ds)),size = 3000,replace = TRUE,prob = 1/(1+table(val_ds$y_true,val_ds$source))[cbind(val_ds$y_true,val_ds$source)])]
+    val_ids <- splitAsList(colnames(val_ds),paste(val_ds$y_true,val_ds$source)) |>
+      lapply(sample,100,replace=TRUE) |>
+      unlist() |>
+      sample()
+    val_ds <- val_ds[,val_ids]
     table(val_ds$y_true,val_ds$source)
-    val_ds <- scuttle::logNormCounts(val_ds)
     val_ds <- val_ds[,sample(ncol(val_ds))]
     list(
       x = t(logcounts(val_ds)) |> as("Matrix"),
@@ -67,7 +68,6 @@ make_celltype_ds <- function() {
     #trn_ds <- trn_ds[rowMins(n)>0.01,]
     
     table(trn_ds$y_true,trn_ds$source)
-    trn_ds <- scuttle::logNormCounts(trn_ds)
     trn_ds <- trn_ds[,sample(ncol(trn_ds))]
     list(
       x = t(logcounts(trn_ds)) |> as("Matrix"),

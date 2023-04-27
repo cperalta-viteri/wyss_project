@@ -1,0 +1,144 @@
+---
+title: "Demo_wyss"
+author: "Peralta Christian"
+date: "2023-02-21"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+
+# Libraries
+
+```{r message=FALSE}
+library(SingleCellExperiment)
+```
+
+
+
+# Data Loading & SCE object creation
+
+To load the information contained on a h5 file, use `DropletUtils::read10xCounts()` because it handles automatically the loading of both mRNA data and ATAC data. `read10xCounts` returns a SCE object with all the information. Make sure to split the data so the object contains two separated experiments, one for `Gene Expression` and the other for epigenetics, `Peaks`.
+
+
+```{r}
+# Loading data
+sce <- DropletUtils::read10xCounts("data/muA/filtered_feature_bc_matrix.h5")
+# spitting by type, i.e. mRNA & ATAC sequencing and set the main experiment to transcriptomic
+sce <- splitAltExps(sce, rowData(sce)[, "Type"],ref="Gene Expression")
+# set row names as unique to avoid redundancy
+rownames(sce) <- make.unique(rowData(sce)$Symbol)
+# set colnames as the cell barcode
+colnames(sce) <- sce$Barcode
+```
+
+
+## Add HTO counts as an alternative experiment
+```{r}
+altExp(sce, "hto") <- local({
+  hto <- DropletUtils::read10xCounts("data/muA/muAh/raw_feature_bc_matrix.h5")
+  colnames(hto) <- hto$Barcode
+  hto <- hto[1:10, intersect(colnames(sce), colnames(hto))]
+  stopifnot(identical(colnames(hto),colnames(sce)))
+  SummarizedExperiment(list(counts=counts(hto)))
+})
+```
+
+
+
+
+# All-in-One
+
+```{r}
+source("src/lib_QC.R")
+```
+
+Another option is to call the holistic function `QC` which will handle everything for you. Just make sure to pass the appropriate parameters:
+
+- sce_objec is a SingleCellExperiment object containing your count matrix as main experiment.
+
+- organism, either "mouse" or "human", to target mitochondrial genes accordingly.
+
+- hto, either `TRUE` or `FALSE` according to whether you have HTO tags on your experiment.
+
+- methods, list of methods which can be passed to `GenerateCellHashingCalls()` to carry out demultiplexing.
+
+- project, character string indicating the subfolder where to store graphical outputs. As default it is set to "New_folder", generating the path `pdf/1-Loading/New_project`.
+
+- HTO_tag is a list containing the HTO tags one wants to keep.
+
+- filter_singlet, either `TRUE` or `FALSE` to whether keep solely cell barcodes identified as singlet or not.
+
+- mito_max, numeric value indicating the maximum cutoff for percentage of mitochondrial genes.
+
+- min_nfeatures, numeric value indicating the minimum cutoff for number of features in log10 scale.
+
+- normalization_method, method to choose as normalization strategy. The options are `logNorm`, `SCTransform` and `AnPearson`.
+
+- workers, set the number of CPU cores you would like to use. *Helpful for UMAP computation*.
+
+
+
+
+```{r warning=FALSE, message=FALSE, eval=FALSE} 
+sce_object <- QC(sce_object = sce,
+            organism = "mouse",
+            hto = TRUE,
+            methods = c("multiseq", "htodemux", "dropletutils"),
+            project = "test",
+            filter_singlet = FALSE,
+            mito_max = 15,
+            min_nfeatures = 200,
+            normalization_method = "logNorm",
+            seed = 12
+)
+```
+
+
+
+# Demo with GEO dataset GSE190012
+https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE213828 
+
+```{r}
+count_m <- read.delim("../notebooks/querying/geo_data/GSE213828/GSE213828_merged_counts.txt.gz")
+metaD <- read.delim("../notebooks/querying/geo_data/GSE213828/GSE213828_merged_sample_info.txt.gz",row.names = "qp_well_fq")
+
+demo_geo <- SingleCellExperiment(list(counts=data.matrix(count_m[,-1:-2])),
+                     rowData=count_m[,1:2],
+                     colData=metaD,mainExpName = "Gene Expression")
+rownames(demo_geo) <- make.unique(mcols(demo_geo)$gene_name)
+```
+
+
+
+
+```{r}
+demo_geo
+```
+
+
+
+```{r message=FALSE, warning=FALSE}
+demo_sce <- QC(sce_object = demo_geo,
+            organism = "mouse",
+            hto=FALSE,
+            project="demo_GSE213828",
+            HTO_tag=HTO_tag,
+            filter_singlet=FALSE,
+            mito_max=15,
+            min_nfeatures=200,
+            normalization_method="AnPearson",
+            seed=12,
+            workers = 16)
+```
+
+
+
+
+
+
+
+
