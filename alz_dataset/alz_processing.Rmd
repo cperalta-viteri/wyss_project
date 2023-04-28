@@ -15,18 +15,20 @@ library(DelayedArray)
 pacman::p_load(torch, luz)
 
 source("src/lib_OR_loss.R")
+source("src/lib_OR_torch_model.R")
+source("src/read_data.R")
 
 set.seed(12)
 ```
 
-\# mse loss | marginrankingloss
+# Importing Alzheimer data
 
 ```{r}
 
 e <- readRDS("data/sce.EC.scAlign.assigned.rds")
 s <- readRDS("data/sce.SFG.scAlign.assigned.rds")
 
-sce_merged <- cbind(e,s)
+sce_alz <- cbind(e,s)
 ```
 
 ```{r}
@@ -35,23 +37,33 @@ bp <-BiocParallel::MulticoreParam(workers = 10)
 
 
 ```{r}
-sce_merged <- runUMAP(sce_merged, name = "UMAP_merged", n_threads=10)
+sce_alz <- runUMAP(sce_alz, name = "UMAP_merged", n_threads=10)
 ```
-
 
 
 ```{r}
-plotReducedDim(sce_merged, dimred = "UMAP_merged",colour_by="BrainRegion")
+plotReducedDim(sce_alz, dimred = "UMAP_merged",colour_by="BrainRegion")
 ```
+
+
+```{r}
+sce_alz$PatientID <- as.integer(sce_alz$PatientID)
+
+colData(sce_alz) <- DataFrame(dplyr::inner_join(dplyr::as_tibble(colData(sce_alz)), metaD))
+sce_alz$PatientID <- as.factor(sce_alz$PatientID)
+
+sce_alz$age <- as.factor(sce_alz$age)
+```
+
 
 
 ## Train - test splitting
 
 ```{r}
-sce_sampled <- sce_merged[, sample(seq(1:dim(sce_merged)[2]), size = dim(sce_merged)[2]*0.5)]
+sce_alz <- sce_alz[, sample(seq(1:dim(sce_alz)[2]), size = dim(sce_alz)[2]*0.5)]
 
-train <- sce_sampled[, sample(seq(1:dim(sce_sampled)[2]), size = dim(sce_sampled)[2]*.7)]
-test <- sce_sampled[, !colnames(sce_sampled) %in% colnames(train)]
+train <- sce_alz[, sample(seq(1:dim(sce_alz)[2]), size = dim(sce_alz)[2]*.7)]
+test <- sce_alz[, !colnames(sce_alz) %in% colnames(train)]
 
 ```
 
@@ -86,32 +98,9 @@ table(train$BraakStage,train$clusterCellType)
 
 
 
-## Torch import
+# Torch import
 
-```{r prados_delayed_ds}
-
-delayed_ds <- dataset(
-  name = "sce_dataset",
- 
-  initialize = function(x,y) {
-    self$x <- x;self$y <- y
-    stopifnot(identical(length(y),nrow(x)))
-  },
- 
-  .length = function() {length(self$y)},
- 
-  .getbatch = function(index) { list(
-    x = torch_tensor(as.matrix(self$x[index, ,drop=FALSE]), torch_float()),
-    y = torch_tensor(as.matrix(self$y[index], ncol=1), torch_long())
-  )},
- 
-  .getitem = function(index) {
-    if (is.list(index)) {index <- unlist(index)}
-    self$.getbatch(index)
-  }
-)
-```
-
+## Alzheimer
 
 ```{r}
 train <- readRDS("data/train_50p.rds")
@@ -130,6 +119,7 @@ metaD <- data.frame(list(PatientID=c(seq(1:10)),
 ```{r}
 train$PatientID <- as.integer(train$PatientID)
 test$PatientID <- as.integer(test$PatientID)
+
 colData(train) <- DataFrame(dplyr::inner_join(dplyr::as_tibble(colData(train)), metaD))
 colData(test) <- DataFrame(dplyr::inner_join(dplyr::as_tibble(colData(test)), metaD))
 
@@ -148,6 +138,54 @@ test_ds <- delayed_ds(x=t(logcounts(test)), y=as.integer(test$age))
 ```
 
 
+
+## Schizophrenia
+
+```{r}
+scz <- read_scz()
+scz_sce <- SingleCellExperiment(assays=list(counts=assay(scz)))
+colData(scz_sce) <- colData(scz)
+scz_sce$donor.Age <- as.factor(scz_sce$donor.Age)
+
+scz_sce <- logNormCounts(scz_sce, BPPARAM=bp)
+scz_sce <- scz_sce[((counts(scz_sce)>0) |> rowMeans()) > 0.01]
+
+```
+
+
+
+```{r splitting_male_female}
+male_scz <- scz_sce[,scz_sce$donor.Gender=="M"]
+female_scz <- scz_sce[, scz_sce$donor.Gender=="F"]
+```
+
+
+
+```{r sampling_male_female}
+train_male <- male_scz[, sample(dim(male_scz)[2], size = dim(male_scz)[2]*0.7)]
+test_male <- male_scz[, !colnames(male_scz) %in% colnames(train_male)]
+
+train_female <- female_scz[, sample(dim(female_scz)[2], size = dim(female_scz)[2]*0.7)]
+test_female <- female_scz[, !colnames(female_scz) %in% colnames(train_female)]
+```
+
+
+```{r preparing_torch_Dataset}
+
+train_male_ds <- delayed_ds(t(logcounts(train_male)), as.integer(train_male$donor.Age))
+test_male_ds <- delayed_ds(t(logcounts(test_male)), as.integer(test_male$donor.Age))
+
+train_female_ds <- delayed_ds(t(logcounts(train_female)), as.integer(train_female$donor.Age))
+test_female_ds <- delayed_ds(t(logcounts(test_female)), as.integer(test_female$donor.Age))
+
+```
+
+
+```{r test_data_F&M}
+
+test_scz <- cbind(test_male, test_female)
+test_scz_ds <- delayed_ds(t(logcounts(test_scz)), as.integer(test_scz$donor.Age))
+```
 
 
 
@@ -168,51 +206,32 @@ sf <- scaling_factor(train_ds$y)
 
 
 ```{r}
-c <- torch_tensor(matrix(c(0,2,6, 2,0,4, 6,4,0), nrow = 3, ncol = 3,
+C_stage <- torch_tensor(matrix(c(0,2,6, 2,0,4, 6,4,0), nrow = 3, ncol = 3,
        dimnames = list(c("1", "2", "3"),
                        c("1", "2", "3"))), dtype = torch_float(), device = "cpu")
 
 ```
 
 
-```{r}
-cost_age <- matrix(rep(seq(1,8), 8), nrow = 8, ncol = 8, dimnames = list(c(seq(1,8)), c(seq(1,8)))) |>
-  dist(method = "maximum", diag = TRUE, upper = TRUE) |> 
+```{r cost_age_alzheimer}
+
+cost_age <- dist(levels(train_filtered$age), diag = TRUE, upper = TRUE)|> 
   as.matrix() |> 
   torch_tensor(dtype = torch_float(), device="cuda")
+
 ```
 
 
+```{r cost_age_schizophrenia}
 
-# Model
+cost_age <- dist(as.numeric(levels(scz_sce$donor.Age)), diag = TRUE,upper = TRUE) |>
+  as.matrix() |>
+  torch_tensor(dtype = torch_float(), device="cpu")
 
-
-
-```{r ordinal_classifier}
-ordinal_classifier <- nn_module(
-  "ordinal_classifier",
-  initialize = function(feature_names, class_names){
-    #browser()
-    self$feature_names <- feature_names
-    self$class_names <- class_names
-    self$layers <- nn_sequential(
-      nn_dropout(),
-      nn_linear(in_features = length(self$feature_names), out_features = 3072L), nn_tanh(), 
-      nn_linear(in_features = 3072L, out_features = 2048L), nn_relu(),
-      nn_dropout(),
-      nn_linear(in_features = 2048L, out_features = 1024L), nn_tanh(),
-      nn_dropout(),
-      nn_linear(in_features = 1024L, out_features = 128L), nn_relu(),
-      nn_linear(in_features = 128L, out_features = 1L)
-    ) 
-  },
-  
-  forward = function(x){
-    x |> self$layers()
-  }
-)
 ```
 
+
+# Model training
 
 
 ```{r braak_stage_model}
@@ -235,25 +254,55 @@ fitted_stage <- ordinal_classifier |>
 
 ```{r age_model}
 fitted_age <- ordinal_classifier |>
-  setup(loss = nn_ordinal_regression_loss(c = cost_age),
+  setup(loss = nn_ordinal_regression_loss(C = cost_age),
         optimizer = optim_adam) |>
-  set_hparams(feature_names=rownames(train),
-              class_names=train_ds$y) |>
-  set_opt_hparams(weight_decay=1, lr=3e-4) |>
-  fit(train_ds,
+  set_hparams(feature_names=rownames(train_male),
+              class_names=train_male_ds$y) |>
+  set_opt_hparams(weight_decay=.1, lr=1e-3) |>
+  fit(train_male_ds,
       epochs=100L,
-      dataloader_options=list(batch_size=100L),
-      valid_data=test_ds, verbose=TRUE,
+      dataloader_options=list(batch_size=1000L),
+      valid_data=test_male_ds, verbose=TRUE,
       # accelerator=accelerator(cpu = TRUE),
       #,
-      #callbacks=list(luz_callback_early_stopping(monitor="valid_loss", mode = "min", patience = 5))
+      callbacks=list(luz_callback_early_stopping(monitor="valid_loss", mode = "min", patience = 5),
+                     luz_callback(on_fit_begin=function(){luz_load_model_weights(ctx,"models/model_OR_age_scz_weights.luz")})())
       )
+
+model_join <- nn_join |>
+  setup(loss = nn_join_loss(nn_loss = nn_join_loss(nn_ordinal_regression_loss(C=cost_age))), optimizer = optim_adam) |>
+  set_hparams(ordinal_classifier(feature_names=rownames(train_male),class_names=levels(train_female$donor.Age))) |>
+  set_opt_hparams(weight_decay=.1, lr=1e-3) |>
+  fit(data=my_ds,
+      epochs=1L,
+      dataloader_options=list(batch_size=1000L),
+      accelerator=accelerator(cpu=TRUE)
+      )
+  
+
+my_ds <- join_ds(train_male_ds,train_female_ds)
+
+predictor <- nn_join(ordinal_classifier(feature_names=rownames(train_male),class_names=NULL))
+
+pred <- predictor(my_ds[1:5]$x)
+
+my_loss <- nn_join_loss(nn_ordinal_regression_loss(C=cost_age))
+
+my_loss(pred,my_ds[1:5]$y)
+
+```
+
+
+
+```{r}
+
 ```
 
 
 ```{r}
-luz_save(fitted_age, "models/model_OR_age_wo_sf_Arch4.luz")
-#fitted <- luz_load("models/model_OR_best_valid_loss.luz")
+luz_save(fitted_age, "models/model_OR_age_schizophrenia_full.luz")
+#fitted_age <- luz_load("models/model_OR_age_schizophrenia.luz")
+luz_save_model_weights(fitted_age, "models/model_OR_age_scz_weights.luz")
 ```
 
 
@@ -265,61 +314,171 @@ plot(fitted_age)
 
 ```{r}
 rates_and_losses <- ordinal_classifier |> 
-  setup(loss = nn_ordinal_regression_loss(c=cost_age), optimizer = optim_adam) |>
-  set_hparams(feature_names=rownames(train),
-              class_names=train_ds$y) |>
-  lr_finder(train_ds, start_lr = 1e-4, end_lr = 1e-3, steps = 200)
+  setup(loss = nn_ordinal_regression_loss(C=cost_age), optimizer = optim_adam) |>
+  set_hparams(feature_names=rownames(train_male),
+              class_names=train_male_ds$y) |>
+  lr_finder(train_male_ds)
 
 rates_and_losses |> plot()
 ```
 
 
+## Performance study
+
 
 ```{r}
-y_hat <- predict(fitted, test_ds)
+y_hat <- predict(fitted_age, test_scz_ds)
+test_scz$pred_age <- as_array(y_hat$to(device="cpu"))
+boxplot(as_array(y_hat$to(device="cpu")) ~ test_scz$donor.Age)
+```
 
-boxplot(as_array(y_hat$to(device="cpu")) ~ test_ds$y)
+
+```{r}
+ggcells(test_scz, aes(x=pred_age, y=paste(donor.Age,donor_id), fill=donor.Diagnosis)) + geom_boxplot()+ facet_wrap(~donor.Gender)
+```
+
+
+```{r}
+ggcells(test_scz, aes(x=donor.Age, y=pred_age)) +
+  geom_boxplot() +
+  stat_summary(aes(group=donor.Gender, color=donor.Gender), geom = "line")
 ```
 
 
 
 
 ```{r}
-test$pred<-as_array(y_hat$to(device="cpu"))
-```
-
-```{r}
-table(train[grep("*Exc.*", train$clusterAssignment), ]$clusterAssignment, train[grep("*Exc.*", train$clusterAssignment),]$BraakStage)
+# test$pred<-as_array(y_hat$to(device="cpu"))
 ```
 
 
 ```{r}
-#plotColData(test, "clusterCellType", "pred", color_by = "BraakStage")
+# table(train[grep("*Exc.*", train$clusterAssignment), ]$clusterAssignment, train[grep("*Exc.*", train$clusterAssignment),]$BraakStage)
+```
 
-ggcells(test, aes(x=pred, y=clusterCellType, fill=BraakStage)) + geom_boxplot() + facet_wrap(~BrainRegion, nrow =1)
+
+```{r boxplots_stage}
+
+# ggcells(test, aes(x=pred, y=clusterCellType, fill=BraakStage)) + geom_boxplot() + facet_wrap(~BrainRegion, nrow =1)
 
 # Excitatory neurons
-ggcells(test[,grep("*Exc.*", test$clusterAssignment)], aes(x=pred, y=clusterAssignment, fill=BraakStage)) + geom_boxplot() + facet_wrap(~BrainRegion, nrow =1)
+# ggcells(test[,grep("*Exc.*", test$clusterAssignment)], aes(x=pred, y=clusterAssignment, fill=BraakStage)) + geom_boxplot() + facet_wrap(~BrainRegion, nrow =1)
 
-ggcells(test, aes(x=pred, y=BrainRegion, fill=BraakStage)) + geom_boxplot()
-ggcells(test, aes(x=pred, y=clusterCellType, fill=BrainRegion)) + geom_boxplot() + facet_wrap(~PatientID+BraakStage)
-ggcells(test, aes(x=pred, y=PatientID, fill=BrainRegion)) + geom_boxplot() + facet_wrap(~BraakStage)
+# ggcells(test, aes(x=pred, y=BrainRegion, fill=BraakStage)) + geom_boxplot()
+# ggcells(test, aes(x=pred, y=clusterCellType, fill=BrainRegion)) + geom_boxplot() + facet_wrap(~PatientID+BraakStage)
+# ggcells(test, aes(x=pred, y=PatientID, fill=BrainRegion)) + geom_boxplot() + facet_wrap(~BraakStage)
+```
+
+
+```{r boxplots_age}
+# ggcells(test, aes(x=pred, y=PatientID)) + geom_boxplot()
+```
+
+
+
+
+
+# Transfer Learning
+
+
+```{r}
+y_hat <- predict_cells(logcounts(sce_alz), fitted_age)
+
+sce_alz$pred_age<-as_array(y_hat$to(device="cpu"))
+
 ```
 
 
 
 ```{r}
-p1 <- plotReducedDim(test, dimred = "UMAP_merged",colour_by="BraakStage", size_by = "pred") +
-  scale_size_area(max_size = 2) + coord_equal()
 
-p2 <- plotReducedDim(test, dimred = "UMAP_merged",colour_by="BrainRegion", size_by = "pred") +
-  scale_size_area(max_size = 2) + coord_equal()
+boxplot(sce_alz$pred_age ~ sce_alz$age)
 
-gridExtra::grid.arrange(
-  p1, p2,
-  ncol=2
-)
+# ggcells(scz_sce, aes(x=pred, y=paste(donor.Age,donor_id), fill=donor.Diagnosis)) + geom_boxplot()+ facet_wrap(~donor.Gender)
 
+ggcells(sce_alz, aes(x=pred_age, y=paste(age,PatientID), fill=BraakStage)) + geom_boxplot()
+
+ggcells(sce_alz, aes(x=pred_age, y=paste(age,PatientID), fill=BraakStage)) +
+  geom_boxplot() + facet_wrap(~BrainRegion)
+
+
+# ggcells(scz_sce, aes(x=donor.Age, y=pred)) + 
+#   geom_boxplot() +
+#   stat_summary(aes(group=donor.Gender, color=donor.Gender),geom = "line")
+
+ggcells(sce_alz, aes(x=age, y=pred_age)) + 
+  geom_boxplot() +
+  stat_summary(aes(group=BraakStage, color=BraakStage),geom = "line")
+
+ggcells(sce_alz, aes(x=age, y=pred_age)) + 
+  geom_boxplot() +
+  stat_summary(aes(group=BrainRegion, color=BrainRegion),geom = "line")
+```
+
+
+
+```{r}
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+# Feature Attribution
+
+## Age model
+
+```{r}
+fitted_age <- luz_load("models/model_OR_age_wo_sf_Arch4.luz")
+magnitudes <- torch_abs(fitted_age$model$layers[[2]]$parameters$weight)
+
+norm_magnitudes <- torch_div(magnitudes, magnitudes$sum(2, keepdim = TRUE)) |> 
+  torch_sum(dim = 1)
+
+norm_magnitudes <- as_array(norm_magnitudes$to(device = "cpu"))
+
+plot(sort(norm_magnitudes))
+
+#feature_importance <- order(as_array(norm_magnitudes$to(device = "cpu")), decreasing = TRUE)
+```
+
+
+```{r}
+rowData(train)$norm_magnitude <- norm_magnitudes
+```
+
+> length(norm_magnitudes[norm_magnitudes>0.35])
+> length(norm_magnitudes[norm_magnitudes<1e-6])
+
+
+```{r}
+train_filtered <- train[rowData(train)$norm_magnitude>0.3,]
+test_filtered <- test[rownames(test) %in% rownames(train_filtered),]
+```
+
+```{r}
+
+train_ds_filtered <- delayed_ds(x=t(logcounts(train_filtered)), y=as.integer(train_filtered$age))
+test_ds_filtered <- delayed_ds(x=t(logcounts(test_filtered)), y=as.integer(test_filtered$age))
+
+```
+
+
+```{r}
+test_filtered$pred<-as_array(y_hat$to(device="cpu"))
+```
+
+
+```{r}
+ggcells(test_filtered, aes(x=pred, y=paste(age, PatientID))) + geom_boxplot()
 ```
 
 
@@ -333,22 +492,7 @@ gridExtra::grid.arrange(
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# wtv
 
 
 
