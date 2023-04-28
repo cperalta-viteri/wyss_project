@@ -270,25 +270,26 @@ fitted_age <- ordinal_classifier |>
       )
 
 model_join <- nn_join |>
-  setup(loss = nn_join_loss(nn_loss = nn_join_loss(nn_ordinal_regression_loss(C=cost_age))), optimizer = optim_adam) |>
+  setup(loss = nn_join_loss(nn_loss = nn_ordinal_regression_loss(C=cost_age)),
+        optimizer = optim_adam) |>
   set_hparams(ordinal_classifier(feature_names=rownames(train_male),class_names=levels(train_female$donor.Age))) |>
   set_opt_hparams(weight_decay=.1, lr=1e-3) |>
   fit(data=my_ds,
       epochs=1L,
       dataloader_options=list(batch_size=1000L),
-      accelerator=accelerator(cpu=TRUE)
+      #accelerator=accelerator(cpu=TRUE)
       )
   
 
-my_ds <- join_ds(train_male_ds,train_female_ds)
-
-predictor <- nn_join(ordinal_classifier(feature_names=rownames(train_male),class_names=NULL))
-
-pred <- predictor(my_ds[1:5]$x)
-
-my_loss <- nn_join_loss(nn_ordinal_regression_loss(C=cost_age))
-
-my_loss(pred,my_ds[1:5]$y)
+# my_ds <- join_ds(train_male_ds,train_female_ds)
+# 
+# predictor <- nn_join(ordinal_classifier(feature_names=rownames(train_male),class_names=NULL))
+# 
+# pred <- predictor(my_ds[1:5]$x)
+# 
+# my_loss <- nn_join_loss(nn_ordinal_regression_loss(C=cost_age))
+# 
+# my_loss(pred,my_ds[1:5]$y)
 
 ```
 
