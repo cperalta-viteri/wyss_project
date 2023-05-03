@@ -19,6 +19,7 @@ source("src/lib_OR_torch_model.R")
 source("src/read_data.R")
 
 set.seed(12)
+bp <-BiocParallel::MulticoreParam(workers = 10)
 ```
 
 # Importing Alzheimer data
@@ -31,18 +32,15 @@ s <- readRDS("data/sce.SFG.scAlign.assigned.rds")
 sce_alz <- cbind(e,s)
 ```
 
+
+
 ```{r}
-bp <-BiocParallel::MulticoreParam(workers = 10)
+#sce_alz <- runUMAP(sce_alz, name = "UMAP_merged", n_threads=10)
 ```
 
 
 ```{r}
-sce_alz <- runUMAP(sce_alz, name = "UMAP_merged", n_threads=10)
-```
-
-
-```{r}
-plotReducedDim(sce_alz, dimred = "UMAP_merged",colour_by="BrainRegion")
+#plotReducedDim(sce_alz, dimred = "UMAP_merged",colour_by="BrainRegion")
 ```
 
 
@@ -182,11 +180,18 @@ test_female_ds <- delayed_ds(t(logcounts(test_female)), as.integer(test_female$d
 
 
 ```{r test_data_F&M}
-
+# used for prediction
 test_scz <- cbind(test_male, test_female)
 test_scz_ds <- delayed_ds(t(logcounts(test_scz)), as.integer(test_scz$donor.Age))
 ```
 
+
+```{r valid_list_dataset}
+# torch training
+scz_train_lds <- join_ds(train_male_ds,train_female_ds)
+# used for torch validation
+scz_valid_lds <- join_ds(test_male_ds, test_female_ds)
+```
 
 
 ## Cost matrix
@@ -226,7 +231,7 @@ cost_age <- dist(levels(train_filtered$age), diag = TRUE, upper = TRUE)|>
 
 cost_age <- dist(as.numeric(levels(scz_sce$donor.Age)), diag = TRUE,upper = TRUE) |>
   as.matrix() |>
-  torch_tensor(dtype = torch_float(), device="cpu")
+  torch_tensor(dtype = torch_float(), device="cuda")
 
 ```
 
@@ -268,16 +273,21 @@ fitted_age <- ordinal_classifier |>
       callbacks=list(luz_callback_early_stopping(monitor="valid_loss", mode = "min", patience = 5),
                      luz_callback(on_fit_begin=function(){luz_load_model_weights(ctx,"models/model_OR_age_scz_weights.luz")})())
       )
+```
+
+```{r scz_age_model}
 
 model_join <- nn_join |>
   setup(loss = nn_join_loss(nn_loss = nn_ordinal_regression_loss(C=cost_age)),
         optimizer = optim_adam) |>
   set_hparams(ordinal_classifier(feature_names=rownames(train_male),class_names=levels(train_female$donor.Age))) |>
   set_opt_hparams(weight_decay=.1, lr=1e-3) |>
-  fit(data=my_ds,
-      epochs=1L,
+  fit(data=scz_train_lds,
+      epochs=100L,
       dataloader_options=list(batch_size=1000L),
-      #accelerator=accelerator(cpu=TRUE)
+      # accelerator=accelerator(cpu=TRUE),
+      valid_data=scz_valid_lds, verbose=TRUE,
+      callbacks=list(luz_callback_early_stopping(monitor="valid_loss", mode = "min", patience = 5))
       )
   
 
@@ -301,15 +311,15 @@ model_join <- nn_join |>
 
 
 ```{r}
-luz_save(fitted_age, "models/model_OR_age_schizophrenia_full.luz")
-#fitted_age <- luz_load("models/model_OR_age_schizophrenia.luz")
-luz_save_model_weights(fitted_age, "models/model_OR_age_scz_weights.luz")
+luz_save(model_join, "models/model_OR_age_schizophrenia_join.luz")
+model_join <- luz_load("models/model_OR_age_schizophrenia_join.luz")
+#luz_save_model_weights(fitted_age, "models/model_OR_age_scz_weights.luz")
 ```
 
 
 
 ```{r}
-plot(fitted_age)
+plot(model_join)
 ```
 
 
@@ -328,7 +338,10 @@ rates_and_losses |> plot()
 
 
 ```{r}
-y_hat <- predict(fitted_age, test_scz_ds)
+y_hat <- predict(model_join, test_scz_ds,
+                 dataloader_options = list(batch_size=1000L)
+                 # ,callbacks = list(luz_callback(on_predict_end=function(){browser()})())
+                 )
 test_scz$pred_age <- as_array(y_hat$to(device="cpu"))
 boxplot(as_array(y_hat$to(device="cpu")) ~ test_scz$donor.Age)
 ```
@@ -383,7 +396,7 @@ ggcells(test_scz, aes(x=donor.Age, y=pred_age)) +
 
 
 ```{r}
-y_hat <- predict_cells(logcounts(sce_alz), fitted_age)
+y_hat <- predict_cells(logcounts(sce_alz), model_join)
 
 sce_alz$pred_age<-as_array(y_hat$to(device="cpu"))
 
