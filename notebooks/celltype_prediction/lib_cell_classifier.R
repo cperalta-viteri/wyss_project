@@ -110,25 +110,25 @@ torch_predict_cell_type <- function(N,model_file,ignore.case=FALSE) {
 }
 
 
-# 
-# DelayedArray_dataset <- dataset(
-#   name = "DelayedArray_dataset",
-#   initialize = function(arrays,dtypes) {
-#       self$arrays <- arrays
-#       self$dtypes <- dtypes
-#   },
-#   .length = function() {nrow(self$arrays[[1]])},
-#   .getbatch = function(index) {
-#       mapply(function(x,dtype) {
-#         x <- as.matrix(x[index,,drop=FALSE])
-#         torch_tensor(x,dtype = dtype)
-#       },self$arrays,self$dtypes)
-#   },
-#   .getitem = function(index) {
-#       if (is.list(index)) {index <- unlist(index)}
-#       self$.getbatch(index)
-#   }
-# )
+
+library(DelayedArray)
+sc_dataset <- dataset(
+  name = "DelayedArray_dataset",
+  initialize = function(x,y) {
+      self$x <- x
+      self$y <- y
+      stopifnot(identical(length(y),nrow(x)))
+  },
+  .length = function() {length(self$y)},
+  .getbatch = function(index) {list(
+        x = torch_tensor(as.matrix(self$x[index,,drop=FALSE]),torch_float()),
+        y = torch_tensor(self$y[index],torch_long())
+  )},
+  .getitem = function(index) {
+      if (is.list(index)) {index <- unlist(index)}
+      self$.getbatch(index)
+  }
+)
 
 
 
