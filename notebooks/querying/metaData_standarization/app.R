@@ -91,7 +91,7 @@ ui <- dashboardPage(
 
 server <- function(input, output) {
 
-  df <- eventReactive(input$in_go, {f <- get(input$in_file)})
+  #df <- eventReactive(input$in_go, {f <- get(input$in_file)})
 
   observeEvent(input$in_go, {
      f <- get(input$in_file)
@@ -114,7 +114,8 @@ server <- function(input, output) {
                 box(width = 7,
                     id="box_id",
                     title = "Dono ID",
-                    textInput(inputId = "in_id", label = "Type donor ID"),
+                    selectizeInput(inputId = "in_id", label = "Type donor ID",  choices=colnames(f),
+                                   options=list(create=TRUE)),
                     collapsible = FALSE
                     )
        ))
