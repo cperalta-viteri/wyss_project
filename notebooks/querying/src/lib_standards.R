@@ -11,13 +11,14 @@
 #           sex_female_value="f",
 #           organism="human")
 
+# metaD <- cbind(metaD, list("gender"=sample(c("m", "f"), nrow(metaD), replace = TRUE)))
+
 # rename column
 #colnames(df)[which(colnames(df)==l$sex_col)] <- "donor_sex"
 
 # map values
 # plyr::mapvalues(df$donor_sex, c(l$sex_male_value, l$sex_female_value), c("male", "female"))
 
-# metaD <- cbind(metaD, list("gender"=sample(c("m", "f"), nrow(metaD), replace = TRUE)))
 
 format_df <- function(fields, dataframe) {
   #browser()
@@ -47,6 +48,7 @@ format_df <- function(fields, dataframe) {
   colnames(output_df) <- columns
 
   f2 <- function(n, v){
+    if(v %in% c("NA", "na")) v <-NA
     output_df[n] <- v
     output_df
   }

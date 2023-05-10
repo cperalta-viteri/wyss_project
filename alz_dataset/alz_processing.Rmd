@@ -179,18 +179,18 @@ test_female_ds <- delayed_ds(t(logcounts(test_female)), as.integer(test_female$d
 ```
 
 
-```{r test_data_F&M}
-# used for prediction
-test_scz <- cbind(test_male, test_female)
-test_scz_ds <- delayed_ds(t(logcounts(test_scz)), as.integer(test_scz$donor.Age))
-```
-
-
 ```{r valid_list_dataset}
 # torch training
 scz_train_lds <- join_ds(train_male_ds,train_female_ds)
 # used for torch validation
 scz_valid_lds <- join_ds(test_male_ds, test_female_ds)
+```
+
+
+```{r test_data_F&M}
+# used for prediction
+test_scz <- cbind(test_male, test_female)
+test_scz_ds <- delayed_ds(t(logcounts(test_scz)), as.integer(test_scz$donor.Age))
 ```
 
 
@@ -257,7 +257,7 @@ fitted_stage <- ordinal_classifier |>
 ```
 
 
-```{r age_model}
+```{r alz_age_model}
 fitted_age <- ordinal_classifier |>
   setup(loss = nn_ordinal_regression_loss(C = cost_age),
         optimizer = optim_adam) |>
@@ -275,51 +275,61 @@ fitted_age <- ordinal_classifier |>
       )
 ```
 
+
+
+
+
 ```{r scz_age_model}
 
 model_join <- nn_join |>
   setup(loss = nn_join_loss(nn_loss = nn_ordinal_regression_loss(C=cost_age)),
         optimizer = optim_adam) |>
-  set_hparams(ordinal_classifier(feature_names=rownames(train_male),class_names=levels(train_female$donor.Age))) |>
+  set_hparams(ordinal_classifier(feature_names=rownames(train_male),
+                                 class_names=levels(train_female$donor.Age))) |>
   set_opt_hparams(weight_decay=.1, lr=1e-3) |>
   fit(data=scz_train_lds,
-      epochs=100L,
+      epochs=15L,
       dataloader_options=list(batch_size=1000L),
       # accelerator=accelerator(cpu=TRUE),
       valid_data=scz_valid_lds, verbose=TRUE,
       callbacks=list(luz_callback_early_stopping(monitor="valid_loss", mode = "min", patience = 5))
       )
-  
 
-# my_ds <- join_ds(train_male_ds,train_female_ds)
-# 
-# predictor <- nn_join(ordinal_classifier(feature_names=rownames(train_male),class_names=NULL))
-# 
-# pred <- predictor(my_ds[1:5]$x)
-# 
-# my_loss <- nn_join_loss(nn_ordinal_regression_loss(C=cost_age))
-# 
-# my_loss(pred,my_ds[1:5]$y)
+model_join$model$feature_names <- rownames(train_male)
 
+```
+
+```{r}
+model_join_filtered <- nn_join |>
+  setup(loss = nn_join_loss(nn_loss = nn_ordinal_regression_loss(C=cost_age)),
+        optimizer = optim_adam) |>
+  set_hparams(ordinal_classifier(feature_names=rownames(train_male_filtered),
+                                 class_names=levels(train_female_filtered$donor.Age))) |>
+  set_opt_hparams(weight_decay=.1, lr=1e-3) |>
+  fit(data=scz_train_filtered_lds,
+      epochs=100L,
+      dataloader_options=list(batch_size=1000L),
+      # accelerator=accelerator(cpu=TRUE),
+      valid_data=scz_valid_filtered_lds, verbose=TRUE,
+      callbacks=list(luz_callback_early_stopping(monitor="valid_loss", mode = "min", patience = 5))
+      )
+
+model_join_filtered$model$feature_names <- rownames(train_male_filtered)
 ```
 
 
 
 ```{r}
-
-```
-
-
-```{r}
-luz_save(model_join, "models/model_OR_age_schizophrenia_join.luz")
+luz_save(model_join_filtered, "models/model_OR_age_scz_join_v2DO_filtered.luz")
 model_join <- luz_load("models/model_OR_age_schizophrenia_join.luz")
+# model_join_filtered <- luz_load("models/model_OR_age_scz_join_v2DO_filtered.luz")
 #luz_save_model_weights(fitted_age, "models/model_OR_age_scz_weights.luz")
 ```
 
 
 
 ```{r}
-plot(model_join)
+plot(model_join_filtered)
 ```
 
 
@@ -338,26 +348,40 @@ rates_and_losses |> plot()
 
 
 ```{r}
-y_hat <- predict(model_join, test_scz_ds,
+y_hat <- predict(model_join_filtered, test_scz_filtered_ds,
                  dataloader_options = list(batch_size=1000L)
                  # ,callbacks = list(luz_callback(on_predict_end=function(){browser()})())
                  )
-test_scz$pred_age <- as_array(y_hat$to(device="cpu"))
-boxplot(as_array(y_hat$to(device="cpu")) ~ test_scz$donor.Age)
+test_scz_filtered$pred_age <- as_array(y_hat$to(device="cpu"))
+boxplot(as_array(y_hat$to(device="cpu")) ~ test_scz_filtered$donor.Age)
 ```
 
 
 ```{r}
-ggcells(test_scz, aes(x=pred_age, y=paste(donor.Age,donor_id), fill=donor.Diagnosis)) + geom_boxplot()+ facet_wrap(~donor.Gender)
+ggcells(test_scz_filtered, aes(x=pred_age, y=paste(donor.Age,donor_id), fill=donor.Diagnosis)) + 
+  geom_boxplot()+ facet_wrap(~donor.Gender)
 ```
 
 
 ```{r}
-ggcells(test_scz, aes(x=donor.Age, y=pred_age)) +
+ggcells(test_scz_filtered, aes(x=donor.Age, y=pred_age)) +
   geom_boxplot() +
   stat_summary(aes(group=donor.Gender, color=donor.Gender), geom = "line")
 ```
 
+
+```{r}
+pdf(file = "figures/scz_pred_new_dropout.pdf", width = 15, height = 10)
+
+ggcells(test_scz, aes(x=pred_age, y=paste(donor.Age,donor_id), fill=donor.Diagnosis)) + 
+  geom_boxplot()+ facet_wrap(~donor.Gender)
+
+ggcells(test_scz, aes(x=donor.Age, y=pred_age)) +
+  geom_boxplot() +
+  stat_summary(aes(group=donor.Gender, color=donor.Gender), geom = "line")
+
+dev.off()
+```
 
 
 
@@ -396,7 +420,8 @@ ggcells(test_scz, aes(x=donor.Age, y=pred_age)) +
 
 
 ```{r}
-y_hat <- predict_cells(logcounts(sce_alz), model_join)
+
+y_hat <- predict_cells(logcounts(sce_alz), model_join_filtered)
 
 sce_alz$pred_age<-as_array(y_hat$to(device="cpu"))
 
@@ -415,18 +440,20 @@ ggcells(sce_alz, aes(x=pred_age, y=paste(age,PatientID), fill=BraakStage)) + geo
 ggcells(sce_alz, aes(x=pred_age, y=paste(age,PatientID), fill=BraakStage)) +
   geom_boxplot() + facet_wrap(~BrainRegion)
 
+# Excitatory neurons
+ggcells(sce_alz[,grep("*Exc.*", sce_alz$clusterAssignment)], aes(x=pred_age, y=clusterAssignment, fill=BraakStage)) + geom_boxplot() + facet_wrap(~BrainRegion, nrow =1)
 
 # ggcells(scz_sce, aes(x=donor.Age, y=pred)) + 
 #   geom_boxplot() +
 #   stat_summary(aes(group=donor.Gender, color=donor.Gender),geom = "line")
 
-ggcells(sce_alz, aes(x=age, y=pred_age)) + 
-  geom_boxplot() +
-  stat_summary(aes(group=BraakStage, color=BraakStage),geom = "line")
-
-ggcells(sce_alz, aes(x=age, y=pred_age)) + 
-  geom_boxplot() +
-  stat_summary(aes(group=BrainRegion, color=BrainRegion),geom = "line")
+# ggcells(sce_alz, aes(x=age, y=pred_age)) + 
+#   geom_boxplot() +
+#   stat_summary(aes(group=BraakStage, color=BraakStage),geom = "line")
+# 
+# ggcells(sce_alz, aes(x=age, y=pred_age)) + 
+#   geom_boxplot() +
+#   stat_summary(aes(group=BrainRegion, color=BrainRegion),geom = "line")
 ```
 
 
@@ -451,8 +478,8 @@ ggcells(sce_alz, aes(x=age, y=pred_age)) +
 ## Age model
 
 ```{r}
-fitted_age <- luz_load("models/model_OR_age_wo_sf_Arch4.luz")
-magnitudes <- torch_abs(fitted_age$model$layers[[2]]$parameters$weight)
+# fitted_age <- luz_load("models/model_OR_age_wo_sf_Arch4.luz")
+magnitudes <- torch_abs(model_join$model$modules$module.layers.1$parameters$weight)
 
 norm_magnitudes <- torch_div(magnitudes, magnitudes$sum(2, keepdim = TRUE)) |> 
   torch_sum(dim = 1)
@@ -466,7 +493,8 @@ plot(sort(norm_magnitudes))
 
 
 ```{r}
-rowData(train)$norm_magnitude <- norm_magnitudes
+rowData(train_female)$norm_magnitude <- norm_magnitudes
+rowData(train_male)$norm_magnitude <- norm_magnitudes
 ```
 
 > length(norm_magnitudes[norm_magnitudes>0.35])
@@ -474,14 +502,48 @@ rowData(train)$norm_magnitude <- norm_magnitudes
 
 
 ```{r}
-train_filtered <- train[rowData(train)$norm_magnitude>0.3,]
-test_filtered <- test[rownames(test) %in% rownames(train_filtered),]
+train_female_filtered <- train_female[rowData(train_female)$norm_magnitude>0.4,]
+test_female_filtered <- test_female[rownames(test_female) %in% rownames(train_female_filtered),]
+
+dim(train_female_filtered); dim(test_female_filtered)
 ```
 
 ```{r}
+train_male_filtered <- train_male[rowData(train_male)$norm_magnitude>0.4,]
+test_male_filtered <- test_male[rownames(test_male) %in% rownames(train_male_filtered)]
 
-train_ds_filtered <- delayed_ds(x=t(logcounts(train_filtered)), y=as.integer(train_filtered$age))
-test_ds_filtered <- delayed_ds(x=t(logcounts(test_filtered)), y=as.integer(test_filtered$age))
+dim(train_male_filtered); dim(test_male_filtered)
+```
+
+
+```{r}
+
+train_F_ds_filtered <- delayed_ds(x=t(logcounts(train_female_filtered)), y=as.integer(train_female_filtered$donor.Age))
+test_F_ds_filtered <- delayed_ds(x=t(logcounts(test_female_filtered)), y=as.integer(test_female_filtered$donor.Age))
+
+train_M_ds_filtered <- delayed_ds(t(logcounts(train_male_filtered)), as.integer(train_male_filtered$donor.Age))
+test_M_ds_filtered <- delayed_ds(t(logcounts(test_male_filtered)), as.integer(test_male_filtered$donor.Age))
+```
+
+
+```{r }
+# torch training
+scz_train_filtered_lds <- join_ds(train_M_ds_filtered,train_F_ds_filtered)
+# used for torch validation
+scz_valid_filtered_lds <- join_ds(test_M_ds_filtered, test_F_ds_filtered)
+```
+
+
+```{r}
+# used for prediction
+test_scz_filtered <- cbind(test_male_filtered, test_female_filtered)
+test_scz_filtered_ds <- delayed_ds(t(logcounts(test_scz_filtered)), as.integer(test_scz_filtered$donor.Age))
+
+dim(test_scz_filtered_ds$x); length(test_scz_filtered_ds$y)
+```
+
+
+```{r}
 
 ```
 
