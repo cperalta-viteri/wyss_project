@@ -3,7 +3,42 @@
 
 
 library(torch)
+library(luz)
 
+
+
+#' Ordinal regression loss
+#' @param C a square 2D float tensor representing the cost matrix
+#' @param margin a scalar positive value
+nnf_ordinal_regression_loss <- function(pred,target,C,margin=1.0) {
+  pred <- pred$squeeze(-1L)
+  target <- target$squeeze(-1L)
+  stopifnot(pred$ndim == 1L)
+  stopifnot(target$ndim == 1L)
+  stopifnot(identical(ncol(C),nrow(C)))
+  
+  ij <- torch_combinations(torch_arange(1L,length(pred)+1L, dtype = torch_long()))
+  y <- target[ij]
+  l <- nnf_margin_ranking_loss(
+    input1 = pred[ij[,1L]], 
+    input2 = pred[ij[,2L]], 
+    target = sign(y[,1L] - y[,2L]),
+    reduction = "none",margin = margin
+  )
+  w <- torch_gather(C[y[,1L],],2L,y[,2L,drop=FALSE])$squeeze(-1L)
+  l$dot(w) / torch_maximum(sum(w!=0),1L)
+}
+
+
+nn_ordinal_regression_loss <- nn_module(
+  "nn_ordinal_regression_loss",
+  initialize = function(C) {
+    self$C <- C
+  },
+  forward = function(input, target){
+    nnf_ordinal_regression_loss(input, target, C = self$C)
+  }
+)
 
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -51,8 +86,8 @@ nn_linear_rescale <- nn_module(
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # Define an advanced model with layer1 scaling and pruning
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-advanced_cell_classifier <- nn_module(
-  "advanced_cell_classifier",
+cell_scorer <- nn_module(
+  "advanced_cell_scorer",
   
   initialize = function(feature_names,class_names,...) {
     self$feature_names <- feature_names
@@ -69,51 +104,18 @@ advanced_cell_classifier <- nn_module(
   },
   forward = function(x) {x |> self$input_dropout() |> self$layer1() |> self$layers()},
   loss = function(input,target) {nnf_multi_margin_loss(input,target)},
-  set_optimizers = function(lr1=1e-5,lr2=lr1) {list(
-  	  	l1 = optim_adam(self$layer1$parameters, lr = lr1,weight_decay=0.1),
-  		  l2 = optim_adam(self$layers$parameters, lr = lr2)
-  )},
-  compute_prune_mask = function(...) {self$layer1$compute_prune_mask()}
+  set_optimizers = function(weight_decay=0.1,...) {
+    optim_adam(self$layer1$parameters,weight_decay=weight_decay,...)
+  }
 )
 
 
 
-#' Predict cell type using given torch model
-#' @param N expression matrix, ideally log1p(RPM/100)/log(2) counts, but raw counts seems to work too
-#' @param model_file path to the file containng the model
-#' @param ignore.case if TRUE ignore case when aligning feature names (=gene names). It is useful for easy Human-Mouse gene-name matching.
-#' @return a prediction matrix giving each input cell a score for each cell type
-torch_predict_cell_type <- function(N,model_file,ignore.case=FALSE) {
-  # Load the model
-  model2 <- torch_load(model_file,device = "cpu")
-  
-  # Align the input matrix to desired matrix format, adding 0 when genes are missing
-  if (isTRUE(ignore.case)) {
-    i <- match(toupper(model2$feature_names),toupper(rownames(N)),nomatch = 0)  
-  } else {
-    i <- match(model2$feature_names,rownames(N),nomatch = 0)  
-  }
-  stopifnot(mean(i>0)>=0.2) # check that 20% of model genes are in the input matrix
-  m <- rbind(N[1,,drop=FALSE]*0,N)[i+1,]
-  
-  # Compute prediction by batch of 128 cells
-  f <- factor((seq(ncol(m))-1L) %/% 128L)
-  P <- lapply(levels(f),function(i) {
-    model2(torch_tensor(as.matrix(t(m[,f==i,drop=FALSE]))))
-  })
-  
-  # Concatenate prediction and return
-  P <- torch_cat(P)
-  P <- as_array(P)
-  colnames(P) <- model2$class_names
-  P  
-}
-
 
 
 library(DelayedArray)
-sc_dataset <- dataset(
-  name = "DelayedArray_dataset",
+delayed_dataset <- dataset(
+  name = "delayed_dataset",
   initialize = function(x,y) {
       self$x <- x
       self$y <- y
@@ -130,6 +132,31 @@ sc_dataset <- dataset(
   }
 )
 
+
+
+#' Predict cell type using given torch model
+#' @param N expression matrix, ideally log1p(RPM/100)/log(2) counts, but raw counts seems to work too
+#' @param model_file path to the file containng the model
+#' @param ignore.case if TRUE ignore case when aligning feature names (=gene names). It is useful for easy Human-Mouse gene-name matching.
+#' @return a prediction matrix giving each input cell a score for each cell type
+predict_delayed <- function(N,luz_model,ignore.case=FALSE) {
+  # Align the input matrix to desired matrix format, adding 0 when genes are missing
+  if (isTRUE(ignore.case)) {
+    i <- match(toupper(luz_model$model$feature_names),toupper(rownames(N)),nomatch = 0)  
+  } else {
+    i <- match(luz_model$model$feature_names,rownames(N),nomatch = 0)  
+  }
+  stopifnot(mean(i>0)>=0.2) # check that 20% of model genes are in the input matrix
+  m <- rbind(N[1,,drop=FALSE]*0,N)[i+1,]
+  
+  # Compute prediction by batch
+  pred <- predict(
+    luz_model,
+    delayed_dataset(t(m),rep(1L,ncol(m))),
+    dataloader_options = list(batch_size=4096L)
+  )
+  pred
+}
 
 
 
