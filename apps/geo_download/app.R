@@ -1,6 +1,6 @@
 
 library(shiny)
-#library(shinyWidgets)
+library(shinyWidgets)
 library(bs4Dash)
 library(rentrez)
 
@@ -34,11 +34,7 @@ ui <- dashboardPage(
       fluidRow(
         box(width = 12,
           title = "Query",
-          selectInput(
-            inputId = "query_org",
-            label = "Organism",
-            choices = c("Mus musculus", "Homo sapiens")
-          ),
+          pickerInput("query_org",label="Organism",choices=c("Mus musculus", "Homo sapiens"),multiple = FALSE),
           textInput(
             inputId = "query_text",
             label = "Query Text",
