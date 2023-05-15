@@ -34,16 +34,6 @@ standard_fields <- list(
 
 
 caseWhenItemInput <- function(id,incol_choices=NULL,inval_choices=NULL,targetval_choices=NULL) {
-  
-  tags$table(
-    tags$tr(width = "100%",
-            tags$td(width = "60%", div(style = "font-size:10px;", "This is label1. I want all labels on left")),
-            tags$td(width = "40%", textInput(inputId = "a", label = NULL))),
-    tags$tr(width = "100%",
-            tags$td(width = "60%", tags$div(style = "font-size:10pX;", "label2")),
-            tags$td(width = "40%", textInput(inputId = "b", label = NULL)))
-  )
-  
   tags$table(
     tags$tr(
       width = "100%",
@@ -137,7 +127,7 @@ server <- function(input, output, session) {
         collapsible = TRUE,
         width = 12,
         rules,
-        actionButton(paste0("rule_",fn,"_add"),"+"),
+        actionButton(paste0("rule_",fn,"_add"),"Add rule"),
         textInput(paste0("rule_",fn,"_default"),"default value")
       )
     })
