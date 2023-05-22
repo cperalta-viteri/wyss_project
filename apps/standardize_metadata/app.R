@@ -82,16 +82,28 @@ server <- function(input, output, session) {
   observeEvent(input$rule_add,{
     x <- isolate(cwf())
     x$rules[[length(x$rules) + 1L]] <- case_when_item()
+    print("add")
     cwf(x)
   })
 
   output$fields <- renderUI({
       rules <- lapply(seq_along(cwf()$rules),function(i) {
         rule_id <- paste0("rule_",i)
+        
+        # When "_incol" change => update _inval
         observeEvent(input[[paste0(rule_id,"_incol")]],{
           choices <- unique(as.character(input_df()[[input[[paste0(rule_id,"_incol")]]]]))
           updatePickerInput(session,paste0(rule_id,"_inval"),choices = choices)
         })
+        
+        # When the "_rm" button is pressed
+        # observeEvent(input[[paste0(rule_id,"_rm")]],{
+        #   print("rm")
+        #   print(i)
+        #   x <- isolate(cwf())
+        #   x$rules <- x$rules[-i]
+        #   cwf(x)
+        # })
         
         caseWhenItemInput(
           rule_id,

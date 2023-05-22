@@ -38,7 +38,7 @@ caseWhenItemInput <- function(id,incol_choices=NULL,inval_choices=NULL,targetval
             "in",
             pickerInput(paste0(id,"_inval"),choices = inval_choices,inline = TRUE,multiple = TRUE, options = pickerOptions(style="label label-info")),
             "then",
-            pickerInput(paste0(id,"_targetval"),choices=targetval_choices,inline = TRUE)
+            selectizeInput(paste0(id,"_targetval"),label=NULL,choices=targetval_choices,options = list(create=TRUE))
           )  
         ),
         conditionalPanel(
@@ -48,7 +48,7 @@ caseWhenItemInput <- function(id,incol_choices=NULL,inval_choices=NULL,targetval
       ),
       tags$td(
         actionButton(paste0(id,"_up"),icon("circle-arrow-up")),
-        actionButton(paste0(id,"_up"),icon("circle-arrow-down")),
+        actionButton(paste0(id,"_dn"),icon("circle-arrow-down")),
         actionButton(paste0(id,"_rm"),icon("trash"))
       )
     )
