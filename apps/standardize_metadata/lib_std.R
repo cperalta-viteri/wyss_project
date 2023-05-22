@@ -6,7 +6,7 @@ library(bs4Dash)
 
 
 
-case_when_item <- function(type=c("in","text"),incol=NULL,inval=NULL,targetval=NULL,text=NULL) {
+case_when_item <- function(type=c("when","text"),incol=NULL,inval=NULL,targetval=NULL,text=NULL) {
   type <- match.arg(type)
   list(
     type = type,
@@ -29,12 +29,11 @@ caseWhenItemInput <- function(id,incol_choices=NULL,inval_choices=NULL,targetval
   tags$table(
     tags$tr(
       width = "100%",
-      tags$td(pickerInput(paste0(id,"_type"),choices=c("in","text"),inline=TRUE)),
+      tags$td(pickerInput(paste0(id,"_type"),choices=c("when","text"),inline=TRUE)),
       tags$td(
         conditionalPanel(
-          condition = sprintf("input.%s_type == 'in'",id),
+          condition = sprintf("input.%s_type == 'when'",id),
           span(
-            "when",
             pickerInput(paste0(id,"_incol"),choices=incol_choices,inline = TRUE),
             "in",
             pickerInput(paste0(id,"_inval"),choices = inval_choices,inline = TRUE,multiple = TRUE, options = pickerOptions(style="label label-info")),
@@ -48,7 +47,9 @@ caseWhenItemInput <- function(id,incol_choices=NULL,inval_choices=NULL,targetval
         )
       ),
       tags$td(
-        actionButton(paste0(id,"_rm"),"remove")
+        actionButton(paste0(id,"_up"),icon("circle-arrow-up")),
+        actionButton(paste0(id,"_up"),icon("circle-arrow-down")),
+        actionButton(paste0(id,"_rm"),icon("trash"))
       )
     )
   )
