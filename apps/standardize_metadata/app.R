@@ -70,34 +70,23 @@ server <- function(input, output, session) {
       filter(Sepal.Length>5)
   })
   
-  cwf <- reactiveValues()
-  
-  observeEvent(input$current_working_field_name,{cwf$name <- input$current_working_field_name})
+  # This reactive variable store the current working field (cwf)
+  cwf <- reactiveVal()
   
   # Copy selected field into cwf
-  observeEvent(cwf$name,{
-    for(nm in names(fields[[cwf$name]])) {
-      cwf[[nm]] <- fields[[cwf$name]][[nm]]
-    }
+  observeEvent(input$current_working_field_name,{
+      cwf(fields[[input$current_working_field_name]])
   })
-  
   
   # Add a rule at the end of the list
   observeEvent(input$rule_add,{
-    cwf$rules[[isolate(length(cwf$rules)) + 1L]] <- case_when_item()
+    x <- isolate(cwf())
+    x$rules[[length(x$rules) + 1L]] <- case_when_item()
+    cwf(x)
   })
-  
-  observeEvent(input$test_btn,{
-    print("test !")
-    for(nm in names(cwf)) {
-      cwf[[nm]] <- NULL
-    }
-    browser()
-  })
-  
 
   output$fields <- renderUI({
-      rules <- lapply(seq_along(cwf$rules),function(i) {
+      rules <- lapply(seq_along(cwf()$rules),function(i) {
         rule_id <- paste0("rule_",i)
         observeEvent(input[[paste0(rule_id,"_incol")]],{
           choices <- unique(as.character(input_df()[[input[[paste0(rule_id,"_incol")]]]]))
@@ -107,20 +96,11 @@ server <- function(input, output, session) {
         caseWhenItemInput(
           rule_id,
           incol_choices = colnames(input_df()),
-          targetval_choices = cwf$targetval_suggestions
+          targetval_choices = cwf()$targetval_suggestions
         )
       })
       rules
   })
-
-  # lapply(seq_along(cwf()$rules),function(i) {
-  #   rule_id <- paste0("rule_",i)
-  #   observeEvent(input[[paste0(rule_id,"_incol")]],{
-  #     print(rule_id)
-  #     updatePickerInput(paste0(rule_id,"_inval"),choices = unique(as.character(input_df()[[input[[paste0(rule_id,"_incol")]]]])))
-  #   })
-  # })
-  
   
   output$input_df <- renderDT(input_df())
   output$output_df <- renderDT(output_df())
