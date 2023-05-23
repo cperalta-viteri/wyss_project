@@ -175,22 +175,25 @@ e2 <- .add_qc_metrics(load_ABAMouseSSv4(dir))
 
 
 
-
-
-
 # Loading the data into R.
-saveRDS(getRowData(path), "1M_neurons_filtered_gene_bc_matrices_h5_rowData.rds")
-
-saveRDS(getColData(path), "1M_neurons_filtered_gene_bc_matrices_h5_colData.rds")
-
-# Converting into a `HDF5Matrix` object
-tenxmat <- TENxMatrix(path)
-
+saveRDS(rowData(e1), "ABAMouseTENx_rowData.rds")
+saveRDS(colData(e1), "ABAMouseTENx_colData.rds")
+saveRDS(reducedDims(e1), "ABAMouseTENx_reducedDims.rds")
 options(DelayedArray.block.size=1e9) # 1GB block size.
-mat.out <- writeHDF5Array(
-    tenxmat,
-    file="1M_neurons_filtered_gene_bc_matrices_h5_rectangular.h5",
-    name="counts",
-    chunkdim=beachmat::getBestChunkDims(dim(tenxmat))
+writeHDF5Array(
+  counts(e1),
+  file = "ABAMouseTENx_counts.h5",
+  name = "counts"
 )
+
+saveRDS(rowData(e2), "ABAMouseSSv4_rowData.rds")
+saveRDS(colData(e2), "ABAMouseSSv4_colData.rds")
+saveRDS(reducedDims(e2), "ABAMouseSSv4_reducedDims.rds")
+options(DelayedArray.block.size=1e9) # 1GB block size.
+writeHDF5Array(
+  counts(e2),
+  file = "ABAMouseSSv4_counts.h5",
+  name = "counts"
+)
+
 
