@@ -1,0 +1,1328 @@
+mouse_adult,mouse_developing,human_adult,human_developing
+root,Mus musculus,brain,neural plate
+Basic cell groups and regions,neural plate,gray matter,neural tube
+Cerebrum,forebrain,telencephalon,brain
+Cerebral cortex,secondary prosencephalon,cerebral cortex,forebrain (prosencephalon)
+Cortical plate,rostral secondary prosencephalon,frontal lobe,gray matter of forebrain
+Isocortex,preoptic telencephalon,anterior orbital gyrus,transient structures of forebrain
+"Frontal pole, cerebral cortex",preoptic roof plate,"anterior orbital gyrus, left",subpial granular zone
+"Frontal pole, layer 1",rostral septocommissural area,"anterior orbital gyrus, right",SG in frontal neocortex
+"Frontal pole, layer 2/3",ventricular zone of RSCom,frontal operculum,SG in frontal polar cortex
+"Frontal pole, layer 5",anterior commissure bed,"frontal operculum, left",SG in dorsomedial frontal cortex
+"Frontal pole, layer 6a",mantle zone of RSCom,"frontal operculum, right",SG in dorsolateral prefrontal cortex
+"Frontal pole, layer 6b","median preoptic nucleus, commissural part",frontal pole,SG in ventrolateral prefrontal cortex
+Somatomotor areas,preoptic alar plate,"frontal pole, left",SG in orbital frontal cortex
+"Somatomotor areas, Layer 1",preoptic area,"frontal pole, left, superior aspect",SG in posterior frontal cortex (motor cortex)
+"Somatomotor areas, Layer 2/3",ventricular zone of PO,"frontal pole, left, inferior aspect",SG in parietal neocortex
+"Somatomotor areas, Layer 5",mantle zone of PO,"frontal pole, left, medial aspect",SG in primary somatosensory cortex
+"Somatomotor areas, Layer 6a",lamina terminalis area,"frontal pole, right",SG in dorsomedial parietal cortex (area 7m)
+"Somatomotor areas, Layer 6b",ventricular zone of LTer,"frontal pole, right, superior aspect",SG in posterosuperior (dorsal) parietal cortex
+Primary motor area,mantle zone of LTer,"frontal pole, right, inferior aspect",SG in posteroinferior (ventral) parietal cortex
+"Primary motor area, Layer 1",periventricular stratum of the LTer,"frontal pole, right, medial aspect",SG in temporal neocortex
+"Primary motor area, Layer 2/3",vascular organ of the lamina terminalis,gyrus rectus,SG in dorsolateral temporal cortex
+"Primary motor area, Layer 5",intermediate stratum of the LTer,"gyrus rectus, left",SG in primary auditory cortex
+"Primary motor area, Layer 6a","median preoptic nucleus, intermediate part","gyrus rectus, right",SG in superolateral temporal cortex
+"Primary motor area, Layer 6b",superficial stratum of the LTer,inferior frontal gyrus,SG in polysensory temporal cortex
+Secondary motor area,"median preoptic nucleus, superficial part","inferior frontal gyrus, left",SG in parainsular temporal cortex
+"Secondary motor area, layer 1",first (dorsal) preoptic domain,"inferior frontal gyrus, right",SG in ventrolateral temporal cortex
+"Secondary motor area, layer 2/3",ventricular zone of PO1,"inferior frontal gyrus, opercular part",SG in midlateral temporal cortex
+"Secondary motor area, layer 5",mantle zone of PO1,"inferior frontal gyrus, opercular part, left",SG in inferolateral temporal cortex
+"Secondary motor area, layer 6a",periventricular stratum of PO1,"inferior frontal gyrus, opercular part, right",SG in midinferior temporal cortex
+"Secondary motor area, layer 6b",anteroventral periventricular preoptic nucleus,"inferior frontal gyrus, orbital part",SG in rostral midinferior temporal cortex (area 36)
+Somatosensory areas,dorsal septopreoptic nucleus,"inferior frontal gyrus, orbital part, left",SG in caudal midinferior temporal cortex (area TF)
+"Somatosensory areas, layer 1",intermediate stratum of PO1,"inferior frontal gyrus, orbital part, right",SG in posterior parahippocampal cortex
+"Somatosensory areas, layer 2/3",parastrial preoptic nucleus,"inferior frontal gyrus, triangular part",SG in medial temporal-occipital cortex
+"Somatosensory areas, layer 4","dorsomedial preoptic area, intermediate part","inferior frontal gyrus, triangular part, left",SG in lateral temporal-occipital cortex
+"Somatosensory areas, layer 5","lateral preoptic area, PO1 part","inferior frontal gyrus, triangular part, right",SG in temporal polar cortex
+"Somatosensory areas, layer 6a",superficial stratum of PO1,inferior rostral gyrus,SG in occipital neocortex
+"Somatosensory areas, layer 6b","dorsomedial preoptic area, superficial part","inferior rostral gyrus, left",SG in area prostriata
+Primary somatosensory area,second (ventral) preoptic domain,"inferior rostral gyrus, right",SG in primary visual cortex
+"Primary somatosensory area, layer 1",ventricular zone of PO2,lateral orbital gyrus,SG in extrastriate cortex
+"Primary somatosensory area, layer 2/3",mantle zone of PO2,"lateral orbital gyrus, left",SG in dorsomedial extrastriate cortex (V2)
+"Primary somatosensory area, layer 4",periventricular stratum of PO2,"lateral orbital gyrus, right",SG in ventromedial extrastriate cortex (VP)
+"Primary somatosensory area, layer 5",medial preoptic periventricular stratum,medial orbital gyrus,SG in midlateral extrastriate cortex (area 19)
+"Primary somatosensory area, layer 6a",medial preoptic nucleus,"medial orbital gyrus, left",SG in insular neocortex
+"Primary somatosensory area, layer 6b",lateral part of MPO,"medial orbital gyrus, right",SG in dysgranular insular cortex
+"Primary somatosensory area, nose",medial part of MPO,middle frontal gyrus,SG in granular insular cortex
+"Primary somatosensory area, nose, layer 1",central part of MPO,"middle frontal gyrus, left",SG in cingulate neocortex
+"Primary somatosensory area, nose, layer 2/3",intermediate stratum of PO2,"middle frontal gyrus, left, superior bank of gyrus",SG in rostral cingulate cortex
+"Primary somatosensory area, nose, layer 4","lateral preoptic nucleus, PO2 part","middle frontal gyrus, left, inferior bank of gyrus",SG in midcingulate cortex
+"Primary somatosensory area, nose, layer 5",superficial stratum of PO2,"middle frontal gyrus, right",SG in caudal cingulate cortex
+"Primary somatosensory area, nose, layer 6a",ventromedial preoptic nucleus,"middle frontal gyrus, right, superior bank of gyrus",SG in subgenual (subcallosal) cingulate cortex
+"Primary somatosensory area, nose, layer 6b",ventrolateral preoptic nucleus,"middle frontal gyrus, right, inferior bank of gyrus",SG in periallocortex
+"Primary somatosensory area, barrel field",preopto-hypothalamic band,olfactory area,SG in perirhinal cortex
+"Primary somatosensory area, barrel field, layer 1",ventricular zone of POH,"olfactory area, left",SG in rostral perirhinal cortex
+"Primary somatosensory area, barrel field, layer 2/3",mantle zone of POH,"olfactory area, right",SG in caudal perirhinal cortex
+"Primary somatosensory area, barrel field, layer 4",periventricular stratum of POH,"paracentral lobule, anterior part",SG in parasubicular cortex
+"Primary somatosensory area, barrel field, layer 5",intermediate stratum of POH,"paracentral lobule, anterior part, left",SG in entorhinal cortex
+"Primary somatosensory area, barrel field, layer 6a",striohypothalamic nucleus,"paracentral lobule, anterior part, left, superior bank of gyrus",SG in lateral (anterior) entorhinal cortex
+"Primary somatosensory area, barrel field, layer 6b",preopto-hypothalamic area,"paracentral lobule, anterior part, left, inferior bank of gyrus",SG in olfactory entorhinal cortex
+Rostrolateral lateral visual area,superficial stratum of POH,"paracentral lobule, anterior part, right",SG in rostral entorhinal cortex
+"Rostrolateral lateral visual area, layer 1",episupraoptic nucleus,"paracentral lobule, anterior part, right, superior bank of gyrus",SG in medial (posterior) entorhinal cortex
+"Rostrolateral lateral visual area, layer 2/3",terminal hypothalamus (rostral hypothalamus),"paracentral lobule, anterior part, right, inferior bank of gyrus",SG in caudal entorhinal cortex
+"Rostrolateral lateral visual area, layer 4",alar part of terminal hypothalamus,paraterminal gyrus,SG in presubicular cortex
+"Rostrolateral lateral visual area,layer 5",terminal paraventricular area of THyA,"paraterminal gyrus, left",SG in rostral presubicular cortex
+"Rostrolateral lateral visual area, layer 6a",ventricular zone of TPaA,"paraterminal gyrus, right",SG in caudal presubicular cortex
+"Rostrolateral lateral visual area, layer 6b",mantle zone of TPaA,parolfactory gyri,SG in retrosplenial cortex
+"Primary somatosensory area, lower limb",periventricular stratum of TPaA,"parolfactory gyri, left",SG in agranular insular cortex
+"Primary somatosensory area, lower limb, layer 1",rostral paraventricular nucleus,"parolfactory gyri, right",SG in allocortex
+"Primary somatosensory area, lower limb, layer 2/3",intermediate stratum of TPaA,posterior orbital gyrus,SG in hippocampal proper
+"Primary somatosensory area, lower limb, layer 4",lateral anterior hypothalamic nucleus,"posterior orbital gyrus, left",SG in subicular cortex
+"Primary somatosensory area, lower limb, layer 5",terminal nucleus of the stria medullaris,"posterior orbital gyrus, right",SG in piriform cortex
+"Primary somatosensory area, lower limb, layer 6a",superficial stratum of TPaA,precentral gyrus,SG in agranular insular cortex
+"Primary somatosensory area, lower limb, layer 6b",supraoptic nucleus,"precentral gyrus, left",marginal zone
+"Primary somatosensory area, mouth","eye vesicle, stalk/nerve","precentral gyrus, left, bank of the precentral sulcus",MZ in frontal neocortex
+"Primary somatosensory area, mouth, layer 1","eye vesicle, pigmented retina","precentral gyrus, left, superior lateral aspect of gyrus",MZ in frontal polar cortex
+"Primary somatosensory area, mouth, layer 2/3","eye vesicle, neural retina","precentral gyrus, left, inferior lateral aspect of gyrus",MZ in dorsomedial frontal cortex
+"Primary somatosensory area, mouth, layer 4",ventricular zone of neural retina,"precentral gyrus, left, bank of the central sulcus",MZ in dorsolateral prefrontal cortex
+"Primary somatosensory area, mouth, layer 5",mantle zone of neural retina,"precentral gyrus, right",MZ in ventrolateral prefrontal cortex
+"Primary somatosensory area, mouth, layer 6a",periventricular stratum of the retina,"precentral gyrus, right, bank of the precentral sulcus",MZ in orbital frontal cortex
+"Primary somatosensory area, mouth, layer 6b",outer nuclear layer (photoreceptor layer),"precentral gyrus, right, superior lateral aspect of gyrus",MZ in posteror frontal cortex (motor cortex)
+"Primary somatosensory area, upper limb",outer plexiform layer,"precentral gyrus, right, inferior lateral aspect of gyrus",MZ in parietal neocortex
+"Primary somatosensory area, upper limb, layer 1",intermediate stratum of the retina,"precentral gyrus, right, bank of the central sulcus",MZ in primary somatosensory cortex
+"Primary somatosensory area, upper limb, layer 2/3",horizontal cell layer,superior frontal gyrus,MZ in dorsomedial parietal cortex
+"Primary somatosensory area, upper limb, layer 4",bipolar cell layer,"superior frontal gyrus, left",MZ in posterodorsal (superior) parietal cortex
+"Primary somatosensory area, upper limb, layer 5",Mueller cell layer,"superior frontal gyrus, left, medial bank of gyrus",MZ in posteroventral (inferior) parietal cortex
+"Primary somatosensory area, upper limb, layer 6a",amacrine cell layer,"superior frontal gyrus, left, lateral bank of gyrus",MZ in temporal neocortex
+"Primary somatosensory area, upper limb, layer 6b",inner plexiform layer,"superior frontal gyrus, right",MZ in dorsolateral temporal cortex
+"Primary somatosensory area, trunk",superficial stratum of the retina,"superior frontal gyrus, right, medial bank of gyrus",MZ in primary auditory cortex
+"Primary somatosensory area, trunk, layer 1",ganglion cell layer,"superior frontal gyrus, right, lateral bank of gyrus",MZ in superolateral temporal cortex
+"Primary somatosensory area, trunk, layer 2/3",ganglion cells,superior rostral gyrus,MZ in polysensory temporal cortex
+"Primary somatosensory area, trunk, layer 4",inverted amacrine cells,"superior rostral gyrus, left",MZ in parainsular temporal cortex
+"Primary somatosensory area, trunk, layer 5",optic fiber layer,"superior rostral gyrus, right",MZ in ventrolateral temporal cortex
+"Primary somatosensory area, trunk, layer 6a",terminal subparaventricular area of THyA,insula,MZ in midlateral temporal cortex
+"Primary somatosensory area, trunk, layer 6b",ventricular zone of TSPaA,long insular gyri,MZ in inferolateral temporal cortex
+"Primary somatosensory area, unassigned",mantle zone of TSPaA,"long insular gyri, left",MZ in midinferior temporal cortex
+"Primary somatosensory area, unassigned, layer 1",periventricular stratum of TSPaA,"long insular gyri, right",MZ in rostral midinferior temporal cortex (area 36)
+"Primary somatosensory area, unassigned, layer 2/3","suprachiasmatic nucleus, periventricular part",short insular gyri,MZ in caudal midinferior temporal cortex (area TF)
+"Primary somatosensory area, unassigned, layer 4",terminal subparaventricular area,"short insular gyri, left",MZ in posterior parahippocampal cortex
+"Primary somatosensory area, unassigned, layer 5",intermediate stratum of TSPaA,"short insular gyri, right",MZ in medial temporal-occipital cortex
+"Primary somatosensory area, unassigned, layer 6a",suprachiasmatic nucleus,limbic lobe,MZ in lateral temporal-occipital cortex
+"Primary somatosensory area, unassigned, layer 6b",core of SCH,cingulate gyrus,MZ in temporal polar cortex
+Supplemental somatosensory area,anterior hypothalamic nucleus,"cingulate gyrus, frontal part",MZ in occipital neocortex
+"Supplemental somatosensory area, layer 1",superficial stratum of TSPaA,"cingulate gyrus, frontal part, left",MZ in area prostriata
+"Supplemental somatosensory area, layer 2/3",shell of SCH,"cingulate gyrus, frontal part, left, superior bank of gyrus",MZ in primary visual cortex
+"Supplemental somatosensory area, layer 4",tuber cinereum area,"cingulate gyrus, frontal part, left, inferior bank of gyrus",MZ in extrastriate cortex
+"Supplemental somatosensory area, layer 5",basal part of terminal hypothalamus,"cingulate gyrus, frontal part, right",MZ in dorsomedial extrastriate cortex (V2)
+"Supplemental somatosensory area, layer 6a",dorsal part of THyB,"cingulate gyrus, frontal part, right, superior bank of gyrus",MZ in ventromedial extrastriate cortex (VP)
+"Supplemental somatosensory area, layer 6b",ventricular zone of THyB-D,"cingulate gyrus, frontal part, right, inferior bank of gyrus",MZ in midlateral extrastriate cortex (area 19)
+Gustatory areas,mantle zone of THyB-D,"cingulate gyrus, parietal part",MZ in insular neocortex
+"Gustatory areas, layer 1",periventricular stratum of THyB-D,"cingulate gyrus, parietal part, left",MZ in dysgranular insular cortex
+"Gustatory areas, layer 2/3",periventricular part of the anterobasal nucleus,"cingulate gyrus, parietal part, left, superior bank of gyrus",MZ in granular insular cortex
+"Gustatory areas, layer 4",periventricular domain associated to VMH,"cingulate gyrus, parietal part, left, inferior bank of gyrus",MZ in cingulate neocortex
+"Gustatory areas, layer 5",intermediate stratum of THyB-D,"cingulate gyrus, parietal part, right",MZ in rostral cingulate cortex
+"Gustatory areas, layer 6a",core part of the anterobasal nucleus,"cingulate gyrus, parietal part, right, superior bank of gyrus",MZ in midcingulate cortex
+"Gustatory areas, layer 6b",ventromedial hypothalamic nucleus,"cingulate gyrus, parietal part, right, inferior bank of gyrus",MZ in caudal cingulate cortex
+Visceral area,dorsomedial part of VMH,"cingulate gyrus, retrosplenial part",MZ in subgenual (subcallosal) cingulate cortex
+"Visceral area, layer 1",central part of VMH,"cingulate gyrus, retrosplenial part, left",MZ in periallocortex
+"Visceral area, layer 2/3",ventrolateral part of VMH,"cingulate gyrus, retrosplenial part, left, superior bank of gyrus",MZ in perirhinal cortex
+"Visceral area, layer 4",shell of VMH,"cingulate gyrus, retrosplenial part, left, inferior bank of gyrus",MZ in rostral perirhinal cortex
+"Visceral area, layer 5",superficial stratum of THyB-D,"cingulate gyrus, retrosplenial part, right",MZ in caudal perirhinal cortex
+"Visceral area, layer 6a",shell part of the anterobasal nucleus,"cingulate gyrus, retrosplenial part, right, superior bank of gyrus",MZ in parasubicular cortex
+"Visceral area, layer 6b",suboptic nucleus,"cingulate gyrus, retrosplenial part, right, inferior bank of gyrus",MZ in entorhinal cortex
+Auditory areas,tuberal nucleus,subcallosal cingulate gyrus,MZ in lateral (anterior) entorhinal cortex
+Dorsal auditory area,intermediate part of THyB,"subcallosal cingulate gyrus, left",MZ in olfactory entorhinal cortex
+"Dorsal auditory area, layer 1",ventricular zone of THyB-I,"subcallosal cingulate gyrus, right",MZ in rostral entorhinal cortex
+"Dorsal auditory area, layer 2/3",mantle zone of THyB-I,hippocampal formation,MZ in medial (posterior) entorhinal cortex
+"Dorsal auditory area, layer 4",periventricular stratum of THyB-I,dentate gyrus,MZ in caudal entorhinal cortex
+"Dorsal auditory area, layer 5",periventricular part of the arcuate nucleus,"dentate gyrus, left",MZ in presubicular cortex
+"Dorsal auditory area, layer 6a",median eminence,"dentate gyrus, right",MZ in rostral presubicular cortex
+"Dorsal auditory area, layer 6b",infundibulum,CA1 field,MZ in caudal presubicular cortex (postsubiculum)
+Laterolateral anterior visual area,neurohypophysis,"CA1 field, left",MZ in retrosplenial cortex
+"Laterolateral anterior visual area, layer 1",periventricular domain associated to T-DMH,"CA1 field, right",MZ in agranular insular cortex
+"Laterolateral anterior visual area, layer 2/3",intermediate stratum of THyB-I,CA2 field,MZ in allocortex
+"Laterolateral anterior visual area, layer 4","dorsomedial nucleus, terminal part","CA2 field, left",MZ in hippocampal proper
+"Laterolateral anterior visual area,layer 5",core of T-DMH,"CA2 field, right",MZ in rostral hippocampal proper
+"Laterolateral anterior visual area, layer 6a",shell of T-DMH,CA3 field,MZ in caudal hippocampal proper
+"Laterolateral anterior visual area, layer 6b",intermediate part of the arcuate nucleus,"CA3 field, left",MZ in subicular cortex
+Primary auditory area,ventral premammillary nucleus (migrated),"CA3 field, right",MZ in rostral subicular cortex
+"Primary auditory area, layer 1",superficial stratum of THyB-I,CA4 field,MZ in caudal subicular cortex
+"Primary auditory area, layer 2/3",superficial part of arcuate nucleus,"CA4 field, left",MZ in piriform cortex
+"Primary auditory area, layer 4",medial tuberal nucleus,"CA4 field, right",MZ in agranular insular cortex
+"Primary auditory area, layer 5",ventral part of THyB,indusium griseum,cortical plate
+"Primary auditory area, layer 6a",ventricular zone of THyB-V,"indusium griseum, left",CP in frontal neocortex
+"Primary auditory area, layer 6b","hypothalamic ventricular organ, terminal part","indusium griseum, right",CP in frontal polar cortex
+Posterior auditory area,mantle zone of THyB-V,subiculum,outer CP in frontal polar cortex
+"Posterior auditory area, layer 1",periventricular stratum of THyB-V,"subiculum, left",inner CP in frontal polar cortex
+"Posterior auditory area, layer 2/3","ventral tuberomammillary nucleus, pervientricular part (histaminergic)","presubiculum, left",CP in dorsomedial frontal cortex
+"Posterior auditory area, layer 4",intermediate stratum of THyB-V,"parasubiculum, left",outer CP in dorsomedial frontal cortex
+"Posterior auditory area, layer 5","ventral tuberomammillary nucleus, intermediate part (histaminergic)","prosubiculum, left",inner CP in dorsomedial frontal cortex
+"Posterior auditory area, layer 6a",superficial stratum of THyB-V,"subiculum proper, left",CP in dorsolateral prefrontal cortex
+"Posterior auditory area, layer 6b","ventral tuberomammillary nucleus, superficial part (histaminergic)","subiculum, right",outer CP in dorsolateral prefrontal cortex
+Ventral auditory area,perimammillary part of THyB,"presubiculum, right",inner CP in dorsolateral prefrontal cortex
+"Ventral auditory area, layer 1",ventricular zone of THyB-P,"parasubiculum, right",CP in ventrolateral prefrontal cortex
+"Ventral auditory area, layer 2/3",mammillary recess organ,"prosubiculum, right",outer CP in ventrolateral prefrontal cortex
+"Ventral auditory area, layer 4",mantle zone of THyB-P,"subiculum proper, right",inner CP in ventrolateral prefrontal cortex
+"Ventral auditory area, layer 5",periventricular stratum of THyB-P,parahippocampal gyrus,CP in orbital frontal cortex
+"Ventral auditory area, layer 6a",periventricular perimammillary area,"parahippocampal gyrus, left",outer CP in orbital frontal cortex
+"Ventral auditory area, layer 6b",intermediate stratum of THyB-P,"parahippocampal gyrus, left, lateral bank of gyrus",inner CP in orbital frontal cortex
+Visual areas,dorsal premammillary nucleus,"parahippocampal gyrus, left, bank of the cos",CP in posterior frontal cortex (motor cortex)
+"Visual areas, layer 1",superficial stratum of THyB-P,"parahippocampal gyrus, right",outer CP in posteror frontal cortex (motor cortex)
+"Visual areas, layer 2/3",terete nucleus,"parahippocampal gyrus, right, lateral bank of gyrus",inner CP in posteror frontal cortex (motor cortex)
+"Visual areas, layer 4",mammillary part of THyB,"parahippocampal gyrus, right, bank of the cos",CP in parietal neocortex
+"Visual areas, layer 5",mammillary area,piriform cortex,CP in primary somatosensory cortex
+"Visual areas, layer 6a",ventricular zone of Mam,"piriform cortex, left",outer CP in primary somatosensory cortex
+"Visual areas, layer 6b",mantle zone of Mam,"piriform cortex, right",inner CP in primary somatosensory cortex
+Anterolateral visual area,periventricular stratum of Mam,occipital lobe,CP in dorsomedial parietal cortex (area 7m)
+"Anterolateral visual area, layer 1",median mammillary nucleus,cuneus,outer CP in dorsomedial parietal cortex (area 7m)
+"Anterolateral visual area, layer 2/3",intermediate stratum of Mam,"cuneus, left",inner CP in dorsomedial parietal cortex (area 7m)
+"Anterolateral visual area, layer 4",medial mammillary nucleus,"cuneus, left, peristriate",CP in posterosuperior (dorsal) parietal cortex
+"Anterolateral visual area, layer 5",medial part of MM,"cuneus, left, striate",outer CP in posterosuperior (dorsal) parietal cortex
+"Anterolateral visual area, layer 6a",lateral part of MM,"cuneus, right",inner CP in posterosuperior (dorsal) parietal cortex
+"Anterolateral visual area, layer 6b",posterior part of MM,"cuneus, right, peristriate",CP in posteroinferior (ventral) parietal cortex
+Anteromedial visual area,superficial stratum of Mam,"cuneus, right, striate",outer CP in posteroinferior (ventral) parietal cortex
+"Anteromedial visual area, layer 1",lateral mammillary nucleus,inferior occipital gyrus,inner CP in posteroinferior (ventral) parietal cortex
+"Anteromedial visual area, layer 2/3","ventral tuberomammillary nucleus, migrated part (histaminergic)","inferior occipital gyrus, left",CP in temporal neocortex
+"Anteromedial visual area, layer 4",floor of terminal hypothalamus,"inferior occipital gyrus, left, superior bank of gyrus",CP in dorsolateral temporal cortex
+"Anteromedial visual area, layer 5",mammillary floor,"inferior occipital gyrus, left, inferior bank of gyrus",CP in primary auditory cortex
+"Anteromedial visual area, layer 6a",caudal secondary prosencephalon,"inferior occipital gyrus, right",outer CP in primary auditory cortex
+"Anteromedial visual area, layer 6b",telencephalic vesicle,"inferior occipital gyrus, right, superior bank of gyrus",inner CP in primary auditory cortex
+Lateral visual area,roof plate of evaginated telencephalic vesicle,"inferior occipital gyrus, right, inferior bank of gyrus",CP in superolateral temporal cortex
+"Lateral visual area, layer 1",caudal septocommissural area,lingual gyrus,outer CP in superolateral temporal cortex
+"Lateral visual area, layer 2/3",ventricular zone of CSCom,"lingual gyrus, left",inner CP in superolateral temporal cortex
+"Lateral visual area, layer 4","subfornical organ, circumventricular ependymal specialization","lingual gyrus, left, peristriate",CP in polysensory temporal cortex
+"Lateral visual area, layer 5",mantle zone of CSCom,"lingual gyrus, left, striate",CP in parainsualr temporal cortex
+"Lateral visual area, layer 6a",periventricular stratum of CSCom,"lingual gyrus, right",CP in ventrolateral temporal cortex
+"Lateral visual area, layer 6b","subfornical organ, periventricular part","lingual gyrus, right, peristriate",CP in midlateral temporal cortex
+Primary visual area,intermediate stratum of CSCom,"lingual gyrus, right, striate",CP in inferolateral temporal cortex
+"Primary visual area, layer 1",superficial stratum of CSCom,occipital pole,outer CP in inferolateral temporal cortex
+"Primary visual area, layer 2/3",telencephalic choroidal formation,"occipital pole, left",inner CP in inferolateral temporal cortex
+"Primary visual area, layer 4",alar plate of evaginated telencephalic vesicle,"occipital pole, left, superior aspect",CP in midinferior temporal cortex
+"Primary visual area, layer 5",subpallium,"occipital pole, left, inferior aspect",outer CP in midinferior temporal cortex
+"Primary visual area, layer 6a",ventricular zone of SPall,"occipital pole, left, lateral aspect",inner CP in midinferior temporal cortex
+"Primary visual area, layer 6b",mantle zone of SPall,"occipital pole, right",CP in rostral midinferior temporal cortex (area 36)
+Posterolateral visual area,subpallial septum,"occipital pole, right, superior aspect",outer CP in (rostral) midinferior temporal cortex (area 36)
+"Posterolateral visual area, layer 1",diagonal part of septum,"occipital pole, right, inferior aspect",inner CP in (rostral) midinferior temporal cortex (area 36)
+"Posterolateral visual area, layer 2/3",ventricular zone of DgSe,"occipital pole, right, lateral aspect",CP in caudal midinferior temporal cortex (area TF)
+"Posterolateral visual area, layer 4",mantle zone of DgSe,occipito-temporal gyrus,outer CP in caudal midinferior temporal cortex (area TF)
+"Posterolateral visual area, layer 5",periventricular stratum of DgSe,"occipito-temporal gyrus, left",inner CP in caudal midinferior temporal cortex (area TF)
+"Posterolateral visual area, layer 6a","lateral septal nucleus, ventral part","occipito-temporal gyrus, left, superior bank of gyrus",CP in posterior parahippocampal cortex
+"Posterolateral visual area, layer 6b",median supracommissural nucleus,"occipito-temporal gyrus, left, inferior bank of gyrus",outer CP in posterior parahippocampal cortex
+posteromedial visual area,intermediate stratum of DgSe,"occipito-temporal gyrus, right",inner CP in posterior parahippocampal cortex
+"posteromedial visual area, layer 1","lateral septal nucleus, intermedio-ventral part","occipito-temporal gyrus, right, superior bank of gyrus",CP in medial temporal-occipital cortex
+"posteromedial visual area, layer 2/3",septohypothalamic nucleus,"occipito-temporal gyrus, right, inferior bank of gyrus",outer CP in medial temporal-occipital cortex
+"posteromedial visual area, layer 4",superficial stratum of DgSe,superior occipital gyrus,inner CP in medial temporal-occipital cortex
+"posteromedial visual area, layer 5",vertical nucleus of the diagonal band,"superior occipital gyrus, left",CP in lateral temporal-occipital cortex
+"posteromedial visual area, layer 6a",medial septal nucleus,"superior occipital gyrus, left, superior bank of gyrus",outer CP in lateral temporal-occipital cortex
+"posteromedial visual area, layer 6b",pallidal septum,"superior occipital gyrus, left, inferior bank of gyrus",inner CP in lateral temporal-occipital cortex
+Laterointermediate area,ventricular zone of PalSe,"superior occipital gyrus, right",CP in temporal polar cortex
+"Laterointermediate area, layer 1",mantle zone of PalSe,"superior occipital gyrus, right, superior bank of gyrus",outer CP in temporal polar cortex
+"Laterointermediate area, layer 2/3",periventricular stratum of PalSe,"superior occipital gyrus, right, inferior bank of gyrus",inner CP in temporal polar cortex
+"Laterointermediate area, layer 4","lateral septal nucleus, intermediate part, periventricular",parietal lobe,CP in occipital neocortex
+"Laterointermediate area, layer 5",intermediate stratum of PalSe,inferior parietal lobule,CP in area prostriata
+"Laterointermediate area, layer 6a","lateral septal nucleus, intermedio-intermediate part",angular gyrus,CP in primary visual cortex
+"Laterointermediate area, layer 6b",lambdoid septal zone,"angular gyrus, left",outer CP in primary visual cortex
+Postrhinal area,superficial stratum of PalSe,"angular gyrus, left, superior bank of gyrus",inner CP in primary visual cortex
+"Postrhinal area, layer 1",striatal septum,"angular gyrus, left, inferior bank of gyrus",CP in extrastriate cortex
+"Postrhinal area, layer 2/3",ventricular zone of StrSe,"angular gyrus, right",CP in dorsomedial extrastriate cortex (V2)
+"Postrhinal area, layer 4",mantle zone of StrSe,"angular gyrus, right, superior bank of gyrus",outer CP in dorsomedial extrastriate cortex
+"Postrhinal area, layer 5",periventricular part of StrSe,"angular gyrus, right, inferior bank of gyrus",inner CP in dorsomedial extrastriate cortex
+"Postrhinal area, layer 6a","lateral septal nucleus, dorsal part",supramarginal gyrus,CP in ventromedial extrastriate cortex (VP)
+"Postrhinal area, layer 6b",triangular septal nucleus,"supramarginal gyrus, left",outer CP in ventromedial extrastriate cortex
+Anterior cingulate area,septofimbrial nucleus,"supramarginal gyrus, left, superior bank of gyrus",inner CP in ventromedial extrastriate cortex
+"Anterior cingulate area, layer 1",intermediate part of StrSe,"supramarginal gyrus, left, inferior bank of gyrus",CP in midlateral extrastriate cortex (area 19)
+"Anterior cingulate area, layer 2/3","lateral septal nucleus, intermedio-dorsal part","supramarginal gyrus, right",outer CP in midlateral extrastriate cortex
+"Anterior cingulate area, layer 5",superficial part of StrSe,"supramarginal gyrus, right, superior bank of gyrus",inner CP in midlateral extrastriate cortex
+"Anterior cingulate area, layer 6a",paraseptal subpallium,"supramarginal gyrus, right, inferior bank of gyrus",CP in insular neocortex
+"Anterior cingulate area, layer 6b",septodiagonal transition area,"paracentral lobule, posterior part",CP in dysgranular insular cortex
+"Anterior cingulate area, dorsal part",ventricular zone of SeDg,"paracentral lobule, posterior part, left",outer CP in dysgranular insular cortex
+"Anterior cingulate area, dorsal part, layer 1",mantle zone of SeDg,"paracentral lobule, posterior part, left, lateral bank of gyrus",inner CP in dysgranular insular cortex
+"Anterior cingulate area, dorsal part, layer 2/3",periventricular stratum of SeDg,"paracentral lobule, posterior part, left, bank of cingulate sulcus",CP in granualr insular cortex
+"Anterior cingulate area, dorsal part, layer 5","bed nucleus of the stria terminalis, medioseptal division","paracentral lobule, posterior part, right",outer CP in granular insular cortex
+"Anterior cingulate area, dorsal part, layer 6a","nucleus of the stria terminalis, medial division, ventral part","paracentral lobule, posterior part, right, lateral bank of gyrus",inner CP in granular insular cortex
+"Anterior cingulate area, dorsal part, layer 6b","nucleus of the stria terminalis, medial division, anterior part","paracentral lobule, posterior part, right, bank of cingulate sulcus",CP in cingulate neocortex
+"Anterior cingulate area, ventral part",intermediate stratum of SeDg,postcentral gyrus,CP in rostral cingulate cortex
+"Anterior cingulate area, ventral part, layer 1","substantia innominata/basal nucleus, transitional part","postcentral gyrus, left",outer CP in rostral cingulate cortex
+"Anterior cingulate area, ventral part, layer 2/3",bed nucleus of the anterior commissure,"postcentral gyrus, left, bank of the central sulcus",inner CP in rostral cingulate cortex
+"Anterior cingulate area, ventral part, layer 5",superficial stratum of SeDg,"postcentral gyrus, left, superior lateral aspect of gyrus",CP in midcingulate cortex
+"Anterior cingulate area, ventral part, 6a","horizontal nucleus of the diagonal band, transitional part","postcentral gyrus, left, inferior lateral aspect of gyrus",outer CP in midcingulate cortex
+"Anterior cingulate area, ventral part, 6b",septopallidal transition area,"postcentral gyrus, left, bank of the posterior central sulcus",inner CP in midcingulate cortex
+Prelimbic area,ventricular zone of SePal,"postcentral gyrus, right",CP in caudal cingulate cortex
+"Prelimbic area, layer 1",mantle zone of SePal,"postcentral gyrus, right, bank of the central sulcus",outer CP in caudal cingulate cortex
+"Prelimbic area, layer 2",periventricular stratum of SePal,"postcentral gyrus, right, superior lateral aspect of gyrus",inner CP in caudal cingulate cortex
+"Prelimbic area, layer 2/3","bed nucleus of the stria terminalis, lateroseptal division","postcentral gyrus, right, inferior lateral aspect of gyrus",CP in subgenual (subcallosal) cingulate cortex
+"Prelimbic area, layer 5","nucleus of the stria terminalis, lateral division, intermediate part","postcentral gyrus, right, bank of the posterior central sulcus",outer CP in subgenual (subcallosal) cingulate cortex
+"Prelimbic area, layer 6a",intermediate stratum of SePal,precuneus,inner CP in subgenual (subcallosal) cingulate cortex
+"Prelimbic area, layer 6b",septopallidal core nucleus,"precuneus, left",CP in periallocortex
+Infralimbic area,septopallidal shell area,"precuneus, left, superior lateral bank of gyrus",CP in perirhinal cortex
+"Infralimbic area, layer 1",superficial stratum of SePal,"precuneus, left, inferior lateral bank of gyrus",CP in rostral perirhinal cortex
+"Infralimbic area, layer 2",septopallidal part of the olfactory tuberculum,"precuneus, right",outer CP in rostral perirhinal cortex
+"Infralimbic area, layer 2/3",island of Calleja major,"precuneus, right, superior lateral bank of gyrus",inner CP in rostral perirhinal cortex
+"Infralimbic area, layer 5",septostriatal transition area (accumbens),"precuneus, right, inferior lateral bank of gyrus",CP in caudal perirhinal cortex
+"Infralimbic area, layer 6a",ventricular zone of SeStr,superior parietal lobule,outer CP in caudal perirhinal cortex
+"Infralimbic area, layer 6b",mantle zone of SeStr,"superior parietal lobule, left",inner CP in caudal perirhinal cortex
+Orbital area,periventricular stratum of SeStr,"superior parietal lobule, left, superior bank of gyrus",CP in parasubicular cortex
+"Orbital area, layer 1","accumbens nucleus, core domain","superior parietal lobule, left, inferior bank of gyrus",CP in entorhinal cortex
+"Orbital area, layer 2/3",intermediate stratum of SeStr,"superior parietal lobule, right",CP in lateral (anterior) entorhinal cortex
+"Orbital area, layer 5","accumbens nucleus, shell domain","superior parietal lobule, right, superior bank of gyrus",CP in olfactory entorhinal cortex
+"Orbital area, layer 6a",superficial stratum of SeStr,"superior parietal lobule, right, inferior bank of gyrus",CP in rostral entorhinal cortex
+"Orbital area, layer 6b",septostriatal part of the olfactory tuberculum,temporal lobe,CP in medial (posterior) entorhinal cortex
+"Orbital area, lateral part",central subpallium (classic basal ganglia),fusiform gyrus,CP in caudal entorhinal cortex
+"Orbital area, lateral part, layer 1",ventricular zone of CSPall,"fusiform gyrus, left",CP in presubicular cortex
+"Orbital area, lateral part, layer 2/3",mantle zone of CSPall,"fusiform gyrus, left, bank of the its",CP in rostral presubicular cortex
+"Orbital area, lateral part, layer 5",periventricular stratum of CSPall,"fusiform gyrus, left, lateral bank of gyrus",CP in caudal presubicular cortex (postsubiculum)
+"Orbital area, lateral part, layer 6a",intermediate stratum of CSPall,"fusiform gyrus, left, bank of cos",CP in retrosplenial cortex
+"Orbital area, lateral part, layer 6b",superficial stratum of CSPall,"fusiform gyrus, right",outer CP in retrosplenial cortex
+"Orbital area, medial part",diagonal domain,"fusiform gyrus, right, bank of the its",inner CP in retrosplenial cortex
+"Orbital area, medial part, layer 1",ventricular zone of Dg,"fusiform gyrus, right, lateral bank of gyrus",CP in agranular insular cortex
+"Orbital area, medial part, layer 2",mantle zone of Dg,"fusiform gyrus, right, bank of cos",outer CP in agranular insular cortex
+"Orbital area, medial part, layer 2/3",periventricular stratum of Dg,Heschl's gyrus,inner CP in agranular insular cortex
+"Orbital area, medial part, layer 5","bed nucleus of the stria terminalis, mediocentral division","Heschl's gyrus, left",CP in allocortex
+"Orbital area, medial part, layer 6a",posteromedial part of BSTMC,"Heschl's gyrus, right",CP in hippocampal proper
+"Orbital area, medial part, layer 6b",posterointermediate part of BSTMC,inferior temporal gyrus,CP in rostral hippocampus
+"Orbital area, ventral part",posterolateral part of BSTMC,"inferior temporal gyrus, left",CP in caudal hippocampus
+"Orbital area, ventrolateral part","extended amygdala, diagonal part","inferior temporal gyrus, left, bank of the its",CP in subicular cortex
+"Orbital area, ventrolateral part, layer 1",intermediate stratum of Dg,"inferior temporal gyrus, left, lateral bank of gyrus",CP in rostral subicular cortex
+"Orbital area, ventrolateral part, layer 2/3",substantia innominata/basal nucleus,"inferior temporal gyrus, left, bank of mts",CP in caudal subicular cortex
+"Orbital area, ventrolateral part, layer 5",internal globus pallidus,"inferior temporal gyrus, right",CP in piriform cortex
+"Orbital area, ventrolateral part, layer 6a",superficial stratum of Dg,"inferior temporal gyrus, right, bank of the its",CP in agranular insular cortex
+"Orbital area, ventrolateral part, layer 6b",horizontal nucleus of the diagonal band,"inferior temporal gyrus, right, lateral bank of gyrus",subplate zone
+Agranular insular area,magnocellular diagonal band nucleus,"inferior temporal gyrus, right, bank of mts",SP in frontal neocortex
+"Agranular insular area, dorsal part",pallidum (globus pallidus complex),middle temporal gyrus,SP in frontal polar cortex
+"Agranular insular area, dorsal part, layer 1",ventricular zone of Pal,"middle temporal gyrus, left",SP in dorsomedial frontal cortex
+"Agranular insular area, dorsal part, layer 2/3",mantle zone of Pal,"middle temporal gyrus, left, superior bank of gyrus",SP in dorsolateral prefrontal cortex
+"Agranular insular area, dorsal part, layer 5",periventricular stratum of Pal,"middle temporal gyrus, left, inferior bank of gyrus",SP in ventrolateral prefrontal cortex
+"Agranular insular area, dorsal part, layer 6a","bed nucleus of the stria terminalis, laterocentral division","middle temporal gyrus, right",SP in orbital frontal cortex
+"Agranular insular area, dorsal part, layer 6b",posterior part of BSTLC,"middle temporal gyrus, right, superior bank of gyrus",SP in posteror frontal cortex (motor cortex)
+"Agranular insular area, posterior part",juxtacapsular part of BSTLC,"middle temporal gyrus, right, inferior bank of gyrus",SP in parietal neocortex
+"Agranular insular area, posterior part, layer 1",dorsal part of BSTLC,planum polare,SP in primary somatosensory cortex
+"Agranular insular area, posterior part, layer 2/3",intermediate stratum of Pal,"planum polare, left",SP in dorsomedial parietal cortex (area 7m)
+"Agranular insular area, posterior part, layer 5",external globus pallidum,"planum polare, right",SP in posterosuperior (dorsal) parietal cortex
+"Agranular insular area, posterior part, layer 6a",ventral pallidum,planum temporale,SP in posteroinferior (ventral) parietal cortex
+"Agranular insular area, posterior part, layer 6b",superficial stratum of Pal,"planum temporale, left",SP in temporal neocortex
+"Agranular insular area, ventral part",pallidal part of olfactory tuberculum,"planum temporale, right",SP in dorsolateral temporal cortex
+"Agranular insular area, ventral part, layer 1",plexiform layer of TuPal,superior temporal gyrus,SP in primary auditory cortex
+"Agranular insular area, ventral part, layer 2/3",corticoid layer of TuPal,"superior temporal gyrus, left",SP in superolateral temporal cortex
+"Agranular insular area, ventral part, layer 5",polymorph layer of TuPal,"superior temporal gyrus, left, lateral bank of gyrus",SP in polysensory temporal cortex
+"Agranular insular area, ventral part, layer 6a",pallidal islands of Calleja,"superior temporal gyrus, left, inferior bank of gyrus",SP in parainsular temporal cortex
+"Agranular insular area, ventral part, layer 6b",striatum (corpus striatum),"superior temporal gyrus, right",SP in ventrolateral temporal cortex
+Retrosplenial area,ventricular zone of Str,"superior temporal gyrus, right, lateral bank of gyrus",SP in midlateral temporal cortex
+"Retrosplenial area, lateral agranular part",mantle zone of Str,"superior temporal gyrus, right, inferior bank of gyrus",SP in inferolateral temporal cortex
+"Retrosplenial area, lateral agranular part, layer 1",periventricular stratum of Str,temporal pole,SP in midinferior temporal cortex
+"Retrosplenial area, lateral agranular part, layer 2/3",caudate nucleus,"temporal pole, left",SP in rostral midinferior temporal cortex (area 36)
+"Retrosplenial area, lateral agranular part, layer 5",intermediate stratum of Str,"temporal pole, left, superior aspect",SP in caudal midinferior temporal cortex (area TF)
+"Retrosplenial area, lateral agranular part, layer 6a",putamen,"temporal pole, left, inferior aspect",SP in posterior parahippocampal cortex
+"Retrosplenial area, lateral agranular part, layer 6b",ventral striatum,"temporal pole, left, medial aspect",SP in medial temporal-occipital cortex
+Mediomedial anterior visual area,interstitial nucleus of the posterior limb of the anterior commissure,"temporal pole, right",SP in lateral temporal-occipital cortex
+"Mediomedial anterior visual area, layer 1",laterostriatal stripe,"temporal pole, right, superior aspect",SP in temporal polar cortex
+"Mediomedial anterior visual area, layer 2/3",superficial stratum of Str,"temporal pole, right, inferior aspect",SP in occipital neocortex
+"Mediomedial anterior visual area, layer 4",striatal part of olfactory tuberculum,"temporal pole, right, medial aspect",SP in area prostriata
+"Mediomedial anterior visual area,layer 5",plexiform layer of TuStr,transverse gyri,SP in primary visual cortex
+"Mediomedial anterior visual area, layer 6a",corticoid layer of TuStr,"transverse gyri, left",SP in extrastriate cortex
+"Mediomedial anterior visual area, layer 6b",polymorph layer of TuStr,"transverse gyri, right",SP in dorsomedial extrastriate cortex (V2)
+Mediomedial posterior visual area,striatal islands of Calleja,cerebral nuclei,SP in ventromedial extrastriate cortex (VP)
+"Mediomedial posterior visual area, layer 1",subpallial amygdala,amygdala,SP in midlateral extrastriate cortex (area 19)
+"Mediomedial posterior visual area, layer 2/3",striatal amygdala,amygdalohippocampal transition zone,SP in insular neocortex
+"Mediomedial posterior visual area, layer 4",ventricular zone of AStr,"amygdalohippocampal transition zone, left",SP in dysgranular insular cortex
+"Mediomedial posterior visual area,layer 5",mantle zone of AStr,"amygdalohippocampal area, left",SP in granular insular cortex
+"Mediomedial posterior visual area, layer 6a",periventricular stratum of AStr,"amygdalohippocampal area, left, magnocellular division",SP in cingulate neocortex
+"Mediomedial posterior visual area, layer 6b",amygdalo-striatal transition,"amygdalohippocampal area, left, parvocellular division",SP in rostral cingulate cortex
+Medial visual area,intermediate stratum of AStr,"amygdalohippocampal area, left, marginal layer",SP in midcingulate cortex
+"Medial visual area, layer 1","central amygdalar nucleus, lateral part","amygdalohippocampal transition zone, right",SP in caudal cingulate cortex
+"Medial visual area, layer 2/3","central amygdalar nucleus, capsular part","amygdalohippocampal area, right",SP in subgenual (subcallosal) cingulate cortex
+"Medial visual area, layer 4",intercalated amygdaloid nuclei,"amygdalohippocampal area, right, magnocellular division",SP in periallocortex
+"Medial visual area,layer 5",superficial stratum of AStr,"amygdalohippocampal area, right, parvocellular division",SP in perirhinal cortex
+"Medial visual area, layer 6a",pallidal amygdala,"amygdalohippocampal area, right, marginal layer",SP in rostral perirhinal cortex
+"Medial visual area, layer 6b",ventricular zone of APal,anterior amygdaloid area,SP in caudal perirhinal cortex
+"Retrosplenial area, dorsal part",mantle zone of APal,"anterior amygdaloid area, left",SP in parasubicular cortex
+"Retrosplenial area, dorsal part, layer 1",periventricular stratum of APal,"anterior amygdaloid area, left, dorsal division",SP in entorhinal cortex
+"Retrosplenial area, dorsal part, layer 2/3","bed nucleus of stria terminalis, lateral amygdaloid division","anterior amygdaloid area, left, ventral division",SP in lateral (anterior) entorhinal cortex
+"Retrosplenial area, dorsal part, layer 4",intermediate stratum of APal,"anterior amygdaloid area, right",SP in medial (posterior) entorhinal cortex
+"Retrosplenial area, dorsal part, layer 5","central amygdaloid nucleus, medial part","anterior amygdaloid area, right, dorsal division",SP in presubicular cortex
+"Retrosplenial area, dorsal part, layer 6a",superficial stratum of APal,"anterior amygdaloid area, right, ventral division",SP in rostral presubicular cortex
+"Retrosplenial area, dorsal part, layer 6b",diagonal amygdala,basolateral nucleus,SP in caudal presubicular cortex (postsubiculum)
+"Retrosplenial area, ventral part",ventricular zone of ADg,"basolateral nucleus, left",SP in retrosplenial cortex
+"Retrosplenial area, ventral part, layer 1",mantle zone of ADg,"basolateral nucleus, left, magnocellular (dorsal)",SP in agranular insular cortex
+"Retrosplenial area, ventral part, layer 2",periventricular stratum of ADg,"basolateral nucleus, left, dorsolateral division",SP in allocortex
+"Retrosplenial area, ventral part, layer 2/3","bed nucleus of the stria terminalis, medial amygdaloid division","basolateral nucleus, left, intermediate",SP in hippocampal proper
+"Retrosplenial area, ventral part, layer 5",intermediate stratum of ADg,"basolateral nucleus, left, parvicellular (ventral)",SP in rostral hippocampal proper
+"Retrosplenial area, ventral part, layer 6a",superficial stratum of ADg,"basolateral nucleus, left, ventrolateral division",SP in caudal hippocampal proper
+"Retrosplenial area, ventral part, layer 6b",hypothalamic amygdala,"basolateral nucleus, left, ventromedial divison",SP in subicular cortex
+Posterior parietal association areas,ventricular zone of AHy,"basolateral nucleus, right",SP in rostral subicular cortex
+"Posterior parietal association areas, layer 1",mantle zone of AHy,"basolateral nucleus, right, magnocellular (dorsal)",SP in caudal subicular cortex
+"Posterior parietal association areas, layer 2/3",periventricular stratum of AHy,"basolateral nucleus, right, dorsolateral division",SP in piriform cortex
+"Posterior parietal association areas, layer 4",intermediate stratum of AHy,"basolateral nucleus, right, intermediate",intermediate zone
+"Posterior parietal association areas, layer 5",superficial stratum of AHy,"basolateral nucleus, right, parvicellular (ventral)",IZ in frontal neocortex
+"Posterior parietal association areas, layer 6a","medial amygdala, posterodorsal part","basolateral nucleus, right, ventrolateral division",IZ in frontal polar cortex
+"Posterior parietal association areas, layer 6b","medial amygdala, posteroventral part","basolateral nucleus, right, ventromedial divison",IZ in dorsomedial frontal cortex
+Anterior area,"medial amygdala, anterodorsal part",basomedial nucleus,IZ in dorsolateral prefrontal cortex
+"Anterior area, layer 1","medial amygdala, anteroventral part","basomedial nucleus, left",IZ in ventrolateral prefrontal cortex
+"Anterior area, layer 2/3",pallium,"basomedial nucleus, left, dorsal division",IZ in orbital frontal cortex
+"Anterior area, layer 4",ventricular zone of Pall,"basomedial nucleus, left, magnocellular division",IZ in posteror frontal cortex (motor cortex)
+"Anterior area, layer 5",mantle zone of Pall,"basomedial nucleus, left, dorsolateral division",IZ in parietal neocortex
+"Anterior area, layer 6a",ventral pallium,"basomedial nucleus, left, medial division",IZ in primary somatosensory cortex
+"Anterior area, layer 6b","olfactory bulb, principal part","basomedial nucleus, left, ventral division",IZ in dorsomedial parietal cortex (area 7m)
+Rostrolateral visual area,ventricular zone of OB,"basomedial nucleus, left, parvicellular division",IZ in posterosuperior (dorsal) parietal cortex
+"Rostrolateral area, layer 1",mantle zone of OB,"basomedial nucleus, left, ventromedial division",IZ in posteroinferior (ventral) parietal cortex
+"Rostrolateral area, layer 2/3",periventricular stratum of OB,"basomedial nucleus, right",IZ in temporal neocortex
+"Rostrolateral area, layer 4",OB granular layer,"basomedial nucleus, right, dorsal division",IZ in dorsolateral temporal cortex
+"Rostrolateral area, layer 5",OB inner plexiform layer,"basomedial nucleus, right, magnocellular division",IZ in primary auditory cortex
+"Rostrolateral area, layer 6a",intermediate stratum of OB,"basomedial nucleus, right, dorsolateral division",IZ in superolateral temporal cortex
+"Rostrolateral area, layer 6b",OB mitral cell layer,"basomedial nucleus, right, medial division",IZ in polysensory temporal cortex
+Temporal association areas,OB outer plexiform layer,"basomedial nucleus, right, ventral division",IZ in parainsular temporal cortex
+"Temporal association areas, layer 1",superficial stratum of OB,"basomedial nucleus, right, parvicellular division",IZ in ventrolateral temporal cortex
+"Temporal association areas, layer 2/3",OB glomerular layer,"basomedial nucleus, right, ventromedial division",IZ in midlateral temporal cortex
+"Temporal association areas, layer 4",OB olfactory fiber layer,central nucleus,IZ in inferolateral temporal cortex
+"Temporal association areas, layer 5","anterior olfactory area, ventral part","central nucleus, left",IZ in midinferior temporal cortex
+"Temporal association areas, layer 6a",ventricular zone of AOV,"central nucleus, medial division, left",IZ in rostral midinferior temporal cortex (area 36)
+"Temporal association areas, layer 6b",mantle zone of AOV,"central nucleus, medial division, left, dorsal part",IZ in caudal midinferior temporal cortex (area TF)
+Perirhinal area,periventricular stratum of AOV,"central nucleus, medial division, left, ventral part",IZ in posterior parahippocampal cortex
+"Perirhinal area, layer 1",intermediate stratum of AOV,"central nucleus, lateral division, left",IZ in medial temporal-occipital cortex
+"Perirhinal area, layer 2/3",superficial stratum of AOV,"central nucleus, lateral division, left, apical part",IZ in lateral temporal-occipital cortex
+"Perirhinal area, layer 5",layer 1 of AOV cortex,"central nucleus, lateral division, left, capsular part",IZ in temporal polar cortex
+"Perirhinal area, layer 6a",layer 2 of AOV cortex,"central nucleus, lateral division, left, paracapsular part",IZ in occipital neocortex
+"Perirhinal area, layer 6b",layer 3 of AOV cortex,"central nucleus, lateral division, left, central part",IZ in area prostriata
+Ectorhinal area,external part of AOV,"central nucleus, right",IZ in primary visual cortex
+Ectorhinal area/Layer 1,navicular nucleus,"central nucleus, medial division, right",IZ in extrastriate cortex
+Ectorhinal area/Layer 2/3,ventropallial prepiriform area,"central nucleus, medial division, right, dorsal part",IZ in dorsomedial extrastriate cortex (V2)
+Ectorhinal area/Layer 5,ventricular zone of VPrP,"central nucleus, medial division, right, ventral part",IZ in ventromedial extrastriate cortex (VP)
+Ectorhinal area/Layer 6a,mantle zone of VPrP,"central nucleus, lateral division, right",IZ in midlateral extrastriate cortex (area 19)
+Ectorhinal area/Layer 6b,periventricular stratum of VPrP,"central nucleus, lateral division, right, apical part",IZ in insular neocortex
+Olfactory areas,intermediate stratum of VPrP,"central nucleus, lateral division, right, capsular part",IZ in dysgranular insular cortex
+Main olfactory bulb,bed nucleus of the external capsule,"central nucleus, lateral division, right, paracapsular part",IZ in granular insular cortex
+"Main olfactory bulb, glomerular layer",dorsal endopiriform nucleus,"central nucleus, lateral division, right, central part",IZ in cingulate neocortex
+"Main olfactory bulb, granule layer",ventral endopiriform nucleus,cortico-medial group,IZ in rostral cingulate cortex
+"Main olfactory bulb, inner plexiform layer",superficial stratum of VPrP,"cortico-medial group, left",IZ in midcingulate cortex
+"Main olfactory bulb, mitral layer",layer 1 of VPrP cortex,"anterior cortical nucleus, left",IZ in caudal cingulate cortex
+"Main olfactory bulb, outer plexiform layer",layer 2 of VPrP cortex,"anterior cortical nucleus, left, dorsal division",IZ in subgenual (subcallosal) cingulate cortex
+Accessory olfactory bulb,layer 3 of VPrP cortex,"anterior cortical nucleus, left, ventral division",IZ in periallocortex
+"Accessory olfactory bulb, glomerular layer",ventropallial amygdalopiriform area,"anterior cortical nucleus, left, marginal layer",IZ in perirhinal cortex
+"Accessory olfactory bulb, granular layer",ventricular zone of the VAP,"medial nucleus, left",IZ in rostral perirhinal cortex
+"Accessory olfactory bulb, mitral layer",mantle zone of VAP,"medial nucleus, left, anterior division",IZ in caudal perirhinal cortex
+Anterior olfactory nucleus,periventricular stratum of the VAP,"medial nucleus, left, posterior division",IZ in entorhinal cortex
+"Anterior olfactory nucleus, dorsal part",lateral amygdaloid nucleus,"medial nucleus, left, posterior division, dorsal part",IZ in lateral (anterior) entorhinal cortex
+"Anterior olfactory nucleus, external part",amygdalohippocampal area,"medial nucleus, left, posterior division, ventral part",IZ in medial (posterior) entorhinal cortex
+"Anterior olfactory nucleus, lateral part",intermediate stratum of the VAP,"medial nucleus, left, marginal layer",IZ in presubicular cortex
+"Anterior olfactory nucleus, medial part","basomedial amygdaloid nucleus, anterior part","posterior cortical nucleus, left",IZ in rostral presubicular cortex
+"Anterior olfactory nucleus, posteroventral part","basomedial amygdaloid nucleus, posterior part","posterior cortical nucleus, left, dorsal division",IZ in caudal presubicular cortex
+"Anterior olfactory nucleus, layer 1",superficial stratum of the VAP,"posterior cortical nucleus, left, ventral division",IZ in retrosplenial cortex
+"Anterior olfactory nucleus, layer 2",posteromedial cortical amygdaloid area,"posterior cortical nucleus, left, marginal layer",IZ in allocortex
+Taenia tecta,nucleus of the lateral olfactory tract,"cortico-medial group, right",IZ in hippocampal proper
+"Taenia tecta, dorsal part",layer 3 of LOT,"anterior cortical nucleus, right",IZ in rostral hippocampal proper
+"Taenia tecta, dorsal part, layers 1-4",layer 2 of LOT,"anterior cortical nucleus, right, dorsal division",IZ in caudal hippocampal proper
+"Taenia tecta, dorsal part, layer 1",layer 1 of LOT,"anterior cortical nucleus, right, ventral division",IZ in subicular cortex
+"Taenia tecta, dorsal part, layer 2",nucleus of the accessory olfactory tract,"anterior cortical nucleus, right, marginal layer",IZ in rostral subicular cortex
+"Taenia tecta, dorsal part, layer 3",lateral pallium,"medial nucleus, right",IZ in caudal subicular cortex
+"Taenia tecta, dorsal part, layer 4",accessory olfactory bulb,"medial nucleus, right, anterior division",subventricular zone
+"Taenia tecta, ventral part",ventricular zone of AOB,"medial nucleus, right, posterior division",SZ in frontal neocortex
+"Taenia tecta, ventral part, layers 1-3",mantle zone of AOB,"medial nucleus, right, posterior division, dorsal part",SZ in frontal polar cortex
+"Taenia tecta, ventral part, layer 1",periventricular stratum of AOB,"medial nucleus, right, posterior division, ventral part",outer SZ in frontal polar cortex
+"Taenia tecta, ventral part, layer 2","AOB, granular layer","medial nucleus, right, marginal layer",inner SZ in frontal polar cortex
+"Taenia tecta, ventral part, layer 3","AOB, internal plexiform layer","posterior cortical nucleus, right",SZ in dorsomedial frontal cortex
+Dorsal peduncular area,intermediate stratum of AOB,"posterior cortical nucleus, right, dorsal division",outer SZ in dorsomedial frontal cortex
+"Dorsal peduncular area, layer 1","AOB, mitral cell layer","posterior cortical nucleus, right, ventral division",outer plexiform (fiber) zone in dorsomedial frontal cortex
+"Dorsal peduncular area, layer 2","AOB, outer plexiform layer","posterior cortical nucleus, right, marginal layer",inner SZ in dorsomedial frontal cortex
+"Dorsal peduncular area, layer 2/3",superficial stratum of AOB,intercalated nuclei,inner plexiform (fiber) zone in dorsomedial frontal cortex
+"Dorsal peduncular area, layer 5","AOB, glomerular layer","intercalated nuclei, left",SZ in dorsolateral prefrontal cortex
+"Dorsal peduncular area, layer 6a","AOB, fiber layer","intercalated nuclei, right",outer SZ in dorsolateral prefrontal cortex
+Piriform area,"anterior olfactory area, dorsal part",lateral nucleus,outer plexiform zone in dorsolateral prefrontal cortex
+"Piriform area, layers 1-3",ventricular zone of AOD,"lateral nucleus, left",inner SZ in dorsolateral prefrontal cortex
+"Piriform area, molecular layer",mantle zone of AOD,"lateral nucleus, left, dorsal division",inner plexiform zone in dorsolateral prefrontal cortex
+"Piriform area, pyramidal layer",periventricular stratum of AOD,"lateral nucleus, left, dorsal anterior division",SZ in ventrolateral prefrontal cortex
+"Piriform area, polymorph layer",intermediate stratum of AOD,"lateral nucleus, left, dorsal medial division",outer SZ in ventrolateral prefrontal cortex
+Nucleus of the lateral olfactory tract,superficial stratum of AOD,"lateral nucleus, left, dorsal lateral division",outer plexiform zone in ventrolateral prefrontal cortex
+"Nucleus of the lateral olfactory tract, layers 1-3",layer 1 of AOD cortex,"lateral nucleus, left, dorsal lateral division, comb-like part",inner SZ in ventrolateral prefrontal cortex
+"Nucleus of the lateral olfactory tract, molecular layer",layer 2 of AOD cortex,"lateral nucleus, left, intermediate division",inner plexiform zone in ventrolateral prefrontal cortex
+"Nucleus of the lateral olfactory tract, pyramidal layer",layer 3 of AOD cortex,"lateral nucleus, left, ventral division",SZ in orbital frontal cortex
+"Nucleus of the lateral olfactory tract, layer 3",external part of AOD,"lateral nucleus, left, ventral lateral division",outer SZ in orbital frontal cortex
+Cortical amygdalar area,lateropallial prepiriform area,"lateral nucleus, left, ventral medial division",outer plexiform (fiber) zone in orbital frontal cortex
+"Cortical amygdalar area, anterior part",ventricular zone of LPrP,"lateral nucleus, left, glomerular division",inner SZ in orbital frontal cortex
+"Cortical amygdalar area, anterior part, layer 1",mantle zone of LPrP,"lateral nucleus, right",inner plexiform (fiber) zone in orbital frontal cortex
+"Cortical amygdalar area, anterior part, layer 2",periventricular stratum of LPrP,"lateral nucleus, right, dorsal division",SZ in posteror frontal cortex (motor cortex)
+"Cortical amygdalar area, anterior part, layer 3",intermediate stratum of LPrP,"lateral nucleus, right, dorsal anterior division",outer SZ in posteror frontal cortex (motor cortex)
+"Cortical amygdalar area, posterior part",claustrum,"lateral nucleus, right, dorsal medial division",outer plexiform (fiber) zone in posteror frontal cortex (motor cortex)
+"Cortical amygdalar area, posterior part, lateral zone",superficial stratum of LPrP,"lateral nucleus, right, dorsal lateral division",inner SZ in posteror frontal cortex (motor cortex)
+"Cortical amygdalar area, posterior part, lateral zone, layers 1-2",layer 1 of LPrP cortex,"lateral nucleus, right, dorsal lateral division, comb-like part",inner plexiform (fiber) zone in posteror frontal cortex (motor cortex)
+"Cortical amygdalar area, posterior part, lateral zone, layers 1-3",layer 2 of LPrP cortex,"lateral nucleus, right, intermediate division",SZ in parietal neocortex
+"Cortical amygdalar area, posterior part, lateral zone, layer 1",layer 3 of LPrP cortex,"lateral nucleus, right, ventral division",SZ in primary somatosensory cortex
+"Cortical amygdalar area, posterior part, lateral zone, layer 2",lateropallial amygdalopiriform area,"lateral nucleus, right, ventral lateral division",outer SZ in primary somatosensory cortex
+"Cortical amygdalar area, posterior part, lateral zone, layer 3",ventricular zone of LAP,"lateral nucleus, right, ventral medial division",outer plexiform zone in primary somatosensory cortex
+"Cortical amygdalar area, posterior part, medial zone",mantle zone of LAP,"lateral nucleus, right, glomerular division",inner SZ in primary somatosensory cortex
+"Cortical amygdalar area, posterior part, medial zone, layers 1-2",periventricular stratum of LAP,nucleus of the lateral olfactory tract,inner plexiform zone in primary somatosensory cortex
+"Cortical amygdalar area, posterior part, medial zone, layers 1-3",intermediate stratum of LAP,"nucleus of the lateral olfactory tract, left",SZ in dorsomedial parietal cortex (area 7m)
+"Cortical amygdalar area, posterior part, medial zone, layer 1","basolateral amygdaloid nucleus, anterior part","nucleus of the lateral olfactory tract, right",outer SZ in dorsomedial parietal cortex (area 7m)
+"Cortical amygdalar area, posterior part, medial zone, layer 2","basolateral amygdaloid nucleus, posterior part",paralaminar nucleus,inner SZ in dorsomedial parietal cortex (area 7m)
+"Cortical amygdalar area, posterior part, medial zone, layer 3","basolateral amygdaloid nucleus, ventral part","paralmainar nucleus, left",SZ in posterosuperior (dorsal) parietal cortex
+Piriform-amygdalar area,superficial stratum of LAP,"paralmainar nucleus, left, glomerular part",outer SZ in posterosuperior (dorsal) parietal cortex
+"Piriform-amygdalar area, layers 1-3",amygdalopiriform area,"paralmainar nucleus, right",outer plexiform zone in posterosuperior (dorsal) parietal cortex
+"Piriform-amygdalar area, molecular layer",posterolateral cortical amygdaloid area,"paralmainar nucleus, right, glomerular part",inner SZ in posterosuperior (dorsal) parietal cortex
+"Piriform-amygdalar area, pyramidal layer",anterior cortical amygdaloid area,anterior olfactory nucleus,inner plexiform zone in posterosuperior (dorsal) parietal cortex
+"Piriform-amygdalar area, polymorph layer",dorsal pallium/isocortex,"anterior olfactory nucleus, left",SZ in posteroinferior (ventral) parietal cortex
+Postpiriform transition area,ventricular zone of DPall,"anterior olfactory nucleus, right",outer SZ in posteroinferior (ventral) parietal cortex
+"Postpiriform transition area, layers 1-3",mantle zone of DPall,basal forebrain,outer plexiform zone in posteroinferior (ventral) parietal cortex
+"Postpiriform transition area, layers 1",periventricular stratum of DPall,septal nuclei,inner SZ in posteroinferior (ventral) parietal cortex
+"Postpiriform transition area, layers 2",intermediate stratum of DPall,"septal nuclei, left",inner plexiform zone in posteroinferior (ventral) parietal cortex
+"Postpiriform transition area, layers 3",superficial stratum of DPall,"medial septal nucleus, left",SZ in temporal neocortex
+Hippocampal formation,frontal cortex,"lateral septal nucleus, left",SZ in dorsolateral temporal cortex
+Hippocampal region,ventricular zone of FCx,"septal nuclei, right",SZ in primary auditory cortex
+Ammon's horn,mantle zone of FCx,"medial septal nucleus, right",outer SZ in primary auditory cortex
+Field CA1,periventricular stratum of FCx (subventricular zone),"lateral septal nucleus, right",outer plexiform zone in primary auditory cortex
+"Field CA1, stratum lacunosum-moleculare",intermediate stratum of FCx (white matter/subplate),substantia innominata,inner SZ in primary auditory cortex
+"Field CA1, stratum oriens",superficial stratum of FCx (cortical plate/marginal zone),"substantia innominata, left",inner plexiform zone in primary auditory cortex
+"Field CA1, pyramidal layer",layer 1 of FCx,"basal nucleus of meynert, left",SZ in superolateral temporal cortex
+"Field CA1, stratum radiatum",layer 2 of FCx,"nucleus of the diagonal band, left",outer SZ in superolateral temporal cortex
+Field CA2,layer 3 of FCx,"nucleus of the diagonal band, left, horizontal division",outer plexiform zone in superolateral temporal cortex
+"Field CA2, stratum lacunosum-moleculare",layer 4 of FCx,"nucleus of the diagonal band, left, vertical division",inner SZ in superolateral temporal cortex
+"Field CA2, stratum oriens",layer 5 of FCx,"nucleus of the anterior commissure, left",inner plexiform zone in superolateral temporal cortex
+"Field CA2, pyramidal layer",layer 6 of FCx,"bed  nucleus of stria terminalis, left",SZ in polysensory temporal cortex
+"Field CA2, stratum radiatum",sublayer 6a of FCx,"olfactory tubercle, left",outer SZ in polysensory temporal cortex
+Field CA3,sublayer 6b of FCx,"islands of calleja, left",outer plexiform zone in polysensory temporal cortex
+"Field CA3, stratum lacunosum-moleculare",parietal cortex,"substantia innominata, right",inner SZ in polysensory temporal cortex
+"Field CA3, stratum lucidum",ventricular zone of PCx,"basal nucleus of meynert, right",inner plexiform zone in polysensory temporal cortex
+"Field CA3, stratum oriens",mantle zone of PCx,"nucleus of the diagonal band, right ",SZ in parainsular temporal cortex
+"Field CA3, pyramidal layer",periventricular stratum of PCx (subventricular zone),"nucleus of the diagonal band, right, horizontal division",outer SZ in parainsular temporal cortex
+"Field CA3, stratum radiatum",intermediate stratum of PCx (white matter/subplate),"nucleus of the diagonal band, right, vertical division",outer plexiform zone in parainsular temporal cortex
+Dentate gyrus,superficial stratum of PCx (cortical plate/marginal zone),"nucleus of the anterior commissure, right",inner SZ in parainsular temporal cortex
+"Dentate gyrus, molecular layer",layer 1 of PCx,"bed  nucleus of stria terminalis, right",inner plexiform zone in parainsular temporal cortex
+"Dentate gyrus, polymorph layer",layer 2 of PCx,"olfactory tubercle, right",SZ in ventrolateral temporal cortex
+"Dentate gyrus, granule cell layer",layer 3 of PCx,"islands of calleja, right",SZ in midlateral temporal cortex
+"Dentate gyrus, subgranular zone",layer 4 of PCx,basal ganglia,outer SZ in midlateral temporal cortex
+Dentate gyrus crest,layer 5 of PCx,globus pallidus,outer plexiform zone in midlateral temporal cortex
+"Dentate gyrus crest, molecular layer",layer 6 of PCx,"globus pallidus, external segment",inner SZ in midlateral temporal cortex
+"Dentate gyrus crest, polymorph layer",sublayer 6a of PCx,"globus pallidus, external segment, left",inner plexiform zone in midlateral temporal cortex
+"Dentate gyrus crest, granule cell layer",sublayer 6b of PCx,"globus pallidus, external segment, right",SZ in inferolateral temporal cortex
+Dentate gyrus lateral blade,occipital cortex,"globus pallidus, internal segment",outer SZ in inferolateral temporal cortex
+"Dentate gyrus lateral blade, molecular layer",ventricular zone of OCx,"globus pallidus, internal segment, left",outer plexiform zone in inferolateral temporal cortex
+"Dentate gyrus lateral blade, polymorph layer",mantle zone of OCx,"globus pallidus, internal segment, right",inner SZ in inferolateral temporal cortex
+"Dentate gyrus lateral blade, granule cell layer",periventricular stratum of OCx (subventricular zone),striatum,inner plexiform zone in inferolateral temporal cortex
+Dentate gyrus medial blade,intermediate stratum of OCx (white matter/subplate),caudate nucleus,SZ in midinferior temporal cortex
+"Dentate gyrus medial blade, molecular layer",superficial stratum of OCx (cortical plate/marginal zone),body of the caudate nucleus,SZ in rostral midinferior temporal cortex (area 36)
+"Dentate gyrus medial blade, polymorph layer",layer 1 of OCx,"body of caudate nucleus, left",outer SZ in rostral midinferior temporal cortex (area 36)
+"Dentate gyrus medial blade, granule cell layer",layer 2 of OCx,"body of caudate nucleus, right",outer plexiform zone in rostral midinferior temporal cortex (area 36)
+Fasciola cinerea,layer 3 of OCx,head of the caudate nucleus,inner SZ in rostral midinferior temporal cortex (area 36)
+Induseum griseum,layer 4 of OCx,"head of caudate nucleus, left",inner plexiform zone in rostral midinferior temporal cortex (area 36)
+Retrohippocampal region,layer 5 of OCx,"head of caudate nucleus, right",SZ in caudal midinferior temporal cortex (area TF)
+Entorhinal area,layer 6 of OCx,tail of the caudate nucleus,outer SZ in caudal midinferior temporal cortex (area TF)
+"Entorhinal area, lateral part",sublayer 6a of OCx,"tail of caudate nucleus, left",outer plexiform zone in caudal midinferior temporal cortex (area TF)
+"Entorhinal area, lateral part, layer 1",sublayer 6b of OCx,"tail of caudate nucleus, right",inner SZ in caudal midinferior temporal cortex (area TF)
+"Entorhinal area, lateral part, layer 2",temporal cortex,nucleus accumbens,inner plexiform zone in caudal midinferior temporal cortex (area TF)
+"Entorhinal area, lateral part, layer 2/3",ventricular zone of TCx,"nucleus accumbens, left",SZ in posterior parahippocampal cortex
+"Entorhinal area, lateral part, layer 2a",mantle zone of TCx,"nucleus accumbens, right",outer SZ in posterior parahippocampal cortex
+"Entorhinal area, lateral part, layer 2b",periventricular stratum of TCx (subventricular zone),putamen,outer plexiform zone in posterior parahippocampal cortex
+"Entorhinal area, lateral part, layer 3",intermediate stratum of TCx (white matter/subplate),"putamen, left",inner SZ in posterior parahippocampal cortex
+"Entorhinal area, lateral part, layer 4",superficial stratum of TCx (cortical plate/marginal zone),"putamen, right",inner plexiform zone in posterior parahippocampal cortex
+"Entorhinal area, lateral part, layer 4/5",layer 1 of TCx,claustrum,SZ in medial temporal-occipital cortex
+"Entorhinal area, lateral part, layer 5",layer 2 of TCx,"claustrum, left",outer SZ in medial temporal-occipital cortex
+"Entorhinal area, lateral part, layer 5/6",layer 3 of TCx,"claustrum, right",outer plexiform zone in medial temporal-occipital cortex
+"Entorhinal area, lateral part, layer 6a",layer 4 of TCx,diencephalon,inner SZ in medial temporal-occipital cortex
+"Entorhinal area, lateral part, layer 6b",layer 5 of TCx,epithalamus,inner plexiform zone in medial temporal-occipital cortex
+"Entorhinal area, medial part, dorsal zone",layer 6 of TCx,habenular nuclei,SZ in lateral temporal-occipital cortex
+"Entorhinal area, medial part, dorsal zone, layer 1",sublayer 6a of TCx,"habenular nuclei, left",outer SZ in lateral temporal-occipital cortex
+"Entorhinal area, medial part, dorsal zone, layer 2",sublayer 6b of TCx,"lateral habenular nucleus, left",outer plexiform zone in lateral temporal-occipital cortex
+"Entorhinal area, medial part, dorsal zone, layer 2a",insular cortex,"lateral habenular nucleus, left, magnocellular division",inner SZ in lateral temporal-occipital cortex
+"Entorhinal area, medial part, dorsal zone, layer 2b",ventricular zone of InsCx,"lateral habenular nucleus, left, parvocellular division",inner plexiform zone in lateral temporal-occipital cortex
+"Entorhinal area, medial part, dorsal zone, layer 3",mantle zone of InsCx,"medial habenular nucleus, left",SZ in temporal polar cortex
+"Entorhinal area, medial part, dorsal zone, layer 4",periventricular stratum of InsCx (subventricular zone),"habenular nuclei, right",SZ in occipital neocortex
+"Entorhinal area, medial part, dorsal zone, layer 5",intermediate stratum of InsCx (white matter/subplate),"lateral habenular nucleus, right",SZ in area prostriata
+"Entorhinal area, medial part, dorsal zone, layer 5/6",superficial stratum of InsCx (cortical plate/marginal zone),"lateral habenular nucleus, right, magnocellular division",outer SZ in area prostriata
+"Entorhinal area, medial part, dorsal zone, layer 6",layer 1 of InsCx,"lateral habenular nucleus, right, parvocellular division",outer plexiform zone in area prostriata
+"Entorhinal area, medial part, ventral zone",layer 2 of InsCx,"medial habenular nucleus, right",inner SZ in area prostriata
+"Entorhinal area, medial part, ventral zone, layer 1",layer 3 of InsCx,paraventricular nuclei of thalamus,inner plexiform zone in area prostriata
+"Entorhinal area, medial part, ventral zone, layer 2",layer 4 of InsCx,"paraventricular nuclei, left of thalamus, left",SZ in primary visual cortex
+"Entorhinal area, medial part, ventral zone, layer 3",layer 5 of InsCx,"anterior paraventricular nucleus of thalamus, left",outer SZ in primary visual cortex
+"Entorhinal area, medial part, ventral zone, layer 4",layer 6 of InsCx,"posterior paraventricular nucleus of thalamus, left",outer plexiform zone in primary visual cortex
+"Entorhinal area, medial part, ventral zone, layer 5/6",sublayer 6a of InsCx,"paraventricular nuclei, right of thalamus, right",inner SZ in primary visual cortex
+Parasubiculum,sublayer 6b of InsCx,"anterior paraventricular nucleus of thalamus, right",inner plexiform zone in primary visual cortex
+"Parasubiculum, layer 1",cingulate cortex,"posterior paraventricular nucleus of thalamus, right",SZ in extrastriate cortex
+"Parasubiculum, layer 2",ventricular zone of CCx,pineal gland,SZ in dorsomedial extrastriate cortex (V2)
+"Parasubiculum, layer 3",mantle zone of CCx,hypothalamus,outer SZ in dorsomedial extrastriate cortex
+Postsubiculum,periventricular stratum of CCx (subventricular zone),anterior hypothalamic region,inner SZ in dorsomedial extrastriate cortex
+"Postsubiculum, layer 1",intermediate stratum of CCx (white matter/subplate),anterior hypothalamic area,SZ in ventromedial extrastriate cortex (VP)
+"Postsubiculum, layer 2",superficial stratum of CCx (cortical plate/marginal zone),"anterior hypothalamic area, left",outer SZ in ventromedial extrastriate cortex
+"Postsubiculum, layer 3",layer 1 of CCx,"anterior hypothalamic area, left, anterior part",inner SZ in ventromedial extrastriate cortex
+Presubiculum,layer 2 of CCx,"anterior hypothalamic area, left, central part",SZ in midlateral extrastriate cortex (area 19)
+"Presubiculum, layer 1",layer 3 of CCx,"anterior hypothalamic area, right",outer SZ in midlateral extrastriate cortex
+"Presubiculum, layer 2",layer 4 of CCx,"anterior hypothalamic area, right, anterior part",inner SZ in midlateral extrastriate cortex
+"Presubiculum, layer 3",layer 5 of CCx,"anterior hypothalamic area, right, central part",outer SZ in extrastriate cortex
+Subiculum,layer 6 of CCx,anterior hypothalamic nucleus,outer plexiform zone in extrastriate cortex
+"Subiculum, dorsal part",sublayer 6a of CCx,"anterior hypothalamic nucleus, left",inner SZ in extrastriate cortex
+"Subiculum, dorsal part, molecular layer",sublayer 6b of CCx,"anterior hypothalamic nucleus, right",inner plexiform zone in extrastriate cortex
+"Subiculum, dorsal part, pyramidal layer",perirhinal-ectorhinal cortex,"lateral hypothalamic area, anterior region",SZ in cingulate neocortex
+"Subiculum, dorsal part, stratum radiatum",layer 1 of PRh-Ect,"lateral hypothalamic area, anterior region, left",SZ in rostral cingulate cortex
+"Subiculum, ventral part",layer 2 of PRh-Ect,"lateral hypothalamic area, anterior region, right",SZ in midcingulate cortex
+"Subiculum, ventral part, molecular layer",layer 3 of PRh-Ect,paraventricular nucleus of the hypothalamus,SZ in caudal cingulate cortex
+"Subiculum, ventral part, pyramidal layer",layer 4 of PRh-Ect,"paraventricular nucleus of the hypothalamus, left",SZ in subgenual cingulate cortex
+"Subiculum, ventral part, stratum radiatum",layer 5 of PRh-Ect,"subparaventricular zone, left",SZ in periallocortex
+Prosubiculum,layer 6 of PRh-Ect,"paraventricular nucleus of the hypothalamus, left, descending division",SZ in septal region
+"Prosubiculum, dorsal part",retrosplenial cortex,"paraventricular nucleus of the hypothalamus, left, descending division, dorsal parvicellular part",ventricular zone
+"Prosubiculum, dorsal part, molecular layer",layer 1 of RSC,"paraventricular nucleus of the hypothalamus, left, descending division, forniceal part",VZ in frontal neocortex
+"Prosubiculum, dorsal part, pyramidal layer",layer 2 of RSC,"paraventricular nucleus of the hypothalamus, left, descending division, lateral parvicellular part",VZ in frontal polar cortex
+"Prosubiculum, dorsal part, stratum radiatum",layer 3 of RSC,"paraventricular nucleus of the hypothalamus, left, descending division, medial parvicellular part, ventral zone",VZ in dorsomedial frontal cortex
+"Prosubiculum, ventral part",layer 4 of RSC,"paraventricular nucleus of the hypothalamus, left, magnocellular division",VZ in dorsolateral prefrontal cortex
+"Prosubiculum, ventral part, molecular layer",layer 5 of RSC,"paraventricular nucleus of the hypothalamus, left, magnocellular division, anterior magnocellular part",outer VZ in dorsolateral prefrontal cortex
+"Prosubiculum, ventral part, pyramidal layer",layer 6 of RSC,"paraventricular nucleus of the hypothalamus, left, magnocellular division, medial magnocellular part",inner VZ in dorsolateral prefrontal cortex
+"Prosubiculum, ventral part, stratum radiatum",layer 6a of RSC,"paraventricular nucleus of the hypothalamus, left, magnocellular division, posterior magnocellular part",VZ in ventrolateral prefrontal cortex
+Hippocampo-amygdalar transition area,layer 6b of RSC,"paraventricular nucleus of the hypothalamus, left, magnocellular division, posterior magnocellular part, lateral zone",VZ in orbital frontal cortex
+Area prostriata,entorhinal cortex,"paraventricular nucleus of the hypothalamus, left, magnocellular division, posterior magnocellular part, medial zone",VZ in posteror frontal cortex (motor cortex)
+Cortical subplate,ventricular zone of ERCx,"paraventricular nucleus of the hypothalamus, left, parvicellular division",outer VZ in posteror frontal cortex (motor cortex)
+"Layer 6b, isocortex",mantle zone of ERCx,"paraventricular nucleus of the hypothalamus, left, parvicellular division, anterior parvicellular part",inner VZ in posteror frontal cortex (motor cortex)
+Claustrum,periventricular stratum of ERCx (subventricular zone),"paraventricular nucleus of the hypothalamus, left, parvicellular division, medial parvicellular part, dorsal zone",VZ in parietal neocortex
+Endopiriform nucleus,intermediate stratum of ERCx (white matter/subplate),"paraventricular nucleus of the hypothalamus, left, parvicellular division, periventricular part",VZ in primary somatosensory cortex
+"Endopiriform nucleus, dorsal part",superficial stratum of ERCx (cortical plate/marginal zone),"paraventricular nucleus of the hypothalamus, right",outer VZ in primary somatosensory cortex
+"Endopiriform nucleus, ventral part",layer 1 of ERCx,"subparaventricular zone, right",inner VZ in primary somatosensory cortex
+Lateral amygdalar nucleus,layer 2 of ERCx,"paraventricular nucleus of the hypothalamus, right, descending division",VZ in dorsomedial parietal cortex (area 7m)
+Basolateral amygdalar nucleus,layer 3 of ERCx,"paraventricular nucleus of the hypothalamus, right, descending division, dorsal parvicellular part",VZ in posterosuperior (dorsal) parietal cortex
+"Basolateral amygdalar nucleus, anterior part",layer 4 of ERCx,"paraventricular nucleus of the hypothalamus, right, descending division, forniceal part",VZ in posteroinferior (ventral) parietal cortex
+"Basolateral amygdalar nucleus, posterior part",layer 5 of ERCx,"paraventricular nucleus of the hypothalamus, right, descending division, lateral parvicellular part",outer VZ in posteroinferior (ventral) parietal cortex
+"Basolateral amygdalar nucleus, ventral part",layer 6 of ERCx,"paraventricular nucleus of the hypothalamus, right, descending division, medial parvicellular part, ventral zone",inner VZ in posteroinferior (ventral) parietal cortex
+Basomedial amygdalar nucleus,medial pallium (hippocampal allocortex),"paraventricular nucleus of the hypothalamus, right, magnocellular division",VZ in temporal neocortex
+"Basomedial amygdalar nucleus, anterior part",ventricular zone of MPall,"paraventricular nucleus of the hypothalamus, right, magnocellular division, anterior magnocellular part",VZ in dorsolateral temporal cortex
+"Basomedial amygdalar nucleus, posterior part",mantle zone of MPall,"paraventricular nucleus of the hypothalamus, right, magnocellular division, medial magnocellular part",VZ in primary auditory cortex
+Posterior amygdalar nucleus,periventricular stratum of MPall,"paraventricular nucleus of the hypothalamus, right, magnocellular division, posterior magnocellular part",VZ in superolateral temporal cortex
+Cerebral nuclei,intermediate stratum of MPall,"paraventricular nucleus of the hypothalamus, right, magnocellular division, posterior magnocellular part, lateral zone",VZ in polysensory temporal cortex
+Striatum,superficial stratum of MPall,"paraventricular nucleus of the hypothalamus, right, magnocellular division, posterior magnocellular part, medial zone",VZ in parainsular temporal cortex
+Striatum dorsal region,dentate gyrus,"paraventricular nucleus of the hypothalamus, right, parvicellular division",VZ in ventrolateral temporal cortex
+Caudoputamen,ventricular zone of DG,"paraventricular nucleus of the hypothalamus, right, parvicellular division, anterior parvicellular part",VZ in midlateral temporal cortex
+Striatum ventral region,mantle zone of DG,"paraventricular nucleus of the hypothalamus, right, parvicellular division, medial parvicellular part, dorsal zone",VZ in inferolateral temporal cortex
+Nucleus accumbens,periventricular stratum of DG,"paraventricular nucleus of the hypothalamus, right, parvicellular division, periventricular part",outer VZ in inferolateral temporal cortex
+Fundus of striatum,intermediate stratum of DG,"periventricular nucleus of the hypothalamus, anterior part",inner VZ in inferolateral temporal cortex
+Olfactory tubercle,hilus of the DG,"periventricular nucleus of the hypohalamus, anterior part, left",VZ in midinferior temporal cortex
+Islands of Calleja,superficial stratum of DG,"periventricular nucleus of the hypohalamus, anterior part, right",VZ in rostral midinferior temporal cortex (area 36)
+Major island of Calleja,granule cell layer of the DG,supraoptic nucleus,VZ in caudal midinferior temporal cortex (area TF)
+"Olfactory tubercle, layers 1-3",molecular layer of the DG,"supraoptic nucleus, left",outer VZ in caudal midinferior temporal cortex (area TF)
+"Olfactory tubercle, molecular layer",hippocampus (cortex Ammonis),"supraoptic nucleus, left, dorsolateral part",inner VZ in caudal midinferior temporal cortex (area TF)
+"Olfactory tubercle, pyramidal layer",ventricular zone of CA,"supraoptic nucleus, left, ventromedial part",VZ in posterior parahippocampal cortex
+"Olfactory tubercle, polymorph layer",mantle zone of CA,"supraoptic nucleus, right",outer VZ in posterior parahippocampal cortex
+Lateral strip of striatum,periventricular stratum of CA,"supraoptic nucleus, right, dorsolateral part",inner VZ in posterior parahippocampal cortex
+Lateral septal complex,intermediate stratum of CA,"supraoptic nucleus, right, ventromedial part",VZ in medial temporal-occipital cortex
+Lateral septal nucleus,superficial stratum of CA,suprachiasmatic nucleus,VZ in lateral temporal-occipital cortex
+"Lateral septal nucleus, caudal (caudodorsal) part",Field CA1,"suprachiasmatic nucleus, left",VZ in temporal polar cortex
+"Lateral septal nucleus, rostral (rostroventral) part","Field CA1, stratum oriens","suprachiasmatic nucleus, left, dorsomedial part",VZ in occipital neocortex
+"Lateral septal nucleus, ventral part","Field CA1, stratum pyramidale","suprachiasmatic nucleus, left, ventrolateral part",VZ in area prostriata
+Septofimbrial nucleus,"Field CA1, stratum radiatum","suprachiasmatic nucleus, right",VZ in primary visual cortex
+Septohippocampal nucleus,"Field CA1, stratum lacunosum-moleculare","suprachiasmatic nucleus, right, dorsomedial part",outer VZ in primary visual cortex
+Striatum-like amygdalar nuclei,Field CA2,"suprachiasmatic nucleus, right, ventrolateral part",inner VZ in primary visual cortex
+Anterior amygdalar area,"Field CA2, stratum lacunosum-moleculare",mammillary region,VZ in extrastriate cortex
+Bed nucleus of the accessory olfactory tract,"Field CA2, stratum oriens","lateral hypothalamic area, mammillary region",VZ in dorsomedial extrastriate cortex (V2)
+Central amygdalar nucleus,"Field CA2, stratum pyramidale","lateral hypothalamic area, mammillary region, left",VZ in ventromedial extrastriate cortex (VP)
+"Central amygdalar nucleus, capsular part","Field CA2, stratum radiatum","pallidohypothalamic nucleus, left",VZ in midlateral extrastriate cortex (area 19)
+"Central amygdalar nucleus, lateral part",Field CA3,"lateral hypothalamic area, mammillary region, right",VZ in cingulate neocortex
+"Central amygdalar nucleus, medial part","Field CA3, stratum oriens","pallidohypothalamic nucleus, right",VZ in rostral cingulate neocortex
+Intercalated amygdalar nucleus,"Field CA3, stratum pyramidale",mammillary body,VZ in midcingulate neocortex
+Medial amygdalar nucleus,"Field CA3, stratum lucidum","mammillary body, left",VZ in caudal cingulate neocortex
+"Medial amygdalar nucleus, anterodorsal part","Field CA3, stratum radiatum","lateral mammillary nucleus, left",VZ in subgenual cingulate neocortex
+"Medial amygdalar nucleus, anteroventral part","Field CA3, stratum lacunosum-moleculare","medial mammillary nucleus, left",VZ in periallocortex
+"Medial amygdalar nucleus, posterodorsal part",induseum griseum,"medial mammillary nucleus, left, lateral part",VZ in perirhinal cortex
+"Medial amygdalar nucleus, posterodorsal part, sublayer a",ventricular zone of the IG,"medial mammillary nucleus, left, medial part",VZ in rostral perirhinal cortex
+"Medial amygdalar nucleus, posterodorsal part, sublayer b",mantle zone of the IG,"medial mammillary nucleus, left, basal division",VZ in caudal perirhinal cortex
+"Medial amygdalar nucleus, posterodorsal part, sublayer c",periventricular stratum of the IG,"premammillary nucleus, left",VZ in entorhinal cortex
+"Medial amygdalar nucleus, posteroventral part",intermediate stratum of the IG,"premammillary nucleus, left, dorsal part",VZ in medial (posterior) entorhinal cortex
+Pallidum,superficial stratum of the IG,"premammillary nucleus, left, ventral part",VZ in caudal entorhinal cortex
+"Pallidum, dorsal region",pyramidal layer of IG,"mammillary body, right",VZ in lateral (anterior) entorhinal cortex
+"Globus pallidus, external segment",taenia tecta,"lateral mammillary nucleus, right",VZ in rostral entorhinal cortex
+"Globus pallidus, internal segment",ventricular zone of TTe,"medial mammillary nucleus, right",VZ in presubicular cortex
+"Pallidum, ventral region",mantle zone of TTe,"medial mammillary nucleus, right, lateral part",VZ in rostral presubicular cortex
+Substantia innominata,periventricular stratum of TTe,"medial mammillary nucleus, right, medial part",VZ in caudal presubicular cortex
+Magnocellular nucleus,"dorsal peduncular cortex, periventricular part","medial mammillary nucleus, right, basal division",VZ in retrosplenial cortex
+"Pallidum, medial region",intermediate stratum of TTe,"premammillary nucleus, right",VZ in allocortex
+Medial septal complex,"dorsal peduncular cortex, intermediate part","premammillary nucleus, right, dorsal part",VZ in hippocampal proper
+Medial septal nucleus,superficial stratum of TTe,"premammillary nucleus, right, ventral part",VZ in rostal hippocampal proper
+Diagonal band nucleus,pyramidal layer of taenia tecta,posterior hypothalamic area,VZ in caudal hippocampal proper
+Triangular nucleus of septum,subiculum,"posterior hypothalamic area, left",VZ in subicular cortex
+"Pallidum, caudal region",ventricular zone of S,"posterior hypothalamic area, right",VZ in rostral subicular cortex
+Bed nuclei of the stria terminalis,mantle zone of S,supramammillary nucleus,VZ in caudal subicular cortex
+"Bed nuclei of the stria terminalis, anterior division",periventricular stratum of S,"supramammillary nucleus, left",Ganglionic eminence (VZ in basal nuclei)
+"Bed nuclei of the stria terminalis, anterior division, anterolateral area",intermediate stratum of S,"supramammillary nucleus, left, medial part",LGE-VZ border region
+"Bed nuclei of the stria terminalis, anterior division, anteromedial area",superficial stratum of S,"supramammillary nucleus, right",lateral ganglionic eminence
+"Bed nuclei of the stria terminalis, anterior division, dorsomedial nucleus",pyramidal layer of S,"supramammillary nucleus, right, medial part",outer portion of lateral ganglionic eminence
+"Bed nuclei of the stria terminalis, anterior division, fusiform nucleus",molecular layer of S,tuberomammillary nucleus,inner portion of lateral ganglionic eminence
+"Bed nuclei of the stria terminalis, anterior division, juxtacapsular nucleus",presubiculum,"tuberomammillary nucleus, left",MGE-Lateral region
+"Bed nuclei of the stria terminalis, anterior division, magnocellular nucleus",ventricular zone of PrS,"tuberomammillary nucleus, left, principle part",medial ganglionic eminence
+"Bed nuclei of the stria terminalis, anterior division, oval nucleus",mantle zone of PrS,"tuberomammillary nucleus, right",outer portion of medial ganglionic eminence
+"Bed nuclei of the stria terminalis, anterior division, rhomboid nucleus",periventricular stratum of PrS (subventricular zone),"tuberomammillary nucleus, right, principle part",inner portion of medial ganglionic eminence
+"Bed nuclei of the stria terminalis, anterior division, ventral nucleus",intermediate stratum of PrS (white matter/subplate),preoptic region,caudal ganglionic eminence
+"Bed nuclei of the stria terminalis, posterior division",superficial stratum of PrS (cortical plate/marginal zone),"preoptic region, left",outer portion of caudal ganglionic eminence
+"Bed nuclei of the stria terminalis, posterior division, dorsal nucleus",layer 1 of PrS,"intermediate hypothalamic nuclei, left",inner portion of caudal ganglionic eminence
+"Bed nuclei of the stria terminalis, posterior division, principal nucleus",layer 2 of PrS,"intermediate nucleus, left",VZ in septal region
+"Bed nuclei of the stria terminalis, posterior division, interfascicular nucleus",layer 3 of PrS,"uncinate nucleus, left",VZ in subcallosal region
+"Bed nuclei of the stria terminalis, posterior division, transverse nucleus",layer 4 of PrS (lamina dissecans),"lateral preoptic area, left",VZ in postamygdaloid region
+"Bed nuclei of the stria terminalis, posterior division, strial extension",layer 5 of PrS,"medial preoptic area, left",VZ in thalamic region
+Bed nucleus of the anterior commissure,layer 6 of PrS,"medial preoptic nucleus, left",VZ in hypothalamic portion
+Brain stem,layer 6a of PrS,"medial preoptic nucleus, left, central part",rostral migratory stream
+Interbrain,layer 6b of PrS,"medial preoptic nucleus, left, lateral part",vertical portion of rostral migratory stream
+Thalamus,parasubiculum,"medial preoptic nucleus, left, medial part",VZ part of RMSv
+"Thalamus, sensory-motor cortex related",ventricular zone of PaS,"median preoptic nucleus, left",GE part of RMSv
+Ventral group of the dorsal thalamus,mantle zone of PaS,"periventricular nucleus of the hypothalamus, left, preoptic part",SZ part of RMSv
+Ventral anterior-lateral complex of the thalamus,periventricular stratum of PaS (subventricular zone),"anteroventral periventricular nucleus, left",horizontal portion of rostral migratory stream
+Ventral medial nucleus of the thalamus,intermediate stratum of PaS (white matter/subplate),"dorsal periventricular nucleus, left",VZ part of RMSh
+Ventral posterior complex of the thalamus,superficial stratum of PaS (cortical plate/marginal zone),"preoptic region, right",GE part of RMSh
+Ventral posterolateral nucleus of the thalamus,layer 1 of PaS,"intermediate hypothalamic nuclei, right",SZ part of RMSh
+"Ventral posterolateral nucleus of the thalamus, parvicellular part",layer 2 of PaS,"intermediate nucleus, right",callosal sling
+Ventral posteromedial nucleus of the thalamus,layer 3 of PaS,"uncinate nucleus, right",dentatohippocampal transient cell zone
+"Ventral posteromedial nucleus of the thalamus, parvicellular part",layer 4 of PaS,"lateral preoptic area, right",interpallidal transient cell zone
+Posterior triangular thalamic nucleus,layer 5 of PaS,"medial preoptic area, right",olfactory peduncle
+Subparafascicular nucleus,layer 6 of PaS,"medial preoptic nucleus, right",perifornical gray zone
+"Subparafascicular nucleus, magnocellular part",layer 6a of PaS,"medial preoptic nucleus, right, central part",primordial plexiform layer
+"Subparafascicular nucleus, parvicellular part",layer 6b of PaS,"medial preoptic nucleus, right, lateral part",subcallosal gray zone
+Subparafascicular area,fasciola cinerea,"medial preoptic nucleus, right, medial part",transient cell zone in external capsule
+Peripeduncular nucleus,ventricular zone of the Fc,"median preoptic nucleus, right",transient cell zone in extreme capsule
+"Geniculate group, dorsal thalamus",mantle zone of the Fc,"periventricular nucleus of the hypothalamus, right, preoptic part",telencephalon
+Medial geniculate complex,periventricular stratum of the Fc,"anteroventral periventricular nucleus, right",cerebral cortex
+"Medial geniculate complex, dorsal part",intermediate stratum of the Fc,"dorsal periventricular nucleus, right",neocortex (isocortex)
+"Medial geniculate complex, ventral part",superficial stratum of the Fc,tuberal region,frontal neocortex
+"Medial geniculate complex, medial part",pyramidal layer of Fc,pituitary body,prefrontal cortex
+Dorsal part of the lateral geniculate complex,molecular layer of Fc,arcuate nucleus of the hypothalamus,frontal polar cortex (area 10)
+"Dorsal part of the lateral geniculate complex, shell",pallial septum,"arcuate nucleus of the hypothalamus, left",medial subdivision of area 10
+"Dorsal part of the lateral geniculate complex, core",ventricular zone of SePall,"arcuate nucleus of the hypothalamus, left, dorsal part",layer I of area 10m
+"Dorsal part of the lateral geniculate complex, ipsilateral zone",mantle zone of SePall,"arcuate nucleus of the hypothalamus, left, lateral part",layer II of area 10m
+"Thalamus, polymodal association cortex related",periventricular stratum of SePall,"arcuate nucleus of the hypothalamus, left, medial part",layer III of area 10m
+Lateral group of the dorsal thalamus,intermediate stratum of SePall,"arcuate nucleus of the hypothalamus, right",layer IV of area 10m
+Lateral posterior nucleus of the thalamus,superficial stratum of SePall,"arcuate nucleus of the hypothalamus, right, dorsal part",layer V of area 10m
+Posterior complex of the thalamus,septohippocampal nucleus,"arcuate nucleus of the hypothalamus, right, lateral part",layer VI of area 10m
+Posterior limiting nucleus of the thalamus,telencephalo-hypothalamic transition area,"arcuate nucleus of the hypothalamus, right, medial part",lateral subdivision of area 10
+Suprageniculate nucleus,ventricular zone of TelH,dorsomedial hypothalamic nucleus,layer I of area 10l
+Ethmoid nucleus of the thalamus,mantle zone of TelH,"dorsomedial hypothalamic nucleus, left",layer II of area 10l
+Retroethmoid nucleus,periventricular stratum of TelH,"dorsomedial hypothalamic nucleus, left, compact part",layer III of area 10l
+Anterior group of the dorsal thalamus,intermediate stratum of TelH,"dorsomedial hypothalamic nucleus, left, diffuse part",layer IV of area 10l
+Anteroventral nucleus of thalamus,superficial stratum of TelH,"dorsomedial hypothalamic nucleus, right",layer V of area 10l
+Anteromedial nucleus,peduncular (caudal) hypothalamus,"dorsomedial hypothalamic nucleus, right, compact part",layer VI of area 10l
+"Anteromedial nucleus, dorsal part",alar part of peduncular hypothalamus,"dorsomedial hypothalamic nucleus, right, diffuse part",orbital subdivision of area 10
+"Anteromedial nucleus, ventral part",peduncular paraventricular area of PHyA,"lateral hypothalamic area, tuberal region",layer I of area 10o
+Anterodorsal nucleus,ventricular zone of PPaA,"lateral hypothalamic area, tuberal region, left",layer II of area 10o
+Interanteromedial nucleus of the thalamus,mantle zone of PPaA,"lateral hypothalamic area, tuberal region, right",layer III of area 10o
+Interanterodorsal nucleus of the thalamus,periventricular stratum of PPaA,lateral tuberal nucleus,layer IV of area 10o
+Lateral dorsal nucleus of thalamus,"paraventricular nucleus, peduncular or principal part","lateral tuberal nucleus, left",layer V of area 10o
+Medial group of the dorsal thalamus,"paraventricular nucleus, dorsal part","lateral tuberal nucleus, right",layer VI of area 10o
+Intermediodorsal nucleus of the thalamus,"paraventricular nucleus, cap part",median eminence,dorsolateral prefrontal cortex
+Mediodorsal nucleus of thalamus,cap part of PPa,"median eminence, left",caudal portion of DFC (area 8)
+"Mediodorsal nucleus of the thalamus, central part",lateral magnocellular part of PPa,"median eminence, right",laterodorsal subdivision of area 8
+"Mediodorsal nucleus of the thalamus, lateral part",medial magnocellular part of PPa,perifornical nucleus,layer I of area 8ld
+"Mediodorsal nucleus of the thalamus, medial part",medial parvicellular part of PPa,"perifornical nucleus, left",layer II of area 8ld
+Submedial nucleus of the thalamus,"paraventricular nucleus, rostral part","perifornical nucleus, right",layer III of area 8ld
+Perireunensis nucleus,intermediate stratum of PPaA,"periventricular nucleus of the hypothalamus, tuberal part",layer IV of area 8ld
+Midline group of the dorsal thalamus,"paraventricular nucleus, lateral part","periventricular nucleus of the hypothalamus, tuberal part, left",layer V of area 8ld
+Paraventricular nucleus of the thalamus,upper dorsal perifornical nucleus,"periventricular nucleus of the hypothalamus, tuberal part, right",layer VI of area 8ld
+Parataenial nucleus,upper dorsal lateral hypothalamic area,ventromedial hypothalamic nucleus,lateroventral subdivision of area 8
+Nucleus of reuniens,lateral posterior nucleus,"ventromedial hypothalamic nucleus, left",layer I of area 8lv
+Xiphoid thalamic nucleus,peduncular nucleus of the stria medullaris,"ventromedial hypothalamic nucleus, left, dorsal part",layer II of area 8lv
+Intralaminar nuclei of the dorsal thalamus,superficial stratum of PPaA,"ventromedial hypothalamic nucleus, left, central part",layer III of area 8lv
+Rhomboid nucleus,dorsal entopeduncular nucleus,"ventromedial hypothalamic nucleus, left, ventral part",layer IV of area 8lv
+Central medial nucleus of the thalamus,peduncular subparaventricular area,"ventromedial hypothalamic nucleus, right",layer V of area 8lv
+Paracentral nucleus,ventricular zone of PSPa,"ventromedial hypothalamic nucleus, right, dorsal part",layer VI of area 8lv
+Central lateral nucleus of the thalamus,mantle zone of PSPa,"ventromedial hypothalamic nucleus, right, central part",medial subdivision of area 8
+Parafascicular nucleus,periventricular stratum of PSPa,"ventromedial hypothalamic nucleus, right, ventral part",layer I of area 8m
+Posterior intralaminar thalamic nucleus,"posterior anterior hypothalamic area, periventricular part",subthalamus,layer II of area 8m
+Reticular nucleus of the thalamus,A13 dopaminergic cell group,"subthalamic nucleus, left",layer III of area 8m
+"Geniculate group, ventral thalamus",intermediate stratum of PSPa,"subthalamic nucleus, right",layer IV of area 8m
+Intergeniculate leaflet of the lateral geniculate complex,posterior part of anterior hypothalamic nucleus,thalamus,layer V of area 8m
+Intermediate geniculate nucleus,stigmoid nucleus,dorsal thalamus,layer VI of area 8m
+Ventral part of the lateral geniculate complex,lower dorsal perifornical nucleus,anterior group of nuclei,rostrodorsal portion of DFC (area 9)
+"Ventral part of the lateral geniculate complex, lateral zone",lower dorsal lateral hypothalamic area,"anterior group of nuclei, left",lateral subdivision of area 9
+"Ventral part of the lateral geniculate complex, medial zone",superficial stratum of PSPa,"anterodorsal nucleus of the thalamus, left",layer I of area 9l
+Subgeniculate nucleus,ventral entopeduncular nucleus,"anteromedial nucleus of the thalamus, left",layer II of area 9l
+Epithalamus,dorsoventral lateral hypothalamic area,"anteroventral nucleus of the thalamus, left",layer III of area 9l
+Medial habenula,basal peduncular hypothalamus,"lateral dorsal nucleus of the thalamus, left",layer IV of area 9l
+Lateral habenula,dorsal part of PHyB,"anterior group of nuclei, right",layer V of area 9l
+Pineal body,ventricular zone of PHyB-D,"anterodorsal nucleus of the thalamus, right",layer VI of area 9l
+Hypothalamus,mantle zone of PHyB-D,"anteromedial nucleus of the thalamus, right",medial subdivision of area 9
+Periventricular zone,periventricular stratum of PHyB-D,"anteroventral nucleus of the thalamus, right",layer I of area 9m
+Supraoptic nucleus,"posterobasal nucleus, periventricular part","lateral dorsal nucleus of the thalamus, right",layer II of area 9m
+Accessory supraoptic group,intermediate stratum of PHyB-D,caudal group of intralaminar nuclei,layer III of area 9m
+Nucleus circularis,"posterobasal nucleus, intermediate part","caudal group of intralaminar nuclei, left",layer IV of area 9m
+Paraventricular hypothalamic nucleus,upper basal lateral hypothalamic area,"centre median nucleus of the thalamus, left",layer V of area 9m
+"Paraventricular hypothalamic nucleus, magnocellular division",upper basal perifornical nucleus,"parafascicular nucleus of the thalamus, left",layer VI of area 9m
+"Paraventricular hypothalamic nucleus, magnocellular division, anterior magnocellular part",superficial stratum of PHyB-D,"caudal group of intralaminar nuclei, right",intermediate portion of DFC (area 9/46)
+"Paraventricular hypothalamic nucleus, magnocellular division, medial magnocellular part",magnocellular superficial hypothalamic nucleus,"centre median nucleus of the thalamus, right",dorsal subdivision of A9/46
+"Paraventricular hypothalamic nucleus, magnocellular division, posterior magnocellular part",intermediate part of PHyB,"parafascicular nucleus of the thalamus, right",layer I of area 9/46d
+"Paraventricular hypothalamic nucleus, magnocellular division, posterior magnocellular part, lateral zone",ventricular zone of PHyB-I,dorsal lateral geneiculate nucleus,layer II of area 9/46d
+"Paraventricular hypothalamic nucleus, magnocellular division, posterior magnocellular part, medial zone",mantle zone of PHyB-I,"dorsal lateral geniculate nucleus, left",layer III of area 9/46d
+"Paraventricular hypothalamic nucleus, parvicellular division",periventricular stratum of PHyB-I,"dorsal lateral geniculate nucleus, left, magnocellular layers",layer IV of area 9/46d
+"Paraventricular hypothalamic nucleus, parvicellular division, anterior parvicellular part",periventricular domain associated to P-DMH,"dorsal lateral geniculate nucleus, left, parvocellular layers",layer V of area 9/46d
+"Paraventricular hypothalamic nucleus, parvicellular division, medial parvicellular part, dorsal zone",intermediate stratum of PHyB-I,"dorsal lateral geniculate nucleus, left, s and intercalated layers",layer VI of area 9/46d
+"Paraventricular hypothalamic nucleus, parvicellular division, periventricular part",peduncular part of dorsomedial hypothalamic nucleus,"dorsal lateral geniculate nucleus, right",ventral subdivision of A9/46
+"Periventricular hypothalamic nucleus, anterior part",core of P-DMH,"dorsal lateral geniculate nucleus, right, magnocellular layers",layer I of area 9/46v
+"Periventricular hypothalamic nucleus, intermediate part",shell of P-DMH,"dorsal lateral geniculate nucleus, right, parvocellular layers",layer II of area 9/46v
+Arcuate hypothalamic nucleus,lower basal lateral hypothalamic area,"dorsal lateral geniculate nucleus, right, s and intercalated layers",layer III of area 9/46v
+Periventricular region,lower basal perifornical nucleus,lateral group of nuclei,layer IV of area 9/46v
+Anterodorsal preoptic nucleus,superficial stratum of PHyB-I,"lateral group of nuclei, dorsal division",layer V of area 9/46v
+Anterior hypothalamic area,lateral tuberal nucleus,"lateral group of nuclei, left, dorsal division",layer VI of area 9/46v
+Anteroventral preoptic nucleus,subthalamic nucleus (migrated),"lateral posterior nucleus of the thalamus, left",rostroventral portion of DFC (area 46)
+Anteroventral periventricular nucleus,parasubthalamic nucleus (migrated),"anterior nucleus of the pulvinar, left",dorsal subdivision of area 46
+Dorsomedial nucleus of the hypothalamus,ventral part of PHyB,"inferior nucleus of the pulvinar, left",layer I of area 46d
+"Dorsomedial nucleus of the hypothalamus, anterior part",ventricular zone of PHyB-V,"inferior nucleus of the pulvinar, left, lateral division",layer II of area 46d
+"Dorsomedial nucleus of the hypothalamus, posterior part","hypothalamic ventricular organ, peduncular part","inferior nucleus of the pulvinar, left, medial division",layer III of area 46d
+"Dorsomedial nucleus of the hypothalamus, ventral part",mantle zone of PHyB-V,"lateral nucleus of the pulvinar, left",layer IV of area 46d
+Median preoptic nucleus,periventricular stratum of PHyB-V,"medial nucleus of the pulvinar, left",layer V of area 46d
+Medial preoptic area,"dorsal tuberomammillary nucleus, periventricular part (histaminergic)","lateral group of nuclei, right, dorsal division",layer VI of area 46d
+Vascular organ of the lamina terminalis,intermediate stratum of PHyB-V,"lateral posterior nucleus of the thalamus, right",ventral subdivision of area 46
+Posterodorsal preoptic nucleus,"dorsal tuberomammillary nucleus, intermediate part (histaminergic)","anterior nucleus of the pulvinar, right",layer I of area 46v
+Parastrial nucleus,superficial stratum of PHyB-V,"inferior nucleus of the pulvinar, right",layer II of area 46v
+Suprachiasmatic preoptic nucleus,paraterete nucleus,"inferior nucleus of the pulvinar, right, lateral division",layer III of area 46v
+"Periventricular hypothalamic nucleus, posterior part",caudal tuberomammillary nucleus (histaminergic),"inferior nucleus of the pulvinar, right, medial division",layer IV of area 46v
+"Periventricular hypothalamic nucleus, preoptic part",perimammillary part of PHyB,"lateral nucleus of the pulvinar, right",layer V of area 46v
+Subparaventricular zone,ventricular zone of PHyB-P,"medial nucleus of the pulvinar, right",layer VI of area 46v
+Suprachiasmatic nucleus,mantle zone of PHyB-P,"lateral group of nuclei, ventral division",ventrolateral prefrontal cortex
+Subfornical organ,periventricular stratum of PHyB-P,"lateral group of nuclei, left, ventral division",caudal portion of VFC (area 44)
+Ventromedial preoptic nucleus,periventricular periretromammillary nucleus,"basal ventral medial nucleus of the thalamus, left",dorsal subdivision of area 44
+Ventrolateral preoptic nucleus,intermediate stratum of PHyB-P,"ventral anterior nucleus of the thalamus, left",layer I of area 44d
+Hypothalamic medial zone,intermediate periretromammillary nucleus,"ventral anterior nucleus of the thalamus, left, magnocellular division",layer II of area 44d
+Anterior hypothalamic nucleus,superficial stratum of PHyB-P,"ventral anterior nucleus of the thalamus, left, principal division",layer III of area 44d
+"Anterior hypothalamic nucleus, anterior part",lateral periretromammillary nucleus,"ventral lateral anterior nucleus of the thalamus, left",layer IV of area 44d
+"Anterior hypothalamic nucleus, central part",mammillary part of PHyB,"ventral lateral posterior nucleus of the thalamus, left",layer V of area 44d
+"Anterior hypothalamic nucleus, dorsal part",retromammillary area,"ventral medial nucleus of the thalamus, left",layer VI of area 44d
+"Anterior hypothalamic nucleus, posterior part",ventricular zone of RMa,"ventral posterior inferior nucleus of the thalamus, left",ventral subdivision of area 44
+Mammillary body,mantle zone of RMa,"ventral posterior lateral nucleus of the thalamus, left",layer I of area 44v
+Lateral mammillary nucleus,periventricular stratum of RMa,"ventral posterior lateral nucleus of the thalamus, left, anterior division",layer II of area 44v
+Medial mammillary nucleus,"retromammillary area, medial part","ventral posterior lateral nucleus of the thalamus, left, posterior division",layer III of area 44v
+"Medial mammillary nucleus, median part",submammillothalamic nucleus,"ventral posterior medial nucleus of the thalamus, left",layer IV of area 44v
+"Medial mammillary nucleus, lateral part",intermediate stratum of RMa,"lateral group of nuclei, right, ventral division",layer V of area 44v
+"Medial mammillary nucleus, medial part","retromammillary area, lateral part","basal ventral medial nucleus of the thalamus, right",layer VI of area 44v
+"Medial mammillary nucleus, posterior part",superficial stratum of RMa,"ventral anterior nucleus of the thalamus, right",opercular subdivision of area 44
+"Medial mammillary nucleus, dorsal part",subthalamic nucleus (migratory origin),"ventral anterior nucleus of the thalamus, right, magnocellular division",layer I of area 44op
+Supramammillary nucleus,parasubthalamic nucleus (migratory origin),"ventral anterior nucleus of the thalamus, right, principal division",layer II of area 44op
+"Supramammillary nucleus, lateral part",floor of peduncular hypothalamus,"ventral lateral anterior nucleus of the thalamus, right",layer III of area 44op
+"Supramammillary nucleus, medial part",retromammillary floor,"ventral lateral posterior nucleus of the thalamus, right",layer IV of area 44op
+Tuberomammillary nucleus,diencephalon,"ventral medial nucleus of the thalamus, right",layer V of area 44op
+"Tuberomammillary nucleus, dorsal part",prosomere 3,"ventral posterior inferior nucleus of the thalamus, right",layer VI of area 44op
+"Tuberomammillary nucleus, ventral part",prethalamus,"ventral posterior lateral nucleus of the thalamus, right",rostral portion of VFC (area 45)
+Medial preoptic nucleus,roof plate of p3,"ventral posterior lateral nucleus of the thalamus, right, anterior division",rostral subdivision of A45
+"Medial preoptic nucleus, central part",choroidal tissue of p3,"ventral posterior lateral nucleus of the thalamus, right, posterior division",layer I of area 45r
+"Medial preoptic nucleus, lateral part",ventricular zone of p3Ch,"ventral posterior medial nucleus of the thalamus, right",layer II of area 45r
+"Medial preoptic nucleus, medial part",mantle zone of p3Ch,medial geniculate complex,layer III of area 45r
+Dorsal premammillary nucleus,alar plate of p3 (alar prethalamus),"medial geniculate complex, left",layer IV of area 45r
+Ventral premammillary nucleus,dorsal part of alar p3,"dorsal nucelus of medial geniculate complex, left",layer V of area 45r
+"Paraventricular hypothalamic nucleus, descending division",prethalamic eminence,"anterodorsal nucleus of medial geniculate complex, left",layer VI of area 45r
+"Paraventricular hypothalamic nucleus, descending division, dorsal parvicellular part",ventricular zone of PThE,"posterodorsal nucleus of medial geniculate complex, left",caudal subdivision of A45
+"Paraventricular hypothalamic nucleus, descending division, forniceal part",mantle zone of PThE,"magnocellular nucleus of the medial geniculate complex, left",layer I of area 45c
+"Paraventricular hypothalamic nucleus, descending division, lateral parvicellular part",periventricular stratum of PThE,"ventral nucleus of the medial geniculate complex, left",layer II of area 45c
+"Paraventricular hypothalamic nucleus, descending division, medial parvicellular part, ventral zone",intermediate stratum of PThE,"medial geniculate complex, right",layer III of area 45c
+Ventromedial hypothalamic nucleus,nucleus of the stria medullaris (prethalamic),"dorsal nucelus of medial geniculate complex, right",layer IV of area 45c
+"Ventromedial hypothalamic nucleus, anterior part",superficial stratum of PThE,"anterodorsal nucleus of medial geniculate complex, right",layer V of area 45c
+"Ventromedial hypothalamic nucleus, central part",lateral part of alar p3,"posterodorsal nucleus of medial geniculate complex, right",layer VI of area 45c
+"Ventromedial hypothalamic nucleus, dorsomedial part",reticular complex,"magnocellular nucleus of the medial geniculate complex, right",opercular subdivision of A45
+"Ventromedial hypothalamic nucleus, ventrolateral part",ventricular zone of RtC,"ventral nucleus of the medial geniculate complex, right",layer I of area 45op
+Posterior hypothalamic nucleus,mantle zone of RtC,medial group of nuclei,layer II of area 45op
+Hypothalamic lateral zone,periventricular stratum of RtC,"medial group of nuclei, left",layer III of area 45op
+Lateral hypothalamic area,retrohypothalamic nucleus,"mediodorsal nucleus of the thalamus, left",layer IV of area 45op
+Lateral preoptic area,intermediate stratum of RtC,"mediodorsal nucleus of the thalamus, left, parvocellular division",layer V of area 45op
+Preparasubthalamic nucleus,reticular nucleus,"mediodorsal nucleus of the thalamus, left, magnocellular division",layer VI of area 45op
+Parasubthalamic nucleus,superficial stratum of RtC,"mediodorsal nucleus of the thalamus, left, densocelllular division",orbital frontal cortex
+Perifornical nucleus,subgeniculate nucleus,"mediodorsal nucleus of thalamus, left, multiform (lateral) division",medial orbital frontal cortex (area 14)
+Retrochiasmatic area,posteroventral part of alar p3,"medioventral nucleus of the thalamus, left",rostral subdivision of area 14
+Subthalamic nucleus,ventricular zone of p3APV,"parataenial nucleus of the thalamus, left",layer I of area 14r
+Tuberal nucleus,mantle zone of p3APV,"submedial nucleus of the thalamus, left",layer II of area 14r
+Zona incerta,prethalamic (p3) zona limitans domain,"medial group of nuclei, right",layer III of area 14r
+Dopaminergic A13 group,ventricular zone of p3ZL,"mediodorsal nucleus of the thalamus, right",layer IV of area 14r
+Fields of Forel,mantle zone of p3ZL,"mediodorsal nucleus of the thalamus, right, parvocellular division",layer V of area 14r
+Median eminence,periventricular stratum of p3ZL,"mediodorsal nucleus of the thalamus, right, magnocellular division",layer VI of area 14r
+Midbrain,shell of p3ZL,"mediodorsal nucleus of the thalamus, right, densocelllular division",caudal subdivision of area 14
+"Midbrain, sensory related",intermediate stratum of p3ZL,"mediodorsal nucleus of thalamus, right, multiform (lateral) division",layer I of area 14c
+"Superior colliculus, sensory related",intercalate nucleus,"medioventral nucleus of the thalamus, right",layer II of area 14c
+"Superior colliculus, optic layer",superficial stratum of p3ZL,"parataenial nucleus of the thalamus, right",layer III of area 14c
+"Superior colliculus, superficial gray layer",pregeniculate nucleus,"submedial nucleus of the thalamus, right",layer IV of area 14c
+"Superior colliculus, zonal layer",peripeduncular nucleus,posterior group of nuclei,layer V of area 14c
+Inferior colliculus,zona incerta complex,"posterior group of nuclei, left",layer VI of area 14c
+"Inferior colliculus, central nucleus",ventricular zone of ZIC,"limitans nucleus of the thalamus, left",intermediate orbital frontal cortex
+"Inferior colliculus, dorsal nucleus",mantle zone of ZIC,"posterior nucleus of the thalamus, left",rostral division of OFCi (area 11)
+"Inferior colliculus, external nucleus",periventricular stratum of ZIC,"suprageniculate nucleus of the thalamus, left",medial subdivision of area 11
+Nucleus of the brachium of the inferior colliculus,magnocellular (periventricular) zona incerta,"posterior group of nuclei, right",layer I of area 11m
+Nucleus sagulum,intermediate stratum of ZIC,"limitans nucleus of the thalamus, right",layer II of area 11m
+Parabigeminal nucleus,rostral zona incerta,"posterior nucleus of the thalamus, right",layer III of area 11m
+Midbrain trigeminal nucleus,superficial stratum of ZIC,"suprageniculate nucleus of the thalamus, right",layer IV of area 11m
+Subcommissural organ,prethalamic tegmentum,rostral group of intralaminar nuclei,layer V of area 11m
+"Midbrain, motor related",basal plate of p3,"rostral group of intralaminar nuclei, left",layer VI of area 11m
+"Substantia nigra, reticular part",ventricular zone of p3B,"central lateral nucleus of the thalamus, left",lateral subdivision of area 11
+Ventral tegmental area,mantle zone of p3B,"central medial nucleus of the thalamus, left",layer I of area 11l
+Paranigral nucleus,periventricular stratum of p3B,"paracentral nucleus of the thalamus, left",layer II of area 11l
+"Midbrain reticular nucleus, retrorubral area",p3 portion of the pre-Edinger-Westphal nucleus,"rhomboid nucleus of the thalamus, left",layer III of area 11l
+Midbrain reticular nucleus,intermediate stratum of p3B,"rostral group of intralaminar nuclei, right",layer IV of area 11l
+"Midbrain reticular nucleus, magnocellular part",p3 part of the ZL core,"central lateral nucleus of the thalamus, right",layer V of area 11l
+"Midbrain reticular nucleus, magnocellular part, general",caudal zona incerta,"central medial nucleus of the thalamus, right",layer VI of area 11l
+"Midbrain reticular nucleus, parvicellular part",tegmental field of p3 (Forel's field),"paracentral nucleus of the thalamus, right",caudal division of OFCi (area 13)
+"Superior colliculus, motor related",gemini nuclei,"rhomboid nucleus of the thalamus, right",medial subdivision of area 13
+"Superior colliculus, motor related, deep gray layer",p3 portion of parabrachial pigmented nucleus,ventral thalamus,layer I of area 13m
+"Superior colliculus, motor related, deep white layer",superficial stratum of p3B,"ventral thalamus, left",layer II of area 13m
+"Superior colliculus, motor related, intermediate white layer",accessory entopeduncular nucleus (post-migratory),"nucleus of the H field of Forel, left",layer III of area 13m
+"Superior colliculus, motor related, intermediate gray layer",p3 portion of the substantia nigra pars compacta,"reticular nucleus of thalamus, left",layer IV of area 13m
+"Superior colliculus, motor related, intermediate gray layer, sublayer a",p3 portion of the substantia nigra pars reticulata,"zona incerta, left",layer V of area 13m
+"Superior colliculus, motor related, intermediate gray layer, sublayer b",p3 portion of paranigral nucleus,"ventral thalamus, right",layer VI of area 13m
+"Superior colliculus, motor related, intermediate gray layer, sublayer c",floor plate of p3,"nucleus of the H field of Forel, right",lateral subdivision of area 13
+Periaqueductal gray,ventricular zone of p3F,"reticular nucleus of thalamus, right",layer I of area 13l
+Precommissural nucleus,mantle zone of p3F,"zona incerta, right",layer II of area 13l
+Interstitial nucleus of Cajal,periventricular stratum of p3F,mesencephalon,layer III of area 13l
+Nucleus of Darkschewitsch,intermediate stratum of p3F,midbrain tectum,layer IV of area 13l
+Supraoculomotor periaqueductal gray,superficial stratum of p3F,inferior colliculus,layer V of area 13l
+Pretectal region,p3 portion of the ventral tegmental area,"inferior colliculus, left",layer VI of area 13l
+Anterior pretectal nucleus,prosomere 2,"central nucleus of the inferior colliculus, left",lateral orbital frontal cortex (area 12/47)
+Medial pretectal area,thalamus,"external nucleus of the inferior colliculus, left",medial subdivision of area 12/47
+Nucleus of the optic tract,roof plate of p2 (epithalamic roofplate),"pericentral nucleus of the inferior colliculus, left",layer I of area 12/47m
+Nucleus of the posterior commissure,choroidal tissue of p2,"inferior colliculus, right",layer II of area 12/47m
+Olivary pretectal nucleus,ventricular zone of p2Ch,"central nucleus of the inferior colliculus, right",layer III of area 12/47m
+Posterior pretectal nucleus,mantle zone of p2Ch,"external nucleus of the inferior colliculus, right",layer IV of area 12/47m
+Retroparafascicular nucleus,bed of the habenular commissure,"pericentral nucleus of the inferior colliculus, right",layer V of area 12/47m
+Intercollicular nucleus,pineal gland (epiphysis) and stalk,intercollicular nucleus,layer VI of area 12/47m
+Cuneiform nucleus,retrohabenular thalamic area,"intercollicular nucleus, left",lateral subdivision of area 12/47
+Red nucleus,alar plate of p2 (alar thalamus),"intercollicular nucleus, right",layer I of area 12/47l
+Oculomotor nucleus,dorsal part of alar p2,nucleus of the brachium of the inferior colliculus,layer II of area 12/47l
+Medial accesory oculomotor nucleus,habenula (old epithalamus),"nucleus of the brachium of the inferior colliculus, left",layer III of area 12/47l
+Edinger-Westphal nucleus,ventricular zone of Hb,"nucleus of the brachium of the inferior colliculus, right",layer IV of area 12/47l
+Trochlear nucleus,mantle zone of Hb,parabigeminal nucleus,layer V of area 12/47l
+Paratrochlear nucleus,periventricular stratum of Hb,"parabigeminal nucleus, left",layer VI of area 12/47l
+Ventral tegmental nucleus,medial habenular nucleus,"parabigeminal nucleus, right",posterior frontal cortex (motor cortex)
+Anterior tegmental nucleus,medial subhabenular nucleus,superior colliculus,"primary motor cortex (area M1, area 4)"
+Lateral terminal nucleus of the accessory optic tract,intermediate stratum of Hb,"superior colliculus, left",head and face region of M1
+Dorsal terminal nucleus of the accessory optic tract,medial part of the lateral habenular nucleus,"stratum lemnisci of the superior colliculus, left",layer I of area M1hf
+Medial terminal nucleus of the accessory optic tract,lateral subhabenular nucleus,"deep gray layer of the superior colliculus, left",layer II of area M1hf
+"Substantia nigra, lateral part",superficial stratum of Hb,"deep white layer of the superior colliculus, left",layer III of area M1hf
+"Midbrain, behavioral state related",lateral part of the lateral habenular nucleus,"middle gray layer of the superior colliculus, left",layer V of area M1hf
+"Substantia nigra, compact part",lateral part of alar p2,"middle white layer of the superior colliculus, left",layer VI of area M1hf
+Pedunculopontine nucleus,ventricular zone of p2AL,"superficial gray layer of the superior colliculus, left",upper limb region of M1
+Midbrain raphe nuclei,mantle zone of p2AL,"superficial white layer of the superior colliculus, left",layer I of area M1ul
+Interfascicular nucleus raphe,dorsal tier of thalamus,"superior colliculus, right",layer II of area M1ul
+Interpeduncular nucleus,ventricular zone of DTTh,"stratum lemnisci of the superior colliculus, right",layer III of area M1ul
+"Interpeduncular nucleus, rostral",mantle zone of DTTh,"deep gray layer of the superior colliculus, right",layer V of area M1ul
+"Interpeduncular nucleus, caudal",periventricular stratum of DTTh,"deep white layer of the superior colliculus, right",layer VI of area M1ul
+"Interpeduncular nucleus, apical",anterior paraventricular nucleus of thalamus,"middle gray layer of the superior colliculus, right",trunk region of M1
+"Interpeduncular nucleus, lateral",intermediodorsal nucleus,"middle white layer of the superior colliculus, right",layer I of area M1tr
+"Interpeduncular nucleus, intermediate",centromedian nucleus,"superficial gray layer of the superior colliculus, right",layer II of area M1tr
+"Interpeduncular nucleus, dorsomedial",interanteromedial nucleus,"superficial white layer of the superior colliculus, right",layer III of area M1tr
+"Interpeduncular nucleus, dorsolateral",interanterodorsal nucleus,sagulum nucleus,layer V of area M1tr
+"Interpeduncular nucleus, rostrolateral",rhomboid nucleus,"sagulum nucleus, left",layer VI of area M1tr
+Rostral linear nucleus raphe,"reuniens nucleus, main part","sagulum, nucleus, right",lower limb region of M1
+Central linear nucleus raphe,retroreuniens nucleus,subcommissural organ,layer I of area M1lm
+Dorsal nucleus raphe,ventral reuniens nucleus,"subcommissural organ, left",layer II of area M1lm
+Hindbrain,intermediate stratum of DTTh,"subcommissural organ, right",layer III of area M1lm
+Pons,paratenial nucleus,midbrain tegmentum,layer V of area M1lm
+"Pons, sensory related",mediodorsal nucleus,central gray substance of midbrain,layer VI of area M1lm
+Nucleus of the lateral lemniscus,medial (magnocellular) part of MD,"central gray substance of midbrain, left",premotor cortex (area 6)
+"Nucleus of the lateral lemniscus, dorsal part",lateral (parvicellular) part of MD,"central gray substance of midbrain, left, dorsolateral division",laterodorsal subdivision of area 6
+"Nucleus of the lateral lemniscus, horizontal part",central part of MD,"central gray substance of midbrain, left, dorsomedial division",layer I of area 6ld
+"Nucleus of the lateral lemniscus, ventral part",intralaminar nuclei,"central gray substance of midbrain, left, lateral division",layer II of area 6ld
+Principal sensory nucleus of the trigeminal,paracentral nucleus,"central gray substance of midbrain, left, pleioglial division",layer III of area 6ld
+Parabrachial nucleus,oval paracentral nucleus,"central gray substance of midbrain, left, ventrolateral division",layer V of area 6ld
+Koelliker-Fuse subnucleus,central lateral nucleus,"central gray substance of midbrain, right",layer VI of area 6ld
+"Parabrachial nucleus, lateral division",anterior nuclei,"central gray substance of midbrain, right, dorsolateral division",lateroventral subdivision of area 6
+"Parabrachial nucleus, lateral division, central lateral part",anterodorsal nucleus,"central gray substance of midbrain, right, dorsomedial division",layer I of area 6lv
+"Parabrachial nucleus, lateral division, dorsal lateral part",anteroventral nucleus,"central gray substance of midbrain, right, lateral division",layer II of area 6lv
+"Parabrachial nucleus, lateral division, external lateral part",anteromedial nucleus,"central gray substance of midbrain, right, pleioglial division",layer III of area 6lv
+"Parabrachial nucleus, lateral division, superior lateral part",ventral nuclei,"central gray substance of midbrain, right, ventrolateral division",layer V of area 6lv
+"Parabrachial nucleus, lateral division, ventral lateral part",ventromedial nucleus,Edinger-Westphal nucleus,layer VI of area 6lv
+"Parabrachial nucleus, medial division",posterior ventromedial nucleus,"Edinger-Westphal nucleus, left",medial subdivision of area 6 (area MII)
+"Parabrachial nucleus, medial division, external medial part",submedius thalamic nucleus,"Edinger-Westphal nucleus, right",layer I of area 6m
+"Parabrachial nucleus, medial division, medial medial part",ventral anterior nucleus,interpeduncular nucleus,layer II of area 6m
+"Parabrachial nucleus, medial division, ventral medial part",ventral lateral nucleus,"interpeduncular nucleus, left",layer III of area 6m
+Superior olivary complex,ventral posteromedial nucleus,"interpeduncular nucleus, right",layer V of area 6m
+"Superior olivary complex, periolivary region",ventral posterolateral nucleus,interstitial nucleus of Cajal,layer VI of area 6m
+"Superior olivary complex, medial part",ventral posterior parvicellular nucleus,"interstitial nucleus of Cajal, left",area 6/32
+"Superior olivary complex, lateral part",posterior (ventral) nucleus,"interstitial nucleus of Cajal, right",layer I of area 6/32
+"Pons, motor related",superficial stratum of DTTh,isthmic reticular formation,layer II of area 6/32
+Barrington's nucleus,laterodorsal nucleus,"isthmic reticular formation, left",layer III of area 6/32
+Dorsal tegmental nucleus,lateral posterior nucleus,"isthmic reticular formation, right",layer IV of area 6/32
+Lateral tegmental nucleus,dorsal lateral geniculate nucleus,midbrain raphe nuclei,layer V of area 6/32
+Posterodorsal tegmental nucleus,intermediate tier of thalamus,"midbrain raphe nuclei, left",layer VI of area 6/32
+Pontine central gray,ventricular zone of ITTh,"dorsal raphe nucleus, left",primary motor-sensory cortex (samples)
+Pontine gray,mantle zone of ITTh,"dorsal raphe nucleus, left, dorsal part",parietal neocortex
+"Pontine reticular nucleus, caudal part",periventricular stratum of ITTh,"dorsal raphe nucleus, left, interfascicular part","primary somatosensory cortex (area S1, areas 3,1,2)"
+"Pontine reticular nucleus, ventral part",posterior paraventricular nucleus,"dorsal raphe nucleus, left, raphe cap",head and face region of S1
+Supragenual nucleus,parafascicular nucleus,"dorsal raphe nucleus, left, ventral part",layer I of area S1hf
+Superior salivatory nucleus,intermediate stratum of ITTh,"median raphe, left",layer II of area S1hf
+Supratrigeminal nucleus,lithoid nucleus,"midbrain raphe nuclei, right",layer III of area S1hf
+Tegmental reticular nucleus,scaphoid nucleus,"dorsal raphe nucleus, right",layer IV of area S1hf
+Motor nucleus of trigeminal,ethmoid nucleus,"dorsal raphe nucleus, right, dorsal part",layer V of area S1hf
+Peritrigeminal zone,subethmoid nucleus,"dorsal raphe nucleus, right, interfascicular part",layer VI of area S1hf
+Accessory trigeminal nucleus,ventral linear nucleus,"dorsal raphe nucleus, right, raphe cap",upper limb region of S1
+Parvicellular motor 5 nucleus,posterior triangular nucleus,"dorsal raphe nucleus, right, ventral part",layer I of area S1ul
+Intertrigeminal nucleus,superficial stratum of ITTh,"median raphe, right",layer II of area S1ul
+"Pons, behavioral state related",intermedioposterior nucleus,midbrain reticular formation,layer III of area S1ul
+Superior central nucleus raphe,suprageniculate nucleus,"midbrain reticular formation, left",layer IV of area S1ul
+"Superior central nucleus raphe, lateral part",ventral tier of thalamus,"cuneiform nucleus, left",layer V of area S1ul
+"Superior central nucleus raphe, medial part",ventricular zone of VTTh,"pedunculopontine tegmental nucleus, left",layer VI of area S1ul
+Locus ceruleus,mantle zone of VTTh,"subcuneiform nucleus, left",trunk region of S1
+Laterodorsal tegmental nucleus,periventricular stratum of VTTh,"midbrain reticular formation, right",layer I of area S1tr
+Nucleus incertus,magnocellular (medial) subparafascicular nucleus,"cuneiform nucleus, right",layer II of area S1tr
+Pontine reticular nucleus,intermediate stratum of VTTh,"pedunculopontine tegmental nucleus, right",layer III of area S1tr
+Nucleus raphe pontis,parvicellular (lateral) subparafascicular nucleus,"subcuneiform nucleus, right",layer IV of area S1tr
+Subceruleus nucleus,posterior intralaminar nucleus,nucleus of Darkschewitsch,layer V of area S1tr
+Sublaterodorsal nucleus,superficial stratum of VTTh,"nucleus of Darkschewitsch, left",layer VI of area S1tr
+Medulla,medial geniculate nucleus,"nucleus of Darkschewitsch, right",lower limb region of S1
+"Medulla, sensory related",ventral subnucleus of MG,nucleus of the posterior commissure,layer I of area S1lm
+Area postrema,dorsal subnucleus of MG,"nucleus of the posterior commissure, left",layer II of area S1lm
+Cochlear nuclei,medial subnucleus of MG,"nucleus of the posterior commissure, right",layer III of area S1lm
+Granular lamina of the cochlear nuclei,anteroventral part of alar thalamus,oculomotor nuclear complex,layer IV of area S1lm
+"Cochlear nucleus, subpedunclular granular region",ventricular zone of p2AAV,"oculomotor nuclear complex, left",layer V of area S1lm
+Dorsal cochlear nucleus,mantle zone of p2AAV,"anterior median oculomotor nucleus, left",layer VI of area S1lm
+Ventral cochlear nucleus,thalamic (p2) zona limitans domain,"caudal central oculomotor nucleus, left","subcentral cortex (gustatory cortex, area 43)"
+Dorsal column nuclei,ventricular zone of p2ZL,"central oculomotor nucleus, left",posterior parietal cortex
+Cuneate nucleus,mantle zone of p2ZL,"dorsal oculomotor nucleus, left",posterodorsal (superior) parietal cortex
+Gracile nucleus,periventricular stratum of p2ZL,"intermediate oculomotor nucleus, left",rostral division of SPC (area 5)
+External cuneate nucleus,shell of p2ZL,"medial oculomotor nucleus, left",cingulate subdivision of area 5
+Nucleus of the trapezoid body,intermediate stratum of p2ZL,"ventral oculomotor nucleus, left",layer I of area 5ci
+Nucleus of the solitary tract,interstitial nucleus of the zona limitans,"oculomotor nuclear complex, right",layer II of area 5ci
+"Nucleus of the solitary tract, central part",superficial stratum of p2ZL,"anterior median oculomotor nucleus, right",layer III of area 5ci
+"Nucleus of the solitary tract, commissural part",intergeniculate leaflet,"caudal central oculomotor nucleus, right",layer IV of area 5ci
+"Nucleus of the solitary tract, gelatinous part",liminal part of alar p2,"central oculomotor nucleus, right",layer V of area 5ci
+"Nucleus of the solitary tract, lateral part",ventricular zone of p2Lim,"dorsal oculomotor nucleus, right",layer VI of area 5ci
+"Nucleus of the solitary tract, medial part",mantle zone of p2Lim,"intermediate oculomotor nucleus, right",lateral subdivision of area 5
+"Spinal nucleus of the trigeminal, caudal part",periventricular stratum of p2Lim,"medial oculomotor nucleus, right",layer I of area 5l
+"Spinal nucleus of the trigeminal, interpolar part",liminal nucleus,"ventral oculomotor nucleus, right",layer II of area 5l
+"Spinal nucleus of the trigeminal, oral part",intermediate stratum of p2Lim,peripeduncular nucleus,layer III of area 5l
+"Spinal nucleus of the trigeminal, oral part, caudal dorsomedial part",reticular formation of p2Lim,"peripeduncular nucleus, left",layer IV of area 5l
+"Spinal nucleus of the trigeminal, oral part, middle dorsomedial part, dorsal zone",superficial stratum of p2Lim,"peripeduncular nucleus, right",layer V of area 5l
+"Spinal nucleus of the trigeminal, oral part, middle dorsomedial part, ventral zone",p2 portion of the peripeduncular nucleus,red nucleus,layer VI of area 5l
+"Spinal nucleus of the trigeminal, oral part, rostral dorsomedial part",epipeduncular nucleus,"red nucleus, left",medial subdivision of area 5
+"Spinal nucleus of the trigeminal, oral part, ventrolateral part",thalamic tegmentum,"magnocellular part of the red nucleus, left",layer I of area 5m
+Paratrigeminal nucleus,basal plate of p2,"parvocellular part of the red nucleus, left",layer II of area 5m
+Nucleus z,ventricular zone of p2B,"red nucleus, right",layer III of area 5m
+"Medulla, motor related",mantle zone of p2B,"magnocellular part of the red nucleus, right",layer IV of area 5m
+Abducens nucleus,periventricular stratum of p2B,"parvocellular part of thered nucleus, right",layer V of area 5m
+Accessory abducens nucleus,p2 portion of the pre-Edinger-Westphal nucleus,rostral interstitial nucleus of the medial longitudinal fasciculus,layer VI of area 5m
+Facial motor nucleus,intermediate stratum of p2B,"rostral interstitial nucleus of the medial longitudinal fasciculus, left",caudal division of SPC (area 7)
+Accessory facial motor nucleus,p2 part of the zona limitans core population,"rostral interstitial nucleus of the medial longitudinal fasciculus, right",rostral subdivision of area 7
+Efferent vestibular nucleus,rostral interstitial nucleus,substantia nigra,layer I of area 7r
+Nucleus ambiguus,prerubral area,"substantia nigra, left",layer II of area 7r
+"Nucleus ambiguus, dorsal division",p2 portion of the parabrachial pigmented nucleus,"substantia nigra, pars compacta, left",layer III of area 7r
+"Nucleus ambiguus, ventral division",superficial stratum of p2B,"substantia nigra, pars reticulata, left",layer IV of area 7r
+Dorsal motor nucleus of the vagus nerve,p2 portion of the medial terminal nucleus of the accessory optic tract,"substantia nigra, right",layer V of area 7r
+Efferent cochlear group,p2 portion of the substantia nigra pars compacta,"substantia nigra, pars compacta, right",layer VI of area 7r
+Gigantocellular reticular nucleus,p2 portion of the substantia nigra pars reticulata,"substantia nigra, pars reticulata, right",medial subdivision of area 7
+Infracerebellar nucleus,p2 portion of paranigral nucleus,trochlear nucleus,layer I of area 7m
+Inferior olivary complex,floor plate of p2,"trochlear nucleus, left",layer II of area 7m
+Intermediate reticular nucleus,ventricular zone of p2F,"trochlear nucleus, right",layer III of area 7m
+Inferior salivatory nucleus,mantle zone of p2F,ventral tegmental area,layer IV of area 7m
+Linear nucleus of the medulla,periventricular stratum of p2F,"ventral tegmental area, left",layer V of area 7m
+Lateral reticular nucleus,intermediate stratum of p2F,"caudal linear nucleus, left",layer VI of area 7m
+"Lateral reticular nucleus, magnocellular part",superficial stratum of p2F,"interfascicular nucleus, left",caudal subdivision of area 7
+"Lateral reticular nucleus, parvicellular part",p2 portion of the ventral tegmental area,"parabrachial pigmented nucleus, left",layer I of area 7c
+Magnocellular reticular nucleus,prosomere 1,"paranigral nucleus, left",layer II of area 7c
+Medullary reticular nucleus,pretectum,"rostral linear nucleus, left",layer III of area 7c
+"Medullary reticular nucleus, dorsal part",roof plate of p1,"ventral tegmental area, right",layer IV of area 7c
+"Medullary reticular nucleus, ventral part",bed area of the posterior commissure,"caudal linear nucleus, right",layer V of area 7c
+Parvicellular reticular nucleus,ventricular zone of PCom,"interfascicular nucleus, right",layer VI of area 7c
+Parasolitary nucleus,subcommissural organ,"parabrachial pigmented nucleus, right",postcentral subdivision of area 7
+Paragigantocellular reticular nucleus,mantle zone of PCom,"paranigral nucleus, right",layer I of area 7pc
+"Paragigantocellular reticular nucleus, dorsal part",periventricular zone of PCom,"rostral linear nucleus, right",layer II of area 7pc
+"Paragigantocellular reticular nucleus, lateral part",intermediate zone of PCom,ventral tegmental nucleus,layer III of area 7pc
+Perihypoglossal nuclei,superficial zone of PCom,"ventral tegmental nucleus, left",layer IV of area 7pc
+Nucleus intercalatus,alar plate of p1,"ventral tegmental nucleus, right",layer V of area 7pc
+Nucleus of Roller,precommissural pretectal domain,pretectal region,layer VI of area 7pc
+Nucleus prepositus,ventricular zone of PcP,nucleus of the optic tract,intraparietal subdivision of area 7 (A7ip)
+Paramedian reticular nucleus,mantle zone of PcP,"nucleus of the optic tract, left","area 7ip, rostral part (A7ipr)"
+Parapyramidal nucleus,dorsal part of PcP,"nucleus of the optic tract, right",layer I of area 7ipr
+"Parapyramidal nucleus, deep part",ventricular zone of PcPD,nucleus of the pretectal area,layer II of area 7ipr
+"Parapyramidal nucleus, superficial part",mantle zone of PcPD,"nucleus of the pretectal area, left",layer III of area 7ipr
+Vestibular nuclei,periventricular stratum of PcPD,"nucleus of the pretectal area, right",layer IV of area 7ipr
+Lateral vestibular nucleus,PcPD part of the periaqueductal gray,olivary pretectal nucleus,layer V of area 7ipr
+Medial vestibular nucleus,intermediate stratum of PcPD,"olivary pretectal nucleus, left",layer VI of area 7ipr
+Spinal vestibular nucleus,dorsofrontal pretectal nucleus,"olivary pretectal nucleus, right","area 7ip, caudal part (A7ipc)"
+Superior vestibular nucleus,superficial stratum of PCPD,principal pretectal nucleus,layer I of area 7ipc
+Nucleus x,superficial dorsofrontal area,"principal pretectal nucleus, left",layer II of area 7ipc
+Hypoglossal nucleus,lateral part of PcP,"principal pretectal nucleus, right",layer III of area 7ipc
+Nucleus y,ventricular zone of PcPL,sublentiform nucleus,layer IV of area 7ipc
+Interstitial nucleus of the vestibular nerve,mantle zone of PcPL,"sublentiform nucleus, left",layer V of area 7ipc
+"Medulla, behavioral state related",periventricular stratum of PcPL,"sublentiform nucleus, right",layer VI of area 7ipc
+Nucleus raphe magnus,PcPL part of the periaqueductal gray,metencephalon,posteroventral (inferior) parietal cortex
+Nucleus raphe pallidus,intermediate stratum of PcPL,cerebellum,rostral division of IPC (area 40)
+Nucleus raphe obscurus,"anterior pretectal nucleus, dorsal core part",cerebellar cortex,rostrodorsal subdivision of area 40
+Cerebellum,superficial stratum of PcPL,vermis,layer I of area 40rd
+Cerebellar cortex,"anterior pretectal nucleus, dorsal superficial part",anterior lobe of the vermis,layer II of area 40rd
+"Cerebellar cortex, molecular layer",ventral part of PcP,I-II,layer III of area 40rd
+"Cerebellar cortex, Purkinje layer",ventricular zone of PcPV,III,layer IV of area 40rd
+"Cerebellar cortex, granular layer",mantle zone of PcPV,IV,layer V of area 40rd
+Vermal regions,periventricular stratum of PcPV,V,layer VI of area 40rd
+Lingula (I),PcPV part of the periaqueductal gray,posterior lobe of the vermis,rostroventral subdivision of area 40
+"Lingula (I), molecular layer",intermediate stratum of PcPV,VI,layer I of area 40rv
+"Lingula (I), Purkinje layer","anterior pretectal nucleus, ventral core part",VIIAf,layer II of area 40rv
+"Lingula (I), granular layer",superficial stratum of PcPV,VIIAt,layer III of area 40rv
+Central lobule,"anterior pretectal nucleus, ventral superficial part",VIIB,layer IV of area 40rv
+Lobule II,juxtacommissural pretectal domain,VIIIA,layer V of area 40rv
+"Lobule II, molecular layer",ventricular zone of JcP,VIIIB,layer VI of area 40rv
+"Lobule II, Purkinje layer",mantle zone of JcP,IX,inferior subdivision of area 40
+"Lobule II, granular layer",dorsal part of JcP,Flocculonodular Lobe of the Vermis,layer I of area 40in
+Lobule III,ventricular zone of JcPD,X,layer II of area 40in
+"Lobule III, molecular layer",mantle zone of JcPD,cerebellar hemispheres,layer III of area 40in
+"Lobule III, Purkinje layer",periventricular stratum of JcPD,Anterior Lobe,layer IV of area 40in
+"Lobule III, granular layer",JcPD part of the periaqueductal gray,I-II,layer V of area 40in
+Culmen,intermediate stratum of JcPD,"I-II, left, paravermis",layer VI of area 40in
+Lobule IV,dorsal juxtacommissural pretectal nucleus,"I-II, left, lateral hemisphere",intermediate division of IPC (area 40/39)
+"Lobule IV, molecular layer",dorsal spiriform nucleus,"I-II, right, paravermis",rostral subdivision of area 40/39
+"Lobule IV, Purkinje layer",superficial stratum of JcPD,"I-II, right, lateral hemisphere",layer I of area 40/39r
+"Lobule IV, granular layer",JcP contribution to DT,III,layer II of area 40/39r
+Lobule V,lateral part of JcP,"III, left, paravermis",layer III of area 40/39r
+"Lobule V, molecular layer",ventricular zone of JcPL,"III, left, lateral hemisphere",layer IV of area 40/39r
+"Lobule V, Purkinje layer",mantle zone of JcPL,"III, right, paravermis",layer V of area 40/39r
+"Lobule V, granular layer",periventricular stratum of JcPL,"III, right, lateral hemisphere",layer VI of area 40/39r
+Lobules IV-V,JcPL part of the periaqueductal gray,IV,caudal subdivision of area 40/39
+"Lobules IV-V, molecular layer",intermediate stratum of JcPL,"IV, left, paravermis",layer I of area 40/39c
+"Lobules IV-V, Purkinje layer",reticular formation of JcPL,"IV, left, lateral hemisphere",layer II of area 40/39c
+"Lobules IV-V, granular layer",lateral spiriform nucleus,"IV, right, paravermis",layer III of area 40/39c
+Declive (VI),superficial stratum of JcPL,"IV, right, lateral hemisphere",layer IV of area 40/39c
+"Declive (VI), molecular layer",JcP contribution to LTL,V,layer V of area 40/39c
+"Declive (VI), Purkinje layer",ventral part of JcP,"V, left, paravermis",layer VI of area 40/39c
+"Declive (VI), granular layer",ventricular zone of JcPV,"V, left, lateral hemisphere",caudal division of IPC (area 39)
+Folium-tuber vermis (VII),mantle zone of JcPV,"V, right, paravermis",rostral subdivision of area 39
+"Folium-tuber vermis (VII), molecular layer",periventricular stratum of JcPV,"V, right, lateral hemisphere",layer I of area 39r
+"Folium-tuber vermis (VII), Purkinje layer",JcPV part of the periaqueductal gray,Posterior Lobe,layer II of area 39r
+"Folium-tuber vermis (VII), granular layer",intermediate stratum of JcPV,VI,layer III of area 39r
+Pyramus (VIII),ventral juxtacommissural pretectal nucleus,"VI, left, paravermis",layer IV of area 39r
+"Pyramus (VIII), molecular layer",superficial stratum of JcPV,"VI, left, lateral hemisphere",layer V of area 39r
+"Pyramus (VIII), Purkinje layer",JcP contribution to LTV,"VI, right, paravermis",layer VI of area 39r
+"Pyramus (VIII), granular layer",commissural pretectal domain,"VI, right, lateral hemisphere",caudal subdivision of area 39
+Uvula (IX),ventricular zone of CoP,crus I,layer I of area 39c
+"Uvula (IX), molecular layer",mantle zone of CoP,"Crus I, left, paravermis",layer II of area 39c
+"Uvula (IX), Purkinje layer",dorsal part of CoP,"Crus I, left, lateral hemisphere",layer III of area 39c
+"Uvula (IX), granular layer",ventricular zone of CoPD,"Crus I, right, paravermis",layer IV of area 39c
+Nodulus (X),mantle zone of CoPD,"Crus I, right, lateral hemisphere",layer V of area 39c
+"Nodulus (X), molecular layer",periventricular stratum of CoPD,crus II,layer VI of area 39c
+"Nodulus (X), Purkinje layer",CoPD part of the periaqueductal gray,"Crus II, left, paravermis",retroinsular cortex
+"Nodulus (X), granular layer",intermediate stratum of CoPD,"Crus II, left, lateral hemisphere",temporal neocortex
+Hemispheric regions,medial pretectal nucleus,"Crus II, right, paravermis",dorsolateral temporal neocortex
+Simple lobule,principal pretectal nucleus,"Crus II, right, lateral hemisphere",primary auditory cortex (core)
+"Simple lobule, molecular layer",reticular formation of CoPD,VIIB,"main portion of A1C (area TC, area 41)"
+"Simple lobule, Purkinje layer",superficial stratum of CoPD,"VIIB, left, paravermis",layer I of area 41
+"Simple lobule, granular layer",olivary pretectal nucleus,"VIIB, left, lateral hemisphere",layer II of area 41
+Ansiform lobule,dorsal terminal nucleus of the accessory optic tract,"VIIB, right, paravermis",layer III of area 41
+Crus 1,lateral part of CoP,"VIIB, right, lateral hemisphere",layer IV of area 41
+"Crus 1, molecular layer",ventricular zone of CoPL,VIIIA,layer V of area 41
+"Crus 1, Purkinje layer",mantle zone of CoPL,"VIIIA, left, paravermis",layer VI of area 41
+"Crus 1, granular layer",periventricular stratum of CoPL,"VIIIA, left, lateral hemisphere",rostral portion of A1C
+Crus 2,CoPL part of the periaqueductal gray,"VIIIA, right, paravermis",layer I of rostral primary auditory cortex
+"Crus 2, molecular layer",intermediate stratum of CoPL,"VIIIA, right, lateral hemisphere",layer II of rostral primary auditory cortex
+"Crus 2, Purkinje layer",parvicellular interstitial nucleus of the posterior commissure,VIIIB,layer III of rostral primary auditory cortex
+"Crus 2, granular layer",intermediate pretectal nucleus,"VIIIB, left, paravermis",layer IV of rostral primary auditory cortex
+Paramedian lobule,reticular formation of CoPL,"VIIIB, left, lateral hemisphere",layer V of rostral primary auditory cortex
+"Paramedian lobule, molecular layer",superficial stratum of CoPL,"VIIIB, right, paravermis",layer VI of rostral primary auditory cortex
+"Paramedian lobule, Purkinje layer","lateral terminal nucleus of the accessory optic tract, lateral part","VIIIB, right, lateral hemisphere","secondary auditory cortex (belt, area 42)"
+"Paramedian lobule, granular layer",ventral part of CoP,IX,layer I of area 42
+Copula pyramidis,ventricular zone of CoPV,"IX, left, paravermis",layer II of area 42
+"Copula pyramidis, molecular layer",mantle zone of CoPV,"IX, left, lateral hemisphere",layer III of area 42
+"Copula pyramidis, Purkinje layer",periventricular stratum of CoPV,"IX, right, paravermis",layer IV of area 42
+"Copula pyramidis, granular layer",CoPV part of the periaqueductal gray,"IX, right, lateral hemisphere",layer V of area 42
+Paraflocculus,intermediate stratum of CoPV,flocculonodular lobe,layer VI of area 42
+"Paraflocculus, molecular layer",subpretectal nucleus,X,superolateral temporal cortex
+"Paraflocculus, Purkinje layer",magnocellular interstitial nucleus of the posterior commissure,"X, left, paravermis",anterior (rostral) superior temporal cortex (area 22r)
+"Paraflocculus, granular layer",superficial stratum of CoPV,"X, left, lateral hemisphere",layer I of area 22r
+Flocculus,"lateral terminal nucleus of the accessory optic tract, ventral part","X, right, paravermis",layer II of area 22r
+"Flocculus, molecular layer",ventrolateral part of alar p1,"X, right, lateral hemisphere",layer III of area 22r
+"Flocculus, Purkinje layer",ventricular zone of p1AVL,cerebellar nuclei,layer IV of area 22r
+"Flocculus, granular layer",mantle zone of p1AVL,dentate nucleus,layer V of area 22r
+Cerebellar nuclei,liminal part of alar p1,"dentate nucleus, left",layer VI of area 22r
+Fastigial nucleus,ventricular zone of p1Lim,"dentate nucleus, right",intermediate superior temporal cortex (area 22i)
+Interposed nucleus,mantle zone of p1Lim,emboliform nucleus,layer I of area 22i
+Dentate nucleus,periventricular stratum of p1Lim,"emboliform nucleus, left",layer II of area 22i
+Vestibulocerebellar nucleus,p1Lim part of periaqueductal gray,"emboliform nucleus, right",layer III of area 22i
+fiber tracts,intermediate stratum of p1Lim,fastigial nucleus,layer IV of area 22i
+cranial nerves,reticular formation of p1Lim,"fastigial nucleus, left",layer V of area 22i
+terminal nerve,superficial stratum of p1Lim,"fastigial nucleus, right",layer VI of area 22i
+vomeronasal nerve,p1 part of the lateral substantia nigra,globose nucleus,posterior (caudal) superior temporal cortex (area 22c)
+olfactory nerve,pretectal tegmentum,"globose nucleus, left",layer I of area 22c
+olfactory nerve layer of main olfactory bulb,basal plate of p1,"globose nucleus, right",layer II of area 22c
+"lateral olfactory tract, general",ventricular zone of p1B,pons,layer III of area 22c
+"lateral olfactory tract, body",mantle zone of p1B,basal part of pons,layer IV of area 22c
+dorsal limb,periventricular stratum of p1B,pontine nuclei,layer V of area 22c
+accessory olfactory tract,p1B part of the periaqueductal gray,"pontine nuclei, left",layer VI of area 22c
+"anterior commissure, olfactory limb",nucleus of Darkschewitsch,"pontine nuclei, right",polysensory temporal cortex (area 22p)
+optic nerve,p1 part of the pre-Edinger-Westphal nucleus,pontine tegmentum,rostral division of 22p (area 22pr)
+accessory optic tract,intermediate stratum of p1B,abducens nucleus,layer I of area 22pr
+brachium of the superior colliculus,interstitial nucleus of Cajal (post-migratory),"abducens nucleus, left",layer II of area 22pr
+superior colliculus commissure,basal reticular formation of p1,"abducens nucleus, right",layer III of area 22pr
+optic chiasm,"red nucleus, parvicellular part",accessory facial nucleus,layer IV of area 22pr
+optic tract,p1 part of the pararubral nucleus,"accessory facial nucleus, left",layer V of area 22pr
+tectothalamic pathway,p1 part of parabrachial pigmented nucleus,"accessory facial nucleus, right",layer VI of area 22pr
+oculomotor nerve,superficial stratum of p1B,accessory trigeminal nucleus,intermediate division of 22p (area 22pi)
+medial longitudinal fascicle,p1 part of the medial terminal nucleus of the accessory optic tract,"accessory trigeminal nucleus, left",layer I of area 22pi
+posterior commissure,p1 part of the substantia nigra compacta,"accessory trigeminal nucleus, right",layer II of area 22pi
+trochlear nerve,p1 part of the substantia nigra reticulata,central gray of the pons,layer III of area 22pi
+trochlear nerve decussation,p1 portion of the paranigral nucleus,"central gray of the pons, left",layer IV of area 22pi
+abducens nerve,floor plate of p1,"central gray of the pons, right",layer V of area 22pi
+trigeminal nerve,ventricular zone of p1F,dorsal nucleus of lateral lemniscus,layer VI of area 22pi
+motor root of the trigeminal nerve,mantle zone of p1F,"dorsal nucleus of lateral lemniscus, left",caudal division of 22p (area 22pc)
+sensory root of the trigeminal nerve,periventricular stratum of p1F,"dorsal nucleus of lateral lemniscus, right",layer I of area 22pc
+midbrain tract of the trigeminal nerve,p1F part of periaqueductal gray,dorsomedial tegmental area,layer II of area 22pc
+spinal tract of the trigeminal nerve,intermediate stratum of p1F,"dorsomedial tegmental area, left",layer III of area 22pc
+facial nerve,superficial stratum of p1F,"dorsomedial tegmental area, right",layer IV of area 22pc
+intermediate nerve,p1 part of the ventral tegmental area,dorsal tegmental nucleus,layer V of area 22pc
+genu of the facial nerve,midbrain,"dorsal tegmental nucleus, left",layer VI of area 22pc
+vestibulocochlear nerve,mesomere 1,"dorsal tegmental nucleus, right",parainsular cortex
+efferent cochleovestibular bundle,collicular (rostral) midbrain tectum,facial motor nucleus,layer I of parainsular cortex
+vestibular nerve,roof plate of m1,"facial motor nucleus, left",layer II of parainsular cortex
+cochlear nerve,ventricular zone of m1R,"facial motor nucleus, left, lateral part",layer III of parainsular cortex
+trapezoid body,mantle zone of m1R,"facial motor nucleus, left, intermediate part",layer IV of parainsular cortex
+intermediate acoustic stria,periventricular stratum of m1R,"facial motor nucleus, left, medial part",layer V of parainsular cortex
+dorsal acoustic stria,intermediate stratum of m1R,"facial motor nucleus, left, perifacial zone",layer VI of parainsular cortex
+lateral lemniscus,superficial stratum of m1R,"facial motor nucleus, left, ventral part",ventrolateral temporal neocortex
+inferior colliculus commissure,bed of the tectal gray commissure,"facial motor nucleus, left, ventrolateral part","midlateral temporal  cortex (area TEd, area 21)"
+brachium of the inferior colliculus,bed of the tectal commissure,"facial motor nucleus, right",rostral subdivision of area 21
+glossopharyngeal nerve,bed of the intercollicular commissure,"facial motor nucleus, right, lateral part",layer I of area 21r
+vagus nerve,alar plate of m1,"facial motor nucleus, right, intermediate part",layer II of area 21r
+solitary tract,dorsal part of m1A,"facial motor nucleus, right, medial part",layer III of area 21r
+accessory spinal nerve,ventricular zone of m1AD,"facial motor nucleus, right, perifacial zone",layer IV of area 21r
+hypoglossal nerve,mantle zone of m1AD,"facial motor nucleus, right, ventral part",layer V of area 21r
+ventral roots,periventricular stratum of m1AD,"facial motor nucleus, right, ventrolateral part",layer VI of area 21r
+dorsal roots,m1AD (DM) part of periaqueductal gray,intermediate nucleus of lateral lemniscus,intermediate subdivision of area 21
+cervicothalamic tract,intermediate stratum of m1AD,"intermediate nucleus of lateral lemniscus, left",layer I of area 21i
+dorsolateral fascicle,"ventral paracommissural tectal nucleus, m1 part","intermediate nucleus of lateral lemniscus, right",layer II of area 21i
+dorsal commissure of the spinal cord,superficial stratum of m1AD,lateral dorsal tegmental nucleus,layer III of area 21i
+ventral commissure of the spinal cord,"dorsal paracommissural tectal nucleus, m1 part","lateral dorsal tegmental nucleus, left",layer IV of area 21i
+fasciculus proprius,dorsolateral part of m1A,"lateral dorsal tegmental nucleus, right",layer V of area 21i
+dorsal column,tectal gray formation,lateral parabrachial nucleus,layer VI of area 21i
+cuneate fascicle,ventricular zone of TG,"lateral parabrachial nucleus, left",caudal subdivision of area 21
+gracile fascicle,mantle zone of TG,"lateral parabrachial nucleus, right",layer I of area 21c
+internal arcuate fibers,periventricular stratum of TG,locus ceruleus,layer II of area 21c
+medial lemniscus,dorsolateral TG part of the periaqueductal gray,"locus ceruleus, left",layer III of area 21c
+spinothalamic tract,intermediate stratum of TG,"locus ceruleus, right",layer IV of area 21c
+lateral spinothalamic tract,central layers of TG,medial parabrachial nucleus,layer V of area 21c
+ventral spinothalamic tract,superficial stratum of TG,"medial parabrachial nucleus, left",layer VI of area 21c
+spinocervical tract,superficial layers of TG,"medial parabrachial nucleus,right","inferolateral temporal cortex (area TEv, area 20)"
+spino-olivary pathway,colliculus superior,nucleus subceruleus,rostral subdivision of area 20
+spinoreticular pathway,ventricular zone of SC,"nucleus subceruleus, left",layer I of area 20r
+spinovestibular pathway,mantle zone of SC,"nucleus subceruleus, right",layer II of area 20r
+spinotectal pathway,periventricular stratum of SC,pontine gamma nucleus,layer III of area 20r
+spinohypothalamic pathway,dorsolateral SC part of the periaqueductal gray,"pontine gamma nucleus, left",layer IV of area 20r
+spinotelenchephalic pathway,deep white layer of SC,"pontine gamma nucleus, right",layer V of area 20r
+hypothalamohypophysial tract,intermediate stratum of SC,pontine raphe nucleus,layer VI of area 20r
+cerebellum related fiber tracts,deep gray layer of SC,"pontine raphe nucleus, left",intermediate subdivision of area 20
+cerebellar commissure,intermediate white layer of SC,"pontine raphe nucleus,right",layer I of area 20i
+cerebellar peduncles,intermediate gray layer of SC,paramedian pontine reticular formation,layer II of area 20i
+superior cerebelar peduncles,superficial stratum of SC,"pontine reticular formation, left",layer III of area 20i
+superior cerebellar peduncle decussation,optic fiber layer of SC,"caudal pontine reticular nucleus, left",layer IV of area 20i
+spinocerebellar tract,superficial gray layer of SC,"oral pontine reticular nucleus, left",layer V of area 20i
+uncinate fascicle,zonal layer of SC,"reticulotegmental nucleus, left",layer VI of area 20i
+ventral spinocerebellar tract,inferior colliculus,"pontine reticular formation, right",caudal subdivision of area 20
+middle cerebellar peduncle,ventricular zone of IC,"caudal pontine reticular nucleus, right",layer I of area 20c
+inferior cerebellar peduncle,mantle zone of IC,"oral pontine reticular nucleus, right",layer II of area 20c
+dorsal spinocerebellar tract,periventricular stratum of IC,"reticulotegmental nucleus, right",layer III of area 20c
+cuneocerebellar tract,dorsolateral IC periaqueductal gray,superior olivary complex,layer IV of area 20c
+juxtarestiform body,intermediate stratum of IC,"superior olivary complex, left",layer V of area 20c
+bulbocerebellar tract,central nucleus of the inferior colliculus,"periolivary nucleus, left",layer VI of area 20c
+olivocerebellar tract,intermediate nucleus of the inferior colliculus,"preolivary nucleus, left",midinferior (fusiform) temporal cortex
+reticulocerebellar tract,superficial stratum of IC,"retro-olivary cell group, left",rostral division of MITC (area 36)
+trigeminocerebellar tract,internal cortical nucleus of inferior colliculus,"superior olive, left",rostral subdivision of area 36
+arbor vitae,dorsal cortical nucleus of inferior colliculus,"lateral superior olivary nucleus, left",layer I of area 36r
+supra-callosal cerebral white matter,external cortical nucleus of inferior colliculus,"medial superior olivary nucleus, left",layer II of area 36r
+lateral forebrain bundle system,lateral part of alar m1,"superior paraolivary nucleus, left",layer III of area 36r
+corpus callosum,ventricular zone of m1AL,"trapezoid nuclei, left",layer IV of area 36r
+"corpus callosum, anterior forceps",mantle zone of m1AL,"superior olivary complex, right",layer V of area 36r
+external capsule,periventricular stratum of m1AL,"periolivary nucleus, right",layer VI of area 36r
+"corpus callosum, extreme capsule",lateral TG part of the periaqueductal gray,"preolivary nucleus, right",caudal subdivision of area 36
+genu of corpus callosum,lateral SC part of the periaqueductal gray,"retro-olivary cell group, right",layer I of area 36c
+"corpus callosum, posterior forceps",lateral IC periaqueductal gray,"superior olive, right",layer II of area 36c
+"corpus callosum, rostrum",intermediate stratum of m1AL,"lateral superior olivary nucleus, right",layer III of area 36c
+"corpus callosum, body","nucleus of the inferior collicular brachium, rostral part","medial superior olivary nucleus, right",layer IV of area 36c
+"corpus callosum, splenium","nucleus of the inferior collicular brachium, caudal part","superior paraolivary nucleus, right",layer V of area 36c
+corticospinal tract,superficial stratum of m1AL,"trapezoid nuclei, right",layer VI of area 36c
+internal capsule,"subbrachial nucleus, rostral part",superior salivatory nucleus,caudal division of MITC (area TF)
+cerebal peduncle,"subbrachial nucleus, caudal part","superior salivatory nucleus, left",layer I of area TF
+corticotectal tract,ventrolateral part of alar m1,"superior salivatory nucleus, right",layer II of area TF
+corticorubral tract,liminal alar domain of m1,trapezoid body,layer III of area TF
+corticopontine tract,ventricular zone of m1Lim,"trapezoid body, left",layer IV of area TF
+corticobulbar tract,mantle zone of m1Lim,"trapezoid body, right",layer V of area TF
+pyramid,periventricular stratum of m1Lim,trigeminal nuclei,layer VI of area TF
+pyramidal decussation,m1Lim (VL) part of the periaqueductal gray,"trigeminal nuclei, left",posterior parahippocampal cortex
+"corticospinal tract, crossed",intermediate stratum of m1Lim,"mesencephalic nucleus of trigeminal nerve, left",medial division of PPHC (area TH)
+"corticospinal tract, uncrossed",m1Lim part of the midbrain reticular formation,"motor nucleus of trigeminal nerve, left",layer I of area TH
+thalamus related,superficial stratum of m1Lim,"principal sensory nucleus of trigeminal nerve, left",layer II of area TH
+external medullary lamina of the thalamus,m1 (rostral) midbrain tegmentum,"trigeminal nuclei, right",layer III of area TH
+internal medullary lamina of the thalamus,basal plate of m1,"mesencephalic nucleus of trigeminal nerve, right",layer V of area TH
+middle thalamic commissure,ventricular zone of m1B,"motor nucleus of trigeminal nerve, right",layer VI of area TH
+thalamic peduncles,mantle zone of m1B,"principal sensory nucleus of trigeminal nerve, right",lateral division of PPHC (area TL)
+optic radiation,periventricular stratum of m1B,ventral nucleus of lateral lemniscus,layer I of area TL
+auditory radiation,m1B part of the periaqueductal gray,"ventral nucleus of lateral lemniscus, left",layer II of area TL
+extrapyramidal fiber systems,m1 part of the pre-Edinger-Westphal nucleus,"ventral nucleus of lateral lemniscus, right",layer III of area TL
+cerebral nuclei related,intermediate stratum of m1B,myelencephalon,layer IV of area TL
+pallidothalamic pathway,rostral linear nucleus,accessory cuneate nucleus,layer V of area TL
+nigrostriatal tract,"oculomotor nucleus, Edinger-Westphal subnucleus","accessory cuneate nucleus, left",layer VI of area TL
+nigrothalamic fibers,"oculomotor nucleus, main part","accessory cuneate nucleus, right",medial temporal-occipital cortex (area TFO)
+pallidotegmental fascicle,medial basal reticular formation of m1,ambiguus nucleus,layer I of area TFO
+striatonigral pathway,"pararubral nucleus, m1 part","ambiguus nucleus, left",layer II of area TFO
+subthalamic fascicle,"red nucleus, magnocellular part","ambiguus nucleus, right",layer III of area TFO
+tectospinal pathway,superficial stratum of m1B,arcuate nucleus of medulla,layer IV of area TFO
+direct tectospinal pathway,m1 part of paranigral nucleus,"arcuate nucleus of medulla, left",layer V of area TFO
+doral tegmental decussation,"substantia nigra compacta, m1 part","arcuate nucleus of medulla, right",layer VI of area TFO
+crossed tectospinal pathway,"substantia nigra reticulata, m1 part",area postrema,lateral temporal-occipital cortex (area 37)
+rubrospinal tract,m1 part of parabrachialis pigmentosus,"area postrema, left",layer I of area 37
+ventral tegmental decussation,floor plate of m1,"area postrema, right",layer II of area 37
+rubroreticular tract,ventricular zone of m1F,central glial substance,layer III of area 37
+central tegmental bundle,mantle zone of m1F,"central glial substance, left",layer IV of area 37
+retriculospinal tract,periventricular stratum of m1F,"central glial substance, right",layer V of area 37
+"retriculospinal tract, lateral part",m1F part of the periaqueductal gray,central gray of the medulla,layer VI of area 37
+"retriculospinal tract, medial part",intermediate stratum of m1F,"central gray of the medulla, left","temporal polar cortex (area TG, area 38)"
+vestibulospinal pathway,superficial stratum of m1F,"central gray of the medulla, right",layer I of area 38
+medial forebrain bundle system,"ventral tegmental area, m1 part",cochlear nuclei,layer II of area 38
+cerebrum related,mesomere 2 (preisthmus or caudal midbrain),"cochlear nuclei, left",layer III of area 38
+amygdalar capsule,preisthmic midbrain tectum,"dorsal cochlear nucleus, left",layer IV of area 38
+ansa peduncularis,m2 roof,"ventral cochlear nuclei, left",layer V of area 38
+"anterior commissure, temporal limb",ventricular zone of m2R,"anteroventral cochlear nucleus, left",layer VI of area 38
+cingulum bundle,mantle zone of m2R,"posteroventral cochlear nucleus, left",area V5 (middle temporal area)
+fornix system,periventricular stratum of m2R,"cochlear nuclei, right",layer I of area V5/MT
+alveus,intermediate stratum of m2R,"dorsal cochlear nucleus, right",layer II of area V5/MT
+dorsal fornix,superficial stratum of m2R,"ventral cochlear nuclei, right",layer III of area V5/MT
+fimbria,m2 alar plate,"anteroventral cochlear nucleus, right",layer IV of area V5/MT
+"precommissural fornix, general",dorsal part of m2A,"posteroventral cochlear nucleus, right",layer V of area V5/MT
+precommissural fornix diagonal band,ventricular zone of m2AD,conterminalis,layer VI of area V5/MT
+postcommissural fornix,mantle zone of m2AD,"conterminalis, left",lateral occipito-temporal area 
+medial corticohypothalamic tract,periventricular stratum of m2AD,"conterminalis, right",layer I of area LO
+columns of the fornix,dorsal preisthmic part of periaqueductal gray,cuneate nucleus,layer II of area LO
+hippocampal commissures,intermediate stratum of m2AD,"cuneate nucleus, left",layer III of area LO
+dorsal hippocampal commissure,"ventral paracommissural tectal nucleus, m2 part","cuneate nucleus, right",layer IV of area LO
+ventral hippocampal commissure,superficial stratum of m2AD,dorsal motor nucleus of the vagus,layer V of area LO
+perforant path,"dorsal paracommissural tectal nucleus, m2 part","dorsal motor nucleus of the vagus, left",layer VI of area LO
+angular path,dorsolateral part of m2A,"dorsal motor nucleus of the vagus, right",occipital neocortex
+longitudinal association bundle,ventricular zone of m2ADL,endolemniscal nucleus,area prostriata
+stria terminalis,mantle zone of m2ADL,"endolemniscal nucleus, left",layer I of area prostriata
+commissural branch of stria terminalis,periventricular stratum of m2ADL,"endolemniscal nucleus, right",layer II of area prostriata
+hypothalamus related,dorsolateral preisthmic part of periaqueductal gray,epifascicular nucleus,layer III of area prostriata
+medial forebrain bundle,intermediate stratum of m2ADL,"epifascicular nucleus, left",layer IV of area prostriata
+ventrolateral hypothalamic tract,"nucleus sagulum, deep part","epifascicular nucleus, right",layer V of area prostriata
+preoptic commissure,superficial stratum of m2ADL,external (accessory/lateral) cuneate nucleus,layer VI of area prostriata
+supraoptic commissures,"nucleus sagulum, superficial part","external (accessory/lateral) cuneate nucleus, left","primary visual cortex (striate cortex, area V1/17)"
+"supraoptic commissures, anterior",lateral part of m2A,"external (accessory/lateral) cuneate nucleus, right",layer I of area 17
+"supraoptic commissures, dorsal",ventricular zone of m2AL,gracile nucleus,layer II of area 17
+"supraoptic commissures, ventral",mantle zone of m2AL,"gracile nucleus, left",layer III of area 17
+premammillary commissure,periventricular stratum of m2AL,"gracile nucleus, right",layer IV of area 17
+supramammillary decussation,lateral part of preisthmic periaqueductal gray,hypoglossal nucleus,layer IVA of area 17
+propriohypothalamic pathways,intermediate stratum of m2AL,"hypoglossal nucleus, left",layer IVB of area 17
+"propriohypothalamic pathways, dorsal",cuneiform nucleus,"hypoglossal nucleus, right",layer IVC of area 17
+"propriohypothalamic pathways, lateral",superficial stratum of m2AL,inferior olivary complex,layer IVCa of area 17
+"propriohypothalamic pathways, medial",superficial cuneiform nucleus,"inferior olivary complex, left",layer IVCb of area 17
+"propriohypothalamic pathways, ventral",ventrolateral part of m2A,"dorsal accessory inferior olivary nucleus, left",layer V of area 17
+periventricular bundle of the hypothalamus,liminal alar domain of m2,"medial accessory inferior olivary nucleus, left",layer VI of area 17
+mammillary related,ventricular zone of m2Lim,"principal inferior olivary nucleus, left",extrastriate occipital cortex
+principal mammillary tract,mantle zone of m2Lim,"beta inferior olivary nucleus, left",area x of visual cortex
+mammillothalamic tract,periventricular stratum of m2Lim,"inferior olivary complex, right","parastriate cortex (area V2, area 18)"
+mammillotegmental tract,liminal periaqueductal gray of m2,"dorsal accessory inferior olivary nucleus, right",layer I of area 18
+mammillary peduncle,intermediate stratum of m2Lim,"medial accessory inferior olivary nucleus, right",layer II of area 18
+dorsal thalamus related,subcuneiform nucleus,"principal inferior olivary nucleus, right",layer III of area 18
+periventricular bundle of the thalamus,liminal reticular formation of m2,"beta inferior olivary nucleus, right",layer IV of area 18
+epithalamus related,superficial stratum of m2Lim,inferior salivatory nucleus,layer V of area 18
+stria medullaris,preisthmic tegmentum,"inferior salivatory nucleus, left",layer VI of area 18
+fasciculus retroflexus,m2 basal plate,"inferior salivatory nucleus, right",peristriate cortex (area 19)
+habenular commissure,ventricular zone of m2B,intercalated nucleus,area V3 of peristriate cortex
+pineal stalk,mantle zone of m2B,"intercalated nucleus, left",layer I of area V3
+midbrain related,periventricular stratum of m2B,"intercalated nucleus, right",layer II of area V3
+dorsal longitudinal fascicle,basal m2 periaqueductal gray,interfascicular hypoglossal nucleus,layer III of area V3
+dorsal tegmental tract,m2 part of the dorsal raphe nucleus,"interfascicular hypoglossal nucleus, left",layer IV of area V3
+ventricular systems,intermediate stratum of m2B,"interfascicular hypoglossal nucleus, right",layer V of area V3
+lateral ventricle,reticular formation of basal m2,interpositus nucleus,layer VI of area V3
+rhinocele,m2 part of pararubral nucleus,"interpositus nucleus, left",area VP of peristriate cortex
+subependymal zone,superficial stratum of m2B,"interpositus nucleus, right",layer I of area VP
+choroid plexus,m2 part of paranigral nucleus,lateral pericuneate nucleus,layer II of area VP
+choroid fissure,m2 part of nucleus parabrachialis pigmentosus,"lateral pericuneate nucleus, left",layer III of area VP
+interventricular foramen,m2 part of substantia nigra compacta,"lateral pericuneate nucleus, right",layer IV of area VP
+third ventricle,m2 part of substantia nigra reticulata,medial pericuneate nucleus,layer V of area VP
+cerebral aqueduct,m2 floor plate,"medial pericuneate nucleus, left",layer VI of area VP
+fourth ventricle,ventricular zone of m2F,"medial pericuneate nucleus, right",area V3A of peristriate cortex
+lateral recess,mantle zone of m2F,medullary reticular formation,layer I of area V3A
+"central canal, spinal cord/medulla",periventricular stratum of m2F,central medullary reticular group,layer II of area V3A
+grooves,intermediate stratum of m2F,"central medullary reticular group, left",layer III of area V3A
+grooves of the cerebral cortex,superficial stratum of m2F,"central reticular nucleus of the medulla, left",layer IV of area V3A
+endorhinal groove,m2 part of VTA,"medial reticular nucleus of the medulla, left",layer V of area V3A
+hippocampal fissure,interfascicular nucleus,"ventral reticular nucleus of the medulla, left",layer VI of area V3A
+rhinal fissure,hindbrain,"intermediate zone, left",area V4 of peristriate cortex
+rhinal incisure,prepontine hindbrain,"central medullary reticular group, right",layer I of area V4
+grooves of the cerebellar cortex,isthmus,"central reticular nucleus of the medulla, right",layer II of area V4
+precentral fissure,isthmic roof plate,"medial reticular nucleus of the medulla, right",layer III of area V4
+preculminate fissure,ventricular zone of isR,"ventral reticular nucleus of the medulla, right",layer IV of area V4
+primary fissure,mantle zone of isR,"intermediate zone, right",layer V of area V4
+posterior superior fissure,periventricular stratum of isR,gigantocellular group,layer VI of area V4
+prepyramidal fissure,intermediate stratum of isR,"gigantocellular group, left",area V3B of peristriate cortex 
+secondary fissure,superficial stratum of isR,"dorsal paragigantocellular nucleus, left",layer I of area V3B
+posterolateral fissure,isthmic alar plate,"lateral paragigantocellular nucleus, left",layer II of area V3B
+nodular fissure,cerebellar vermis,"gigantocellular nucleus, left",layer III of area V3B
+simple fissure,rhombic lip of cerebellar vermis,"gigantocellular nucleus, ventral part, left",layer IV of area V3B
+intercrural fissure,external granular layer of CbV,"paragigantocellular nucleus, alpha part, left",layer V of area V3B
+ansoparamedian fissure,ventricular zone of cerebellar vermis,"gigantocellular group, right",layer VI of area V3B
+intraparafloccular fissure,mantle zone of cerebellar vermis,"dorsal paragigantocellular nucleus, right",area V6 of peristriate cortex 
+paramedian sulcus,periventricular stratum of cerebellar vermis,"lateral paragigantocellular nucleus, right",layer I of area V6
+parafloccular sulcus,white matter of cerebellar vermis,"gigantocellular nucleus, right",layer II of area V6
+Interpeduncular fossa,intermediate stratum of cerebellar vermis,"gigantocellular nucleus, ventral part, right",layer III of area V6
+retina,cerebellar nuclei of CbV,"paragigantocellular nucleus, alpha part, right",layer IV of area V6
