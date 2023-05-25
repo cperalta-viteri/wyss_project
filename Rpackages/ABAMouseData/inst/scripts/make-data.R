@@ -44,22 +44,30 @@ read_dend_json <- function(json_file) {
 
 
 .add_qc_metrics <- function(e) {
-  e <- scuttle::computeLibraryFactors(e,BPPARAM=BiocParallel::MulticoreParam(6,progressbar = TRUE))
-  e <- scuttle::addPerCellQCMetrics(e,BPPARAM=BiocParallel::MulticoreParam(6,progressbar = TRUE))
-  e <- scuttle::addPerFeatureQCMetrics(e,BPPARAM=BiocParallel::MulticoreParam(6,progressbar = TRUE))
+  BPPARAM <- BiocParallel::MulticoreParam(6,progressbar = TRUE)
+  e <- scuttle::computeLibraryFactors(e,BPPARAM=BPPARAM)
+  e <- scuttle::addPerCellQCMetrics(e,BPPARAM=BPPARAM)
+  e <- scuttle::addPerFeatureQCMetrics(e,BPPARAM=BPPARAM)
   e
 }
 
 
-# Allen Brain Atlas Mouse Cortex
-download_ABAMouseTENx <- function(dir) {
-  # Download the files from GEO as well as the cell-type hierarchy
-  .download_url('https://idk-etl-prod-download-bucket.s3.amazonaws.com/aibs_mouse_ctx-hpf_10x/dend.json',dir)
-  .download_url('ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE185nnn/GSE185862/suppl/GSE185862_expression_matrix_10x.hdf5',dir)
-  .download_url('ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE185nnn/GSE185862/suppl/GSE185862_metadata_10x.hdf5',dir)
-  .download_url('ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE185nnn/GSE185862/suppl/GSE185862_umap.2d.10x.csv.gz',dir)
+.save_SCE <- function(e,dir,prefix) {
+  saveRDS(rowData(e), file.path(dir,paste0(prefix,"_rowData.rds")))
+  saveRDS(colData(e), file.path(dir,paste0(prefix,"_colData.rds")))
+  saveRDS(reducedDims(e), file.path(dir,paste0(prefix,"_reducedDims.rds")))
+  options(DelayedArray.block.size=1e9) # 1GB block size.
+  writeHDF5Array(
+    counts(e),
+    file = file.path(dir,paste0(prefix,"_counts.h5")),
+    name = "counts",
+    chunkdim = NULL
+  )
 }
 
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# Allen Brain SSv4 Mouse Atlas
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 download_ABAMouseSSv4 <- function(dir) {
   # Download the files from GEO as well as the cell-type hierarchy
   .download_url('https://idk-etl-prod-download-bucket.s3.amazonaws.com/aibs_mouse_ctx-hpf_10x/dend.json',dir)
@@ -68,56 +76,12 @@ download_ABAMouseSSv4 <- function(dir) {
   .download_url('ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE185nnn/GSE185862/suppl/GSE185862_umap2d.ssv4.csv.gz',dir)
 }
 
-#.download_url('ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE185nnn/GSE185862/suppl/GSE185862_CTX-HPF-73538sample_metadata.xlsx',dir)
-
-load_ABAMouseTENx <- function(dir) {
-  #dir <- "../../notebooks/01_data_collection/allen_brain_atlas/data/GSE185862/"
-  files <- list(
-    metadata = file.path(dir,"GSE185862_metadata_10x.csv.gz"),
-    umap = file.path(dir,"GSE185862_umap.2d.10x.csv.gz"),
-    h5 = file.path(dir,"GSE185862_expression_matrix_10x.hdf5")
-  )
-
-  # Process cell-type hierarchy
-  dend <- read_dend_json(file.path(dir,"dend.json"))
-
-  # Load count matrix
-  M <- HDF5Array(files$h5,"data/counts")
-  colnames(M) <- as.character(h5read(files$h5,"data/gene"))
-  rownames(M) <- as.character(h5read(files$h5,"data/samples"))
-  M <- t(M)
-
-  # Process cells meta-data
-  meta <- read.csv(files$metadata,check.names = FALSE,stringsAsFactors = FALSE,row.names=1L)
-  stopifnot(all(meta$cell_type_accession_label %in% c("",dend$cell_set_accession)))
-  rownames(meta) <- meta$sample_name
-  stopifnot(all(rownames(meta) %in% colnames(M)))
-  meta <- meta[colnames(M),]
-  rownames(meta) <- colnames(M)
-
-  # Load umap coordinates
-  umap <- read.csv(files$umap,check.names = FALSE,stringsAsFactors = FALSE,row.names = 1) |>
-    data.matrix()
-  umap <- umap[match(colnames(M),rownames(umap)),]
-  rownames(umap) <- colnames(M)
-
-  e <- SingleCellExperiment(
-    assays = list(counts = M),
-    rowData = DataFrame(symbol=rownames(M)),
-    colData = meta,
-    metadata = list(taxonomy=dend),
-    reducedDims = list(UMAP=umap)
-  )
-
-  e
-}
-
 load_ABAMouseSSv4 <- function(dir) {
   #dir <- "../../notebooks/01_data_collection/allen_brain_atlas/data/GSE185862"
   files <- list(
-      metadata = file.path(dir,"GSE185862_metadata_ssv4.csv.gz"),
-      umap = file.path(dir,"GSE185862_umap2d_ssv4.csv.gz"),
-      h5 = file.path(dir,"GSE185862_expression_matrix_SSv4.hdf5")
+    metadata = file.path(dir,"GSE185862_metadata_ssv4.csv.gz"),
+    umap = file.path(dir,"GSE185862_umap2d_ssv4.csv.gz"),
+    h5 = file.path(dir,"GSE185862_expression_matrix_SSv4.hdf5")
   )
 
   # Process cell-type hierarchy
@@ -165,35 +129,80 @@ load_ABAMouseSSv4 <- function(dir) {
 }
 
 
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# Allen Brain 10x Mouse Atlas
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+download_ABAMouseTENx <- function(dir) {
+  # Download the files from GEO as well as the cell-type hierarchy
+  .download_url('https://idk-etl-prod-download-bucket.s3.amazonaws.com/aibs_mouse_ctx-hpf_10x/dend.json',dir)
+  .download_url('ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE185nnn/GSE185862/suppl/GSE185862_expression_matrix_10x.hdf5',dir)
+  .download_url('ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE185nnn/GSE185862/suppl/GSE185862_metadata_10x.hdf5',dir)
+  .download_url('ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE185nnn/GSE185862/suppl/GSE185862_umap.2d.10x.csv.gz',dir)
+}
 
+load_ABAMouseTENx <- function(dir) {
+  #dir <- "../../notebooks/01_data_collection/allen_brain_atlas/data/GSE185862/"
+  files <- list(
+    metadata = file.path(dir,"GSE185862_metadata_10x.csv.gz"),
+    umap = file.path(dir,"GSE185862_umap.2d.10x.csv.gz"),
+    h5 = file.path(dir,"GSE185862_expression_matrix_10x.hdf5")
+  )
+
+  # Process cell-type hierarchy
+  dend <- read_dend_json(file.path(dir,"dend.json"))
+
+  # Load count matrix
+  M <- HDF5Array(files$h5,"data/counts")
+  colnames(M) <- as.character(h5read(files$h5,"data/gene"))
+  rownames(M) <- as.character(h5read(files$h5,"data/samples"))
+  M <- t(M)
+
+  # Process cells meta-data
+  meta <- read.csv(files$metadata,check.names = FALSE,stringsAsFactors = FALSE,row.names=1L)
+  stopifnot(all(meta$cell_type_accession_label %in% c("",dend$cell_set_accession)))
+  rownames(meta) <- meta$sample_name
+  stopifnot(all(rownames(meta) %in% colnames(M)))
+  meta <- meta[colnames(M),]
+  rownames(meta) <- colnames(M)
+
+  # Load umap coordinates
+  umap <- read.csv(files$umap,check.names = FALSE,stringsAsFactors = FALSE,row.names = 1) |>
+    data.matrix()
+  umap <- umap[match(colnames(M),rownames(umap)),]
+  rownames(umap) <- colnames(M)
+
+  e <- SingleCellExperiment(
+    assays = list(counts = M),
+    rowData = DataFrame(symbol=rownames(M)),
+    colData = meta,
+    metadata = list(taxonomy=dend),
+    reducedDims = list(UMAP=umap)
+  )
+
+  e
+}
+
+
+
+
+
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# Main
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 dir <- "../../notebooks/01_data_collection/allen_brain_atlas/data/GSE185862"
-#download_ABAMouseTENx(dir)
-#download_ABAMouseSSv4(dir)
-e1 <- .add_qc_metrics(load_ABAMouseTENx(dir))
+if (dir.create(dir)) {
+  download_ABAMouseSSv4(dir)
+  download_ABAMouseTENx(dir)
+  #.download_url('ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE185nnn/GSE185862/suppl/GSE185862_CTX-HPF-73538sample_metadata.xlsx',dir)
+}
 e2 <- .add_qc_metrics(load_ABAMouseSSv4(dir))
+.save_SCE(e2,".","ABAMouseSSv4")
+
+e1 <- .add_qc_metrics(load_ABAMouseTENx(dir))
+.save_SCE(e1,".","ABAMouseTENx")
 
 
 
 
-# Loading the data into R.
-saveRDS(rowData(e1), "ABAMouseTENx_rowData.rds")
-saveRDS(colData(e1), "ABAMouseTENx_colData.rds")
-saveRDS(reducedDims(e1), "ABAMouseTENx_reducedDims.rds")
-options(DelayedArray.block.size=1e9) # 1GB block size.
-writeHDF5Array(
-  counts(e1),
-  file = "ABAMouseTENx_counts.h5",
-  name = "counts"
-)
-
-saveRDS(rowData(e2), "ABAMouseSSv4_rowData.rds")
-saveRDS(colData(e2), "ABAMouseSSv4_colData.rds")
-saveRDS(reducedDims(e2), "ABAMouseSSv4_reducedDims.rds")
-options(DelayedArray.block.size=1e9) # 1GB block size.
-writeHDF5Array(
-  counts(e2),
-  file = "ABAMouseSSv4_counts.h5",
-  name = "counts"
-)
 
 
