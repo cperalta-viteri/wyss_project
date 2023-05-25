@@ -1,6 +1,11 @@
 library(HDF5Array)
 library(SingleCellExperiment)
 library(DelayedArray)
+#library(rjson)
+#library(BiocParallel)
+#library(scuttle)
+#library(Matrix)
+
 
 
 #' Read json file storing the allen taxonomy and convert into a data.frame
@@ -120,11 +125,6 @@ load_ABAMouseSSv4 <- function(dir) {
     reducedDims = list(UMAP=umap)
   )
 
-  # Compute librarySizeFactors
-  #S <- .qc_metrics(e)
-  e <- scuttle::computeLibraryFactors(e,BPPARAM=BiocParallel::MulticoreParam(6,progressbar = TRUE))
-  e <- scuttle::addPerCellQCMetrics(e,BPPARAM=BiocParallel::MulticoreParam(6,progressbar = TRUE))
-  e <- scuttle::addPerFeatureQCMetrics(e,BPPARAM=BiocParallel::MulticoreParam(6,progressbar = TRUE))
   e
 }
 
