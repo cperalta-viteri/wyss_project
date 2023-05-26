@@ -189,7 +189,7 @@ load_ABAMouseTENx <- function(dir) {
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # Main
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-dir <- "../../notebooks/01_data_collection/allen_brain_atlas/data/GSE185862"
+dir <- "GSE185862"
 if (dir.create(dir)) {
   download_ABAMouseSSv4(dir)
   download_ABAMouseTENx(dir)
@@ -200,7 +200,6 @@ e2 <- .add_qc_metrics(load_ABAMouseSSv4(dir))
 
 e1 <- .add_qc_metrics(load_ABAMouseTENx(dir))
 .save_SCE(e1,".","ABAMouseTENx")
-
 
 
 
