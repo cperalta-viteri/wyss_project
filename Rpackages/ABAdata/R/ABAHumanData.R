@@ -35,19 +35,32 @@
 
 
 
+
+#' @title prepare_ABAHumanTENx.
+#' @description Fetches human TENx data form Allen Brain Atlas.
+#' @param outdir Directory where to store data files.
+#'
 #' @export
 prepare_ABAHumanTENx <- function(outdir=".") {
     tmpdir <- tempdir()
     .download_ABAHumanTENx(tmpdir)
     e <- .add_qc_metrics(.load_ABAHumanTENx(tmpdir))
     .save_SCE(e,outdir,"ABAHumanTENx")
+
 }
 
+#' @title ABAHumanTENx
+#' @description Imports atlas data into R.
+#' @param dir Path to directory from where to read the data files.
 #' @export
 ABAHumanTENx <- function(dir) {
 }
 
 
+#' @title prepare_ABAHumanSSv4.
+#' @description Fetches human Smart-Seq data from Allen Brain Atlas.
+#' @param outdir Directory where to store data files.
+#'
 #' @export
 prepare_ABAHumanSSv4 <- function(outdir=".") {
     tmpdir <- tempdir()
@@ -56,6 +69,9 @@ prepare_ABAHumanSSv4 <- function(outdir=".") {
     .save_SCE(e,outdir,"ABAHumanSSv4")
 }
 
+#' @title ABAHumanTENx
+#' @description Imports atlas data into R.
+#' @param dir Path to directory from where to read the data files.
 #' @export
 ABAHumanSSv4 <- function(dir) {
 }
