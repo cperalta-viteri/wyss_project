@@ -56,7 +56,8 @@ read_dend_json <- function(json_file) {
   e
 }
 
-
+#' Save a SingleCellExperiment object into a folder with generic formats (H5 and TSV only)
+#' Note: only counts() assay is saved, raise a warning if more assays available
 .save_SCE <- function(e,dir,prefix) {
   saveRDS(rowData(e), file.path(dir,paste0(prefix,"_rowData.rds")))
   saveRDS(colData(e), file.path(dir,paste0(prefix,"_colData.rds")))
@@ -73,15 +74,17 @@ read_dend_json <- function(json_file) {
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # Allen Brain SSv4 Mouse Atlas
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-download_ABAMouseSSv4 <- function(dir) {
-  # Download the files from GEO as well as the cell-type hierarchy
+# Download the files from GEO as well as the cell-type hierarchy
+.download_ABAMouseSSv4 <- function(dir) {
+  #dir <- "~/Downloads"
   .download_url('https://idk-etl-prod-download-bucket.s3.amazonaws.com/aibs_mouse_ctx-hpf_10x/dend.json',dir)
   .download_url('ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE185nnn/GSE185862/suppl/GSE185862_expression_matrix_SSv4.hdf5',dir)
   .download_url('ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE185nnn/GSE185862/suppl/GSE185862_metadata_ssv4.csv.gz',dir)
-  .download_url('ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE185nnn/GSE185862/suppl/GSE185862_umap2d.ssv4.csv.gz',dir)
+  .download_url('ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE185nnn/GSE185862/suppl/GSE185862_umap2d_ssv4.csv.gz',dir)
+  .download_url('ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE185nnn/GSE185862/suppl/GSE185862_CTX-HPF-73538sample_metadata.xlsx',dir)
 }
 
-load_ABAMouseSSv4 <- function(dir) {
+.load_ABAMouseSSv4 <- function(dir) {
   #dir <- "../../notebooks/01_data_collection/allen_brain_atlas/data/GSE185862"
   files <- list(
     metadata = file.path(dir,"GSE185862_metadata_ssv4.csv.gz"),
@@ -132,15 +135,18 @@ load_ABAMouseSSv4 <- function(dir) {
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # Allen Brain 10x Mouse Atlas
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-download_ABAMouseTENx <- function(dir) {
-  # Download the files from GEO as well as the cell-type hierarchy
+
+# Download the files from GEO as well as the cell-type hierarchy
+.download_ABAMouseTENx <- function(dir) {
+  #dir <- "~/Downloads"
   .download_url('https://idk-etl-prod-download-bucket.s3.amazonaws.com/aibs_mouse_ctx-hpf_10x/dend.json',dir)
   .download_url('ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE185nnn/GSE185862/suppl/GSE185862_expression_matrix_10x.hdf5',dir)
-  .download_url('ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE185nnn/GSE185862/suppl/GSE185862_metadata_10x.hdf5',dir)
+  .download_url('ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE185nnn/GSE185862/suppl/GSE185862_metadata_10x.csv.gz',dir)
   .download_url('ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE185nnn/GSE185862/suppl/GSE185862_umap.2d.10x.csv.gz',dir)
+  .download_url('ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE185nnn/GSE185862/suppl/GSE185862_CTX-HPF-73538sample_metadata.xlsx',dir)
 }
 
-load_ABAMouseTENx <- function(dir) {
+.load_ABAMouseTENx <- function(dir) {
   #dir <- "../../notebooks/01_data_collection/allen_brain_atlas/data/GSE185862/"
   files <- list(
     metadata = file.path(dir,"GSE185862_metadata_10x.csv.gz"),
@@ -184,22 +190,31 @@ load_ABAMouseTENx <- function(dir) {
 
 
 
-
-
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-# Main
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-dir <- "GSE185862"
-if (dir.create(dir)) {
-  download_ABAMouseSSv4(dir)
-  download_ABAMouseTENx(dir)
-  #.download_url('ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE185nnn/GSE185862/suppl/GSE185862_CTX-HPF-73538sample_metadata.xlsx',dir)
+#' @export
+prepare_ABAMouseTENx <- function(outdir=".") {
+  tmpdir <- tempdir()
+  .download_ABAMouseTENx(tmpdir)
+  e <- .add_qc_metrics(.load_ABAMouseTENx(tmpdir))
+  .save_SCE(e,outdir,"ABAMouseTENx")
 }
-e2 <- .add_qc_metrics(load_ABAMouseSSv4(dir))
-.save_SCE(e2,".","ABAMouseSSv4")
 
-e1 <- .add_qc_metrics(load_ABAMouseTENx(dir))
-.save_SCE(e1,".","ABAMouseTENx")
+#' @export
+ABAMouseTENx <- function(dir) {
+}
+
+
+#' @export
+prepare_ABAMouseSSv4 <- function(outdir=".") {
+  tmpdir <- tempdir()
+  .download_ABAMouseSSv4(tmpdir)
+  e <- .add_qc_metrics(.load_ABAMouseSSv4(tmpdir))
+  .save_SCE(e,outdir,"ABAMouseSSv4")
+}
+
+#' @export
+ABAMouseSSv4 <- function(dir) {
+}
+
 
 
 
