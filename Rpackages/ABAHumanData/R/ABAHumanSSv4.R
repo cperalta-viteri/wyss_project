@@ -73,7 +73,6 @@
 
 
 
-#'
 #' #' @title prepare_ABAHumanSSv4.
 #' #' @description Fetches human Smart-Seq data from Allen Brain Atlas.
 #' #' @param outdir Directory where to store data files.
@@ -90,6 +89,6 @@
 #' @description Imports atlas data into R.
 #' @param outdir Path to directory from where to read the data files.
 #' @export
-ABAHumanSSv4 <- function(outdir="ABAMouseSSv4") {
+ABAHumanSSv4 <- function(outdir="ABAHumanSSv4") {
   SingleCellExperimentCachedDataset(outdir,.download_ABAHumanSSv4, .load_ABAHumanSSv4)
 }

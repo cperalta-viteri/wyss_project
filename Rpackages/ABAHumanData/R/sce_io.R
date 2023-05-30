@@ -30,7 +30,7 @@ writeSingleCellExperiment <- function(e,dir) {
   closeAllConnections()
 
   # write counts
-  writeHDF5Array(
+  HDF5Array::writeHDF5Array(
     SingleCellExperiment::counts(e),
     file = file.path(dir,"counts.h5"),
     name = "counts",
@@ -58,12 +58,12 @@ readSingleCellExperiment <- function(dir) {
   red <- lapply(red,function(r) {
     z <- read.table(file.path(dir,sprintf("reducedDim_%s.tsv.gz",r)),sep="\t") |>
       data.matrix()
-    SingleCellExperiment::colnames(z) <- NULL
+    colnames(z) <- NULL
     z
   }) |> setNames(red)
 
   # Counts matrix
-  n <- HDF5Array(file = file.path(dir,"counts.h5"),name = "counts")
+  n <- HDF5Array::HDF5Array(file = file.path(dir,"counts.h5"),name = "counts")
 
   # Return SCE object
   SingleCellExperiment::SingleCellExperiment(list(counts=n),rowData=rd,colData=cd,reducedDims = red)
@@ -73,7 +73,7 @@ readSingleCellExperiment <- function(dir) {
 
 #' Generic function to create a cached SingleCellExperiment dataset
 #'
-#' The function automaticaly handle download and caching of the data
+#' The function automatically handle download and caching of the data
 #' @param download_fun function used to download the data into a given directory
 #' @param load_fun function used to load the downloaded data from the given directory into a SingleCellExperiment object
 #' @import SingleCellExperiment
