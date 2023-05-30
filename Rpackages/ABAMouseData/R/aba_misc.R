@@ -51,45 +51,5 @@ read_dend_json <- function(json_file) {
   e
 }
 
-#' Save a SingleCellExperiment object into a folder with generic formats (H5 and TSV only)
-#' Note: only counts() assay is saved, raise a warning if more assays available
-#' @import HDF5Array
-#' @import SingleCellExperiment
-.write_SCE <- function(e,dir) {
-  stopifnot(!anyDuplicated(reducedDimNames(e)))
-  stopifnot("counts" %in% assayNames(e))
-  if (!identical(assayNames(e),"counts")) warning("only counts assay will be saved.")
-  write.table(rowData(e), sep="\t", file.path(dir,"rowData.tsv"))
-  write.table(colData(e), sep="\t", file.path(dir,"colData.tsv"))
-  for(rdn in reducedDimNames(e)) {
-    write.table(reducedDim(e,rdn), sep="\t", file.path(dir,sprintf("reducedDim_%s.tsv",rdn)))
-  }
-  writeHDF5Array(
-    counts(e),
-    file = file.path(dir,"counts.h5"),
-    name = "counts",
-    chunkdim = NULL
-  )
-}
-
-
-#' Read a SingleCellExperiment from a directory savec with .save_SCE
-#' Note: only counts() assay is saved, raise a warning if more assays available
-#' @import HDF5Array
-#' @import SingleCellExperiment
-.read_SCE <- function(e,dir) {
-  rd <- read.table(sep="\t", file.path(dir,"rowData.tsv"))
-  cd <- read.table(sep="\t", file.path(dir,"colData.tsv"))
-  # for(rdn in reducedDimNames(e)) {
-  #   write.table(reducedDim(e,rdn), sep="\t", file.path(dir,sprintf("reducedDim_%s.tsv",rdn)))
-  # }
-  n <- HDF5Array(file = file.path(dir,"_counts.h5"),name = "counts")
-  SingleCellExperiment(list(counts=n),rowData=rd,colData(cd))
-}
-
-
-
-
-
 
 

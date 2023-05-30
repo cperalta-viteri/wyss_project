@@ -11,3 +11,9 @@ Encoding: UTF-8
 LazyData: true
 Maintainer: Julien Prados <julien.prados@unige.ch>
 RoxygenNote: 7.2.3
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+VignetteBuilder: knitr

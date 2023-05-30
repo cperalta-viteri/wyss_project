@@ -1,0 +1,80 @@
+---
+title: "ABAMouse"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ABAMouse}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(ABAMouseData)
+library(ggplot2)
+library(scuttle)
+```
+
+
+Create a SingleCellExperiment object with 70k cells and normalize counts.
+```{r setup}
+x <- ABAMouseSSv4()
+x <- scuttle::logNormCounts(x)
+```
+
+# Standard plotting
+```{r}
+scater::plotUMAP(x,colour_by="subclass_label",text_by="subclass_label",add_legend=FALSE,point_size=0.3,text_size=3) +
+  coord_equal()
+scater::plotUMAP(x,colour_by="Gad1",point_size=0.3) + coord_equal()
+scater::plotDots(x,c("Gad1","Gad2","Neurod1","Neurod2"),group = "subclass_label") + coord_flip()
+scater::plotExpression(x,c("Gad2","Neurod2"))
+scater::plotGroupedHeatmap(x,c("Gad1","Gad2","Neurod1","Neurod2"),group = "subclass_label")
+```
+
+
+
+# Custom plotting
+```{r}
+makePerCellDF(x) |>
+  ggplot() +
+    geom_point(aes(x=UMAP.1,y=UMAP.2,color=subclass_color),size=0.3) + 
+    scale_color_identity() + 
+    coord_equal() +
+    theme_classic()
+```
+
+
+# Dimensionality reduction
+```{r}
+BPPARAM <- BiocParallel::MulticoreParam(6,progressbar = TRUE)
+x <- scater::runPCA(x,BPPARAM=BPPARAM)
+x <- scater::runUMAP(x,dimred="PCA",BPPARAM=BPPARAM,name="U")
+```
+
+## Clustering
+```{r}
+k <- scran::clusterCells(x,use.dimred="UMAP",BLUSPARAM=bluster::NNGraphParam(shared = FALSE,k=30),full=TRUE)
+x$my_cluster <- igraph::cut_at(k$objects$communities,no=50)
+```
+
+
+```{r}
+scater::plotUMAP(x,colour_by="my_cluster",text_by="my_cluster",add_legend=FALSE,point_size=0.3,text_size=3)
+```
+
+```{r}
+markers <- scran::findMarkers(x,x$class_label,test.type="wilcox",pval.type="any",BPPARAM=BPPARAM)
+```
+
+```{r}
+scater::plotDots(x,rownames(markers$GABAergic)[1:20],group = "class_label")
+```
+
+
+

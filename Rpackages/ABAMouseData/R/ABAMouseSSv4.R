@@ -19,7 +19,7 @@
 #' @import Matrix
 #' @import SingleCellExperiment
 .load_ABAMouseSSv4 <- function(dir) {
-  #dir <- "../../notebooks/01_data_collection/allen_brain_atlas/data/GSE185862"
+  #dir <- "ABAMouseSSv4/download/"
   files <- list(
     metadata = file.path(dir,"GSE185862_metadata_ssv4.csv.gz"),
     umap = file.path(dir,"GSE185862_umap2d_ssv4.csv.gz"),
@@ -51,8 +51,9 @@
   # Load umap coordinates
   umap <- read.csv(files$umap,check.names = FALSE,stringsAsFactors = FALSE,row.names = 1) |>
     data.matrix()
-  umap <- umap[match(colnames(M),rownames(umap)),]
+  umap <- umap[match(colnames(M),sub("^Smartseq_cells.","",rownames(umap))),]
   rownames(umap) <- colnames(M)
+  colnames(umap) <- NULL
 
   e <- SingleCellExperiment(
     assays = list(counts = M),
@@ -67,19 +68,9 @@
 
 #' @export
 ABAMouseSSv4 <- function(outdir="ABAMouseSSv4") {
-
-  # Download the data and prepare QC
-  if (!file.exists(file.path(outdir,"DONE"))) {
-    tmpdir <- file.path(outdir,"download")
-    if (!file.exists(file.path(tmpdir,"DONE"))) {
-      .download_ABAMouseSSv4(tmpdir)
-      writeLines("DONE",file.path(tmpdir,"DONE"))
-    }
-    e <- .load_ABAMouseSSv4(tmpdir)
-    e <- .add_qc_metrics(e)
-    .write_SCE(e,outdir)
-    writeLines("DONE",file.path(outdir,"DONE"))
-  }
-  .read_SCE(outdir)
+  SingleCellExperimentCachedDataset(outdir,.download_ABAMouseSSv4,.load_ABAMouseSSv4)
 }
+
+
+
 

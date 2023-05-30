@@ -62,21 +62,9 @@
 
 #' @export
 ABAMouseTENx <- function(outdir="ABAMouseTENx") {
-
-  # Download the data and prepare QC
-  if (!file.exists(file.path(outdir,"DONE"))) {
-    tmpdir <- file.path(outdir,"download")
-    if (!file.exists(file.path(tmpdir,"DONE"))) {
-      .download_ABAMouseTENx(tmpdir)
-      writeLines("DONE",file.path(tmpdir,"DONE"))
-    }
-    e <- .load_ABAMouseTENx(tmpdir)
-    e <- .add_qc_metrics(e)
-    .write_SCE(e,outdir)
-    writeLines("DONE",file.path(outdir,"DONE"))
-  }
-  .read_SCE(outdir)
+  SingleCellExperimentCachedDataset(outdir,.download_ABAMouseTENx,.load_ABAMouseTENx)
 }
+
 
 
 
