@@ -26,7 +26,7 @@
   )
 
   # Process cell-type hierarchy
-  dend <- read_dend_json(file.path(dir,"dend.json"))
+  dend <- aba_read_dend_json(file.path(dir,"dend.json"))
 
   # Load count matrix
   M <- HDF5Array(files$h5,"data/counts")
@@ -60,6 +60,7 @@
 }
 
 #' Allen Brain 10x Mouse Atlas
+#'
 #' Return a SingleCellExperiment object with 1M cells annotated
 #' @param outdir name of the directory to store the dataset
 #' @export

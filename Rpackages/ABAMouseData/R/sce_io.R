@@ -2,7 +2,8 @@
 
 
 #' Save a SingleCellExperiment object into a folder with generic formats (H5 and TSV only)
-#' Note: only counts() assay is saved, raise a warning if more assays available
+#'
+#' Important: only counts() assay is saved, raise a warning if more assays available
 #' @param e a SingleCellExperiment object to write
 #' @param dir directory to write dataset in
 #' @import HDF5Array
@@ -36,8 +37,8 @@ writeSingleCellExperiment <- function(e,dir) {
 }
 
 
-#' Read a SingleCellExperiment from a directory savec with .save_SCE
-#' Note: only counts() assay is saved, raise a warning if more assays available
+#' Read a SingleCellExperiment from a directory saved with .save_SCE
+#'
 #' @param dir a length-one character containing the directory to load data from
 #' @import HDF5Array
 #' @import SingleCellExperiment
@@ -69,6 +70,7 @@ readSingleCellExperiment <- function(dir) {
 
 
 #' Generic function to create a cached SingleCellExperiment dataset
+#'
 #' The function automaticaly handle download and caching of the data
 #' @param download_fun function used to download the data into a given directory
 #' @param load_fun function used to load the downloaded data from the given directory into a SingleCellExperiment object

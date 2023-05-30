@@ -26,7 +26,7 @@
   )
 
   # Process cell-type hierarchy
-  dend <- read_dend_json(file.path(dir,"dend.json"))
+  dend <- aba_read_dend_json(file.path(dir,"dend.json"))
 
   # Load count matrix
   M <- Matrix::sparseMatrix(
@@ -66,6 +66,7 @@
 }
 
 #' Allen Brain SmartSeq V4 Mouse Atlas
+#'
 #' Return a SingleCellExperiment object with 73k cells annotated
 #' @param outdir name of the directory to store the dataset
 #' @export

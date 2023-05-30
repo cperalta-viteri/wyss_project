@@ -5,7 +5,7 @@
 #' @param path to the json file containing the taxonomy in allen20 format
 #' @return a data.frame
 #' @importFrom rjson fromJSON
-read_dend_json <- function(json_file) {
+aba_read_dend_json <- function(json_file) {
   x <- rjson::fromJSON(file=json_file,simplify = FALSE)
 
   # recursive function converting into dcf format
