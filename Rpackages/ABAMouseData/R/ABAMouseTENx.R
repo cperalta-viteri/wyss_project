@@ -59,6 +59,9 @@
   e
 }
 
+#' Allen Brain 10x Mouse Atlas
+#' Return a SingleCellExperiment object with 1M cells annotated
+#' @param outdir name of the directory to store the dataset
 #' @export
 ABAMouseTENx <- function(outdir="ABAMouseTENx") {
   SingleCellExperimentCachedDataset(outdir,.download_ABAMouseTENx,.load_ABAMouseTENx)

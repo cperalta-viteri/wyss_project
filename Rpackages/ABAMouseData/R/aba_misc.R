@@ -42,7 +42,7 @@ read_dend_json <- function(json_file) {
 }
 
 #' @import scuttle
-#' @import BiocParallel
+#' @importFrom BiocParallel MulticoreParam
 .add_qc_metrics <- function(e) {
   BPPARAM <- BiocParallel::MulticoreParam(6,progressbar = TRUE)
   e <- scuttle::computeLibraryFactors(e,BPPARAM=BPPARAM)

@@ -3,8 +3,7 @@ Type: Package
 Title: Data package from Allen Brain Atlas
 Version: 0.1.0
 Author: Julien Prados
-Depends: SingleCellExperiment, HDF5Array
-Imports: ExperimentHub, AnnotationHub
+Imports: scuttle, Matrix, BiocParallel, SingleCellExperiment, HDF5Array, rjson
 Description: Transcriptomics data from Allen Brain Atlas.
 License: What license is it under?
 Encoding: UTF-8
@@ -12,6 +11,8 @@ LazyData: true
 Maintainer: Julien Prados <julien.prados@unige.ch>
 RoxygenNote: 7.2.3
 Suggests: 
+    scater,
+    scran,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
