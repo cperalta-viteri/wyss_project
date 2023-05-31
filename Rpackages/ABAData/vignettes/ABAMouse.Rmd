@@ -23,7 +23,7 @@ library(scuttle)
 
 Create a SingleCellExperiment object with 70k cells and normalize counts.
 ```{r}
-x <- ABAMouseSSv4()
+x <- ABAMouseSSv4(path.expand("~/Downloads/ABAMouseSSv4"))
 x <- scuttle::logNormCounts(x)
 ```
 
