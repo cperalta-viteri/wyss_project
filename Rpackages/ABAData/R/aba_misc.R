@@ -1,24 +1,11 @@
 
 
-.download_url <- function(url,dir) {
-  local_path <- file.path(dir,basename(url))
-  download.file(url, local_path, method = "wget")
-  local_path
-}
-
-#' @import scuttle
-#' @importFrom BiocParallel MulticoreParam
-.add_qc_metrics <- function(e) {
-  e <- scuttle::computeLibraryFactors(e,BPPARAM=BiocParallel::MulticoreParam(6,progressbar = TRUE))
-  e <- scuttle::addPerCellQCMetrics(e,BPPARAM=BiocParallel::MulticoreParam(6,progressbar = TRUE))
-  e <- scuttle::addPerFeatureQCMetrics(e,BPPARAM=BiocParallel::MulticoreParam(6,progressbar = TRUE))
-  e
-}
 
 #' Read json file storing the allen taxonomy and convert into a data.frame
 #' @param path to the json file containing the taxonomy in allen20 format
 #' @return a data.frame
-.read_dend_json <- function(json_file) {
+#' @importFrom rjson fromJSON
+aba_read_dend_json <- function(json_file) {
   x <- rjson::fromJSON(file=json_file,simplify = FALSE)
 
   # recursive function converting into dcf format
@@ -47,6 +34,24 @@
   })
 }
 
+
+.download_url <- function(url,dir) {
+  local_path <- file.path(dir,basename(url))
+  download.file(url, local_path, method = "wget")
+  local_path
+}
+
+#' @import scuttle
+#' @importFrom BiocParallel MulticoreParam
+.add_qc_metrics <- function(e) {
+  BPPARAM <- BiocParallel::MulticoreParam(6,progressbar = TRUE)
+  e <- scuttle::computeLibraryFactors(e,BPPARAM=BPPARAM)
+  e <- scuttle::addPerCellQCMetrics(e,BPPARAM=BPPARAM)
+  e <- scuttle::addPerFeatureQCMetrics(e,BPPARAM=BPPARAM)
+  e
+}
+
+
 .read_sparseMatrix_from_csv <- function(file,batch_size=1024L) {
   con <- gzfile(file,"r")
 
@@ -64,10 +69,5 @@
   M <- do.call(rbind,M)
   M
 }
-
-
-
-
-
 
 

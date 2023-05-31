@@ -30,14 +30,14 @@
 
   # Load count matrix
   M <- Matrix::sparseMatrix(
-    i = as.integer(h5read(files$h5,"/data/t_exon/i")),
-    p = as.integer(h5read(files$h5,"/data/t_exon/p")),
-    x = as.vector(h5read(files$h5,"/data/t_exon/x")),
-    dims = as.vector(h5read(files$h5,"/data/t_exon/dims")),
+    i = as.integer(rhdf5::h5read(files$h5,"/data/t_exon/i")),
+    p = as.integer(rhdf5::h5read(files$h5,"/data/t_exon/p")),
+    x = as.vector(rhdf5::h5read(files$h5,"/data/t_exon/x")),
+    dims = as.vector(rhdf5::h5read(files$h5,"/data/t_exon/dims")),
     index1 = FALSE
   )
-  colnames(M) <- as.character(h5read(files$h5,"/sample_names"))
-  rownames(M) <- as.character(h5read(files$h5,"/gene_names"))
+  colnames(M) <- as.character(rhdf5::h5read(files$h5,"/sample_names"))
+  rownames(M) <- as.character(rhdf5::h5read(files$h5,"/gene_names"))
 
   # Process cells meta-data
   meta <- read.csv(files$metadata,check.names = FALSE,stringsAsFactors = FALSE,row.names=1L)
@@ -54,9 +54,9 @@
   rownames(umap) <- colnames(M)
   colnames(umap) <- NULL
 
-  e <- SingleCellExperiment(
+  e <- SingleCellExperiment::SingleCellExperiment(
     assays = list(counts = M),
-    rowData = DataFrame(symbol=rownames(M)),
+    rowData = S4Vectors::DataFrame(symbol=rownames(M)),
     colData = meta,
     metadata = list(taxonomy=dend),
     reducedDims = list(UMAP=umap)

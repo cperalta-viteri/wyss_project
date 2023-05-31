@@ -29,9 +29,9 @@
   dend <- aba_read_dend_json(file.path(dir,"dend.json"))
 
   # Load count matrix
-  M <- HDF5Array(files$h5,"data/counts")
-  colnames(M) <- as.character(h5read(files$h5,"data/gene"))
-  rownames(M) <- as.character(h5read(files$h5,"data/samples"))
+  M <- HDF5Array::HDF5Array(files$h5,"data/counts")
+  colnames(M) <- as.character(rhdf5::h5read(files$h5,"data/gene"))
+  rownames(M) <- as.character(rhdf5::h5read(files$h5,"data/samples"))
   M <- t(M)
 
   # Process cells meta-data
@@ -48,9 +48,9 @@
   umap <- umap[match(colnames(M),rownames(umap)),]
   rownames(umap) <- colnames(M)
 
-  e <- SingleCellExperiment(
+  e <- SingleCellExperiment::SingleCellExperiment(
     assays = list(counts = M),
-    rowData = DataFrame(symbol=rownames(M)),
+    rowData = S4Vectors::DataFrame(symbol=rownames(M)),
     colData = meta,
     metadata = list(taxonomy=dend),
     reducedDims = list(UMAP=umap)

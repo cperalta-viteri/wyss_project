@@ -18,7 +18,7 @@
 
 #' @import Matrix
 #' @import SingleCellExperiment
-.load_ABAHumanSSv4 <- function(dir) {
+.load_ABAHumanSS <- function(dir) {
   #dir <- "../../notebooks/01_data_collection/allen_brain_atlas/data/GSE185862/"
   files <- list(
     metadata = file.path(dir,"metadata.csv"),
@@ -89,6 +89,6 @@
 #' @description Imports atlas data into R.
 #' @param outdir Path to directory from where to read the data files.
 #' @export
-ABAHumanSSv4 <- function(outdir="ABAHumanSSv4") {
+ABAHumanSS <- function(outdir="ABAHumanSS") {
   SingleCellExperimentCachedDataset(outdir,.download_ABAHumanSSv4, .load_ABAHumanSSv4)
 }
