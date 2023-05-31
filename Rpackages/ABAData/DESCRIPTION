@@ -1,4 +1,4 @@
-Package: ABAMouseData
+Package: ABAData
 Type: Package
 Title: Data package from Allen Brain Atlas
 Version: 0.1.0

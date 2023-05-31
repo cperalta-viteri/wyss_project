@@ -15,14 +15,14 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(ABAMouseData)
+library(ABAData)
 library(ggplot2)
 library(scuttle)
 ```
 
 
 Create a SingleCellExperiment object with 70k cells and normalize counts.
-```{r setup}
+```{r}
 x <- ABAMouseSSv4()
 x <- scuttle::logNormCounts(x)
 ```
