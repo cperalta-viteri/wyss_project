@@ -1,7 +1,7 @@
 
 
 
-
+#' A torch dataset which accepts DelayedArrays
 #' @export
 #' @import torch
 #' @import DelayedArray
