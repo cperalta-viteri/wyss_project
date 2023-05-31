@@ -16,7 +16,7 @@
 #' @import LowRankQP
 #' @export
 #'
-#' @example
+#' @examples
 #' x <- matrix(runif(1000),ncol=5)
 #' alpha_true <- c(0.3,0.1,0.1,0.4,0.1)
 #' y <- x %*% alpha_true + rnorm(nrow(x),0,0.03)
