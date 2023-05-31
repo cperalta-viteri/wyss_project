@@ -18,7 +18,7 @@
 
 #' @import Matrix
 #' @import SingleCellExperiment
-.load_ABAHumanSS <- function(dir) {
+.load_ABAHumanSSv4 <- function(dir) {
   #dir <- "../../notebooks/01_data_collection/allen_brain_atlas/data/GSE185862/"
   files <- list(
     metadata = file.path(dir,"metadata.csv"),
@@ -70,25 +70,10 @@
 }
 
 
-
-
-
-#' #' @title prepare_ABAHumanSSv4.
-#' #' @description Fetches human Smart-Seq data from Allen Brain Atlas.
-#' #' @param outdir Directory where to store data files.
-#' #'
-#' #' @export
-#' prepare_ABAHumanSSv4 <- function(outdir=".") {
-#'   tmpdir <- tempdir()
-#'   .download_ABAHumanSSv4(tmpdir)
-#'   e <- .add_qc_metrics(.load_ABAHumanSSv4(tmpdir))
-#'   .save_SCE(e,outdir,"ABAHumanSSv4")
-#' }
-
 #' @title ABAHumanTENx
 #' @description Imports atlas data into R.
 #' @param outdir Path to directory from where to read the data files.
 #' @export
-ABAHumanSS <- function(outdir="ABAHumanSS") {
+ABAHumanSSv4 <- function(outdir="ABAHumanSS") {
   SingleCellExperimentCachedDataset(outdir,.download_ABAHumanSSv4, .load_ABAHumanSSv4)
 }

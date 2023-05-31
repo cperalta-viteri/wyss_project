@@ -10,7 +10,7 @@ G <- get_exp_gene_relationships() |>
 
 V <- with(
   G,
-  lapply(id,get_aba_ish_data) |> 
+  lapply(id,get_aba_ish_data) |>
     setNames(paste0(gene_symbol,"/",id))
 )
 V <- simplify2array(V)
