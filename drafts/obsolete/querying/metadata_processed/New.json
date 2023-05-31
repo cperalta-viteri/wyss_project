@@ -1,0 +1,17 @@
+{
+  "organism": "human",
+  "donor_id": "orig.ident",
+  "sex_col": {},
+  "sex_male_value": {},
+  "sex_female_value": {},
+  "sex_default": {},
+  "donor_age_col": "NA",
+  "donor_age": "P3",
+  "data_mod": "scRNA",
+  "brain_injec": "neural plate",
+  "brain_origin": "neural plate",
+  "cell_type_col": {},
+  "cell_type": {},
+  "barcode_col": {},
+  "condition_col": {}
+}
