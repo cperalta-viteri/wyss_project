@@ -51,7 +51,7 @@ makePerCellDF(x) |>
 
 
 # Dimensionality reduction
-```{r}
+```{r,eval=FALSE}
 BPPARAM <- BiocParallel::MulticoreParam(6,progressbar = TRUE)
 x <- scater::runPCA(x,BPPARAM=BPPARAM)
 x <- scater::runUMAP(x,dimred="PCA",BPPARAM=BPPARAM,name="U")
@@ -69,6 +69,7 @@ scater::plotUMAP(x,colour_by="my_cluster",text_by="my_cluster",add_legend=FALSE,
 ```
 
 ```{r}
+BPPARAM <- BiocParallel::MulticoreParam(6,progressbar = TRUE)
 markers <- scran::findMarkers(x,x$class_label,test.type="wilcox",pval.type="any",BPPARAM=BPPARAM)
 ```
 
