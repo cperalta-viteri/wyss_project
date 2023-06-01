@@ -2,7 +2,7 @@
 
 
 #' Read json file storing the allen taxonomy and convert into a data.frame
-#' @param path to the json file containing the taxonomy in allen20 format
+#' @param json_file to the json file containing the taxonomy in allen20 format
 #' @return a data.frame
 #' @importFrom rjson fromJSON
 aba_read_dend_json <- function(json_file) {

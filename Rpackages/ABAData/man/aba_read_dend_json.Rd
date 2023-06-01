@@ -7,7 +7,7 @@
 aba_read_dend_json(json_file)
 }
 \arguments{
-\item{path}{to the json file containing the taxonomy in allen20 format}
+\item{json_file}{to the json file containing the taxonomy in allen20 format}
 }
 \value{
 a data.frame

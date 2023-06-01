@@ -14,7 +14,9 @@
 }
 
 
-
+#' @import SingleCellExperiment
+#' @import S4Vectors
+#' @import rhdf5
 .load_ABAHumanTENx <- function(dir) {
   #dir <- "../../notebooks/01_data_collection/allen_brain_atlas/data/GSE185862/"
   files <- list(
@@ -65,21 +67,6 @@
   e
 }
 
-
-
-
-#' #' @title prepare_ABAHumanTENx.
-#' #' @description Fetches human TENx data form Allen Brain Atlas.
-#' #' @param outdir Directory where to store data files.
-#' #'
-#' #' @export
-#' prepare_ABAHumanTENx <- function(outdir=".") {
-#'   tmpdir <- tempdir()
-#'   .download_ABAHumanTENx(tmpdir)
-#'   e <- .add_qc_metrics(.load_ABAHumanTENx(tmpdir))
-#'   .save_SCE(e,outdir,"ABAHumanTENx")
-#'
-#' }
 
 
 #' @title ABAHumanTENx

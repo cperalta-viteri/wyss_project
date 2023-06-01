@@ -5,7 +5,7 @@ Version: 0.1.0
 Author: Julien Prados
 Imports: scuttle, Matrix, BiocParallel, SingleCellExperiment, HDF5Array, rjson
 Description: Transcriptomics data from Allen Brain Atlas.
-License: What license is it under?
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Maintainer: Julien Prados <julien.prados@unige.ch>
@@ -15,6 +15,8 @@ Suggests:
     scran,
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    igraph,
+    bluster
 Config/testthat/edition: 3
 VignetteBuilder: knitr

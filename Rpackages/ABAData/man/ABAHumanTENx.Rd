@@ -12,17 +12,3 @@ ABAHumanTENx(outdir = "ABAHumanTENx")
 \description{
 Imports atlas data into R.
 }
-\details{
-#' @title prepare_ABAHumanTENx.
-#' @description Fetches human TENx data form Allen Brain Atlas.
-#' @param outdir Directory where to store data files.
-#'
-#' @export
-prepare_ABAHumanTENx <- function(outdir=".") {
-  tmpdir <- tempdir()
-  .download_ABAHumanTENx(tmpdir)
-  e <- .add_qc_metrics(.load_ABAHumanTENx(tmpdir))
-  .save_SCE(e,outdir,"ABAHumanTENx")
-
-}
-}

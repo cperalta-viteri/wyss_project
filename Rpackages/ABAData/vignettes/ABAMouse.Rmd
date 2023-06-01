@@ -23,7 +23,7 @@ library(scuttle)
 
 Create a SingleCellExperiment object with 70k cells and normalize counts.
 ```{r}
-x <- ABAMouseSSv4()
+x <- ABAMouseSSv4("/mnt/Data/Bioinfo_platf/wyss_project/docker_envi/Rpackages/data/ABAMouseSSv4/")
 x <- scuttle::logNormCounts(x)
 ```
 

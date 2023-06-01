@@ -72,6 +72,7 @@ readSingleCellExperiment <- function(dir) {
 #' Generic function to create a cached SingleCellExperiment dataset
 #'
 #' The function automaticaly handle download and caching of the data
+#' @param  outdir path to directory used for I/O
 #' @param download_fun function used to download the data into a given directory
 #' @param load_fun function used to load the downloaded data from the given directory into a SingleCellExperiment object
 #' @import SingleCellExperiment

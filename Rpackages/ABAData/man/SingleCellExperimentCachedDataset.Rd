@@ -7,6 +7,8 @@
 SingleCellExperimentCachedDataset(outdir, download_fun, load_fun)
 }
 \arguments{
+\item{outdir}{path to directory used for I/O}
+
 \item{download_fun}{function used to download the data into a given directory}
 
 \item{load_fun}{function used to load the downloaded data from the given directory into a SingleCellExperiment object}
