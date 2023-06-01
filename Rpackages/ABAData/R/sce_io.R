@@ -45,10 +45,10 @@ writeSingleCellExperiment <- function(e,dir) {
 #' @export
 readSingleCellExperiment <- function(dir) {
   # rowData
-  rd <- read.table(sep="\t", file.path(dir,"rowData.tsv.gz"))
+  rd <- read.table(sep="\t", file.path(dir,"rowData.tsv.gz"), check.names = FALSE, comment.char = "")
 
   # colData
-  cd <- read.table(sep="\t", file.path(dir,"colData.tsv.gz"))
+  cd <- read.table(sep="\t", file.path(dir,"colData.tsv.gz"), check.names = FALSE, comment.char = "")
 
   # reducedDims
   red <- list.files(dir,"^reducedDim_") |>

@@ -2,19 +2,21 @@
 
 
 #' Solve a least square fitting problem with the constraints that coefficient are positive and sum to 1
-#' 
+#'
 #' The solution is useful to demultiplex a multiplexed signal where component profiles are known.
 #' For example to demultiplex a bulk RNA-seq signal into known underlying cell-type profiles
-#' 
+#'
 #' The function find the solution to the minimization problem:
-#'   min_a (a.x - y)^2 
-#' s.t. 
+#'   min_a (a.x - y)^2
+#' s.t.
 #'   a>0 and sum a=1
 #' @param x numeric matrix (n x m) of m components
 #' @param y a vector with multiplexed expression profile of length n
 #' @return a vector of m positive coefficients summing to one.
-#' 
-#' @example 
+#' @import LowRankQP
+#' @export
+#'
+#' @examples
 #' x <- matrix(runif(1000),ncol=5)
 #' alpha_true <- c(0.3,0.1,0.1,0.4,0.1)
 #' y <- x %*% alpha_true + rnorm(nrow(x),0,0.03)
