@@ -6,7 +6,7 @@ Author: Julien Prados
 Maintainer: Julien Prados <julien.prados@unige.ch>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
-Imports: torch, luz, DelayedArray
+Imports: torch, luz, DelayedArray, LowRankQP, stats
 License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
@@ -14,6 +14,9 @@ RoxygenNote: 7.2.3
 Suggests: 
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    qpdf,
+    R6,
+    rlang
 Config/testthat/edition: 3
 VignetteBuilder: knitr

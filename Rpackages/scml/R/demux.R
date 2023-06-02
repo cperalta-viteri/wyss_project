@@ -1,10 +1,10 @@
 
 
-
-#' Solve a least square fitting problem with the constraints that coefficient are positive and sum to 1
+#' @title demux
+#' @description  Solve a least square fitting problem with the constraints that coefficient are positive and sum to 1.
 #'
 #' The solution is useful to demultiplex a multiplexed signal where component profiles are known.
-#' For example to demultiplex a bulk RNA-seq signal into known underlying cell-type profiles
+#' For example to demultiplex a bulk RNA-seq signal into known underlying cell-type profiles.
 #'
 #' The function find the solution to the minimization problem:
 #'   min_a (a.x - y)^2

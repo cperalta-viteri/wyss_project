@@ -1,8 +1,10 @@
 
-
-#' Ordinal regression loss function
-#' @param C a square 2D float tensor representing the cost matrix
-#' @param margin a scalar positive value
+#' @title nnf_ordinal_regression_loss
+#' @description  Ordinal regression loss function.
+#' @param pred Predicted values.
+#' @param target Target values.
+#' @param C a square 2D float tensor representing the cost matrix.
+#' @param margin a scalar positive value.
 #' @return loss value
 #' @export
 #' @import torch
@@ -25,8 +27,9 @@ nnf_ordinal_regression_loss <- function(pred,target,C,margin=1.0) {
   l$dot(w) / torch_maximum(sum(w!=0),1L)
 }
 
-
-#' Ordinal regression loss
+#' @title nn_ordinal_regression_loss
+#' @description  Ordinal regression loss module
+#' @param C a square 2D float tensor representing the cost matrix.
 #' @export
 #' @import torch
 nn_ordinal_regression_loss <- torch::nn_module(

@@ -1,10 +1,13 @@
 
 
-
-#' @export
+#' @title luz_callback_prune
+#' @param param Model parameters
+#' @param n ###łæßðđðsdfgw
+#' @param at_epoch Epoch at which compute pruning mask.
 #' @import torch
 #' @import luz
-luz_callback_prune <- luz_callback(
+#' @export
+luz_callback_prune <- luz::luz_callback(
   initialize = function(param,n,at_epoch) {
     self$param <- param
     self$n <- n

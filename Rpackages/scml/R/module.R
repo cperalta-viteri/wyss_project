@@ -1,7 +1,9 @@
 
 
-
-#' A linear layer a rescaled output
+#' @title nn_linear_rescale
+#' @description  A linear layer a rescaled output.
+#' @param in_features Input number of features.
+#' @param out_features Output number of features
 #' @import torch
 #' @export
 nn_linear_rescale <- nn_module(
@@ -17,7 +19,11 @@ nn_linear_rescale <- nn_module(
 )
 
 
-
+#' @title nn_cell_scorer
+#' @description Cell type classifier NN.
+#' @param feature_names Names of the features.
+#' @param class_names Class of the cells
+#' @param ...  ###łæßðđðsdfgw
 #' @import torch
 #' @export
 nn_cell_scorer <- torch::nn_module(

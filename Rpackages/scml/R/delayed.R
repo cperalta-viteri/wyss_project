@@ -1,7 +1,11 @@
 
 
-
-#' A torch dataset which accepts DelayedArrays
+#' @title delayed_dataset
+#' @description A torch dataset which accepts DelayedArrays.
+#' @param x Count matrix.
+#' @param y Cell type array.
+#' @param dtypes torch types.
+#' @param ...  ###łæßðđðsdfgw
 #' @export
 #' @import torch
 #' @import DelayedArray
@@ -34,15 +38,17 @@ delayed_dataset <- torch::dataset(
 )
 
 
-
-#' Predict cell type using given torch model
+#' @title predict_deayed
+#' @description Predict cell type given a torch model
 #' @param N expression matrix, ideally log1p(RPM/100)/log(2) counts, but raw counts seems to work too
-#' @param model_file path to the file containng the model
+# @param model_file path to the file containng the model
+#' @param luz_model model to be fitted
 #' @param ignore.case if TRUE ignore case when aligning feature names (=gene names). It is useful for easy Human-Mouse gene-name matching.
 #' @return a prediction matrix giving each input cell a score for each cell type
 #' @export
 #' @import torch
 #' @import luz
+#' @import stats
 predict_delayed <- function(N,luz_model,ignore.case=FALSE) {
   # Align the input matrix to desired matrix format, adding 0 when genes are missing
   if (isTRUE(ignore.case)) {
@@ -54,7 +60,7 @@ predict_delayed <- function(N,luz_model,ignore.case=FALSE) {
   m <- rbind(N[1,,drop=FALSE]*0,N)[i+1,]
 
   # Compute prediction by batch
-  pred <- predict(
+  pred <- stats::predict(
     luz_model,
     delayed_dataset(t(m),rep(1L,ncol(m))),
     dataloader_options = list(batch_size=4096L)
