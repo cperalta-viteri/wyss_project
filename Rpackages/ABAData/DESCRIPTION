@@ -3,13 +3,25 @@ Type: Package
 Title: Data package from Allen Brain Atlas
 Version: 0.1.0
 Author: Julien Prados
-Imports: scuttle, Matrix, BiocParallel, SingleCellExperiment, HDF5Array, rjson
 Description: Transcriptomics data from Allen Brain Atlas.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Maintainer: Julien Prados <julien.prados@unige.ch>
 RoxygenNote: 7.2.3
+Imports: 
+    scuttle,
+    Matrix,
+    BiocParallel,
+    SummarizedExperiment,
+    SingleCellExperiment,
+    HDF5Array,
+    rjson,
+    S4Vectors,
+    rhdf5,
+    gplots,
+    utils,
+    methods
 Suggests: 
     scater,
     scran,
@@ -17,6 +29,8 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0),
     igraph,
-    bluster
+    bluster,
+    ggplot2,
+    qpdf
 Config/testthat/edition: 3
 VignetteBuilder: knitr

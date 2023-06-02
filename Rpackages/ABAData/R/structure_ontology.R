@@ -1,7 +1,7 @@
 
 
 
-#' Read structure ontology 
+#' Read structure ontology
 #'
 #' Consult following page for a description
 #' http://help.brain-map.org/display/api/Atlas+Drawings+and+Ontologies
@@ -15,6 +15,8 @@
 #' gplots::venn(list(human_ontology$id,mouse_ontology$id))
 #' gplots::venn(list(na.exclude(human_ontology$atlas_id),na.exclude(mouse_ontology$atlas_id)))
 #' gplots::venn(list(na.exclude(human_ontology$acronym),na.exclude(mouse_ontology$acronym)))
+#' @import gplots
+#' @param json_file path to JSON file
 aba_read_structure_ontology <- function(json_file) {
   node2df_ <- function(n) {
     l <- lapply(n$children,node2df_)
@@ -23,7 +25,7 @@ aba_read_structure_ontology <- function(json_file) {
     n[sapply(n,is.null)] <- NA
     rbind(data.frame(n),l)
   }
-  
+
   json <- rjson::fromJSON(file=json_file,simplify = FALSE)
   node2df_(json$msg[[1]])
 }

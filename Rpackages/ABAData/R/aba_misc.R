@@ -5,6 +5,8 @@
 #' @param json_file to the json file containing the taxonomy in allen20 format
 #' @return a data.frame
 #' @importFrom rjson fromJSON
+#' @import utils
+#' @import methods
 aba_read_dend_json <- function(json_file) {
   x <- rjson::fromJSON(file=json_file,simplify = FALSE)
 
@@ -15,7 +17,7 @@ aba_read_dend_json <- function(json_file) {
 
     # retrieve attributes
     att <- n[[grep("_attributes",names(n))]][[1]]
-    stopifnot(hasName(att,"cell_set_accession"))
+    stopifnot(utils::hasName(att,"cell_set_accession"))
     att$path <- paste0(path,"/",att$cell_set_accession) # add path
 
     l <- mapply(to_dcf,n$children,att$path)
@@ -57,7 +59,7 @@ aba_read_dend_json <- function(json_file) {
 
   # Create the initial Matrix as an empty row, and set colnames
   M <- read.csv(con,nrows=batch_size,header=TRUE,row.names=1L,check.names = FALSE) |>
-    data.matrix()  |> as("RleArray")
+    data.matrix()  |> methods::as("RleArray")
   M <- list(M)
 
   # iterate over rows of the CSV

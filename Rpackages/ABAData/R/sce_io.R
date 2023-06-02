@@ -8,10 +8,11 @@
 #' @param dir directory to write dataset in
 #' @import HDF5Array
 #' @import SingleCellExperiment
+#' @import SummarizedExperiment
 #' @export
 writeSingleCellExperiment <- function(e,dir) {
   stopifnot(!anyDuplicated(reducedDimNames(e)))
-  stopifnot("counts" %in% assayNames(e))
+  stopifnot("counts" %in% SummarizedExperiment::assayNames(e))
   if (!identical(assayNames(e),"counts")) warning("only counts assay will be saved.")
   dir.create(dir)
 
@@ -42,23 +43,24 @@ writeSingleCellExperiment <- function(e,dir) {
 #' @param dir a length-one character containing the directory to load data from
 #' @import HDF5Array
 #' @import SingleCellExperiment
+#' @import utils
 #' @export
 readSingleCellExperiment <- function(dir) {
   # rowData
-  rd <- read.table(sep="\t", file.path(dir,"rowData.tsv.gz"), check.names = FALSE, comment.char = "")
+  rd <- utils::read.table(sep="\t", file.path(dir,"rowData.tsv.gz"), check.names = FALSE, comment.char = "")
 
   # colData
-  cd <- read.table(sep="\t", file.path(dir,"colData.tsv.gz"), check.names = FALSE, comment.char = "")
+  cd <- utils::read.table(sep="\t", file.path(dir,"colData.tsv.gz"), check.names = FALSE, comment.char = "")
 
   # reducedDims
   red <- list.files(dir,"^reducedDim_") |>
     sub(pattern="^reducedDim_([^\\.]*)\\.tsv.*$",replacement="\\1")
   red <- lapply(red,function(r) {
-    z <- read.table(file.path(dir,sprintf("reducedDim_%s.tsv.gz",r)),sep="\t") |>
+    z <- utils::read.table(file.path(dir,sprintf("reducedDim_%s.tsv.gz",r)),sep="\t") |>
       data.matrix()
     colnames(z) <- NULL
     z
-  }) |> setNames(red)
+  }) |> stats::setNames(red)
 
   # Counts matrix
   n <- HDF5Array(file = file.path(dir,"counts.h5"),name = "counts")

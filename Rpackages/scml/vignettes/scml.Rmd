@@ -14,17 +14,20 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r message=FALSE, warning=FALSE, eval=FALSE}
 library(scml)
 library(torch)
 library(luz)
+library(ABAData)
+library(SingleCellExperiment)
 ```
 
 
 
 # Train a classifier on iris dataset
-```{r message=FALSE, warning=FALSE, include=FALSE}
+```{r message=FALSE, warning=FALSE, eval=FALSE}
 ds <- list(x=data.matrix(iris[1:4]),y=iris$Species)
+
 fm <- nn_cell_scorer |>
   setup(
     optimizer = optim_adam,
@@ -49,12 +52,12 @@ fm <- nn_cell_scorer |>
 ```
 
 
-```{r}
+```{r eval=FALSE}
 plot(fm)
 ```
 
 
-```{r, warning=FALSE}
+```{r eval=FALSE, warning=FALSE}
 #rec <- lr_finder(fm,ds,accelerator=accelerator(cpu = TRUE))
 predict(fm,ds,accelerator = accelerator(cpu = TRUE))$max(dim=2)[[2]] |> 
   as_array() |>
@@ -64,9 +67,84 @@ predict(fm,ds,accelerator = accelerator(cpu = TRUE))$max(dim=2)[[2]] |>
 
 
 # Train a classifier on allen dataset
-```{r}
 
+
+```{r eval=FALSE}
+sce_mouse <- ABAMouseSSv4("/mnt/Data/Bioinfo_platf/wyss_project/docker_envi/Rpackages/data/ABAMouseSSv4/")
 ```
+
+
+
+```{r eval=FALSE}
+sce_set <- sce_mouse[, 1:10000]
+sce_set <- scuttle::logNormCounts(sce_set, BPPARAM=BiocParallel::MulticoreParam(workers = 10))
+```
+
+
+
+```{r eval=FALSE}
+train <- sce_set[, sample(seq(1:dim(sce_set)[2]), size = dim(sce_set)[2]*0.7)]
+test <- sce_set[, !colnames(sce_set) %in% colnames(train)]
+```
+
+
+```{r eval=FALSE}
+#.getbatch is not working
+train_ds <- delayed_dataset(x=t(logcounts(train)), y=as.numeric(as.factor(train$subclass_label)))
+test_ds <- delayed_dataset(x=t(logcounts(test)), y=as.numeric(as.factor(test$subclass_label)))
+```
+
+
+```{r eval=FALSE, include=FALSE}
+dl <- train_ds |> dataloader(batch_size = 300)
+
+dl$.length()
+```
+
+
+```{r warning=FALSE, eval=FALSE}
+fitted <- nn_cell_scorer |>
+  setup(
+    optimizer = optim_adam,
+    metrics = list(
+      luz_metric_accuracy()
+    ),
+    loss = nn_multi_margin_loss(margin=1)
+  ) |>
+  set_hparams(feature_names=rownames(train), class_names=train$subclass_label) |>
+  set_opt_hparams(weight_decay=0,lr=0.001) |>
+  fit(
+    epoch = 300L,
+    data = train_ds,
+    valid_data = test_ds,
+    #accelerator = accelerator(cpu = TRUE),
+    callbacks = list(
+      luz_callback_lr_scheduler(lr_lambda,verbose=TRUE,function(epoch) {0.1^(((epoch * 4L) %/% 150L) %% 4L)}),
+      luz_callback_prune("layer1.linear.weight",n=1,at_epoch=149L)
+    )
+  )
+```
+
+
+```{r eval=FALSE}
+plot(fitted)
+```
+
+
+```{r eval=FALSE}
+predict(fitted, test_ds ,accelerator = accelerator(cpu = TRUE))$max(dim=2)[[2]] |> 
+  as_array() |>
+  table(test$subclass_label)
+```
+
+
+
+
+
+
+
+
+
 
 
 

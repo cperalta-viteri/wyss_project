@@ -7,15 +7,25 @@
 #' @import DelayedArray
 delayed_dataset <- torch::dataset(
   name = "delayed_dataset",
-  initialize = function(...,dtypes=list(torch_float())) {
-      self$arrays <- list(...)
+  initialize = function(x, y,...,dtypes=list(torch_float())) {
+      # self$arrays <- list(...)
+      #####C
+      self$x <- x; self$y <- y
       self$dtypes <- dtypes
+      stopifnot(identical(length(y), nrow(x)))
+      #####C
   },
-  .length = function() {nrow(self$arrays[[1]])},
+  # .length = function() {nrow(self$arrays[[1]])},
+  .length = function() {length(self$y)}, #C
   .getbatch = function(index) {
-      mapply(function(A,dtype) {
-        torch_tensor(as.matrix(A[index,,drop=FALSE]),dtype)
-      },self$arrays,self$dtypes)
+  #     mapply(function(A,dtype) {
+  #       torch_tensor(as.matrix(A[index,,drop=FALSE]),dtype)
+  #     },self$arrays,self$dtypes)
+    #####C
+    list(
+      x = torch_tensor(as.matrix(self$x[index, ,drop=FALSE]), torch_float()),
+      y = torch_tensor(self$y[index], torch_long()))
+    #####C
   },
   .getitem = function(index) {
       if (is.list(index)) {index <- unlist(index)}

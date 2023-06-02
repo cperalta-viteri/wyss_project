@@ -17,6 +17,8 @@
 
 #' @import HDF5Array
 #' @import SingleCellExperiment
+#' @import rhdf5
+#' @import S4Vectors
 .load_ABAMouseTENx <- function(dir) {
   #dir <- "../../notebooks/01_data_collection/allen_brain_atlas/data/GSE185862/"
   files <- list(

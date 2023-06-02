@@ -16,7 +16,6 @@
 
 #' @import SingleCellExperiment
 #' @import S4Vectors
-#' @import rhdf5
 .load_ABAHumanTENx <- function(dir) {
   #dir <- "../../notebooks/01_data_collection/allen_brain_atlas/data/GSE185862/"
   files <- list(

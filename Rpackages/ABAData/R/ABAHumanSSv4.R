@@ -19,7 +19,6 @@
 #' @import Matrix
 #' @import SingleCellExperiment
 #' @import S4Vectors
-#' @import rhdf5
 .load_ABAHumanSSv4 <- function(dir) {
   files <- list(
     metadata = file.path(dir,"metadata.csv"),
