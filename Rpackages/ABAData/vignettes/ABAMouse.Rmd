@@ -3,7 +3,7 @@ title: "ABAMouse"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{ABAMouse}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{knitr::knitr}
   %\VignetteEncoding{UTF-8}
 ---
 

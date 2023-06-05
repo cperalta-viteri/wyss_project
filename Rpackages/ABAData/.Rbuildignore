@@ -3,3 +3,5 @@
 ./ABAMouseSSv4/
 ./ABAMouseTENx/
 ^ABAData\.Rproj$
+^doc$
+^Meta$

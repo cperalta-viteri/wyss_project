@@ -32,7 +32,7 @@ aba_read_dend_json <- function(json_file) {
   local({
     con <- textConnection(NULL,"w")
     write.table(dcf,file=con,sep="\t",quote=FALSE,na = "")
-    read.table(text=textConnectionValue(con),sep="\t",quote="",comment="",check.names = FALSE,stringsAsFactors = FALSE)
+    read.table(text=textConnectionValue(con),sep="\t",quote="",comment.char ="",check.names = FALSE,stringsAsFactors = FALSE)
   })
 }
 

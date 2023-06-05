@@ -31,7 +31,7 @@ writeSingleCellExperiment <- function(e,dir) {
   # write counts
   writeHDF5Array(
     counts(e),
-    file = file.path(dir,"counts.h5"),
+    filepath = file.path(dir,"counts.h5"),
     name = "counts",
     chunkdim = NULL
   )
@@ -63,7 +63,7 @@ readSingleCellExperiment <- function(dir) {
   }) |> stats::setNames(red)
 
   # Counts matrix
-  n <- HDF5Array(file = file.path(dir,"counts.h5"),name = "counts")
+  n <- HDF5Array(filepath = file.path(dir,"counts.h5"),name = "counts")
 
   # Return SCE object
   SingleCellExperiment(list(counts=n),rowData=rd,colData=cd,reducedDims = red)

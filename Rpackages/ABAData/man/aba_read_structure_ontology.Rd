@@ -14,8 +14,10 @@ Consult following page for a description
 http://help.brain-map.org/display/api/Atlas+Drawings+and+Ontologies
 }
 \examples{
-human_ontology <- aba_read_structure_ontology("http://api.brain-map.org/api/v2/structure_graph_download/10.json")
-mouse_ontology <- aba_read_structure_ontology("http://api.brain-map.org/api/v2/structure_graph_download/1.json")
+human_ontology <- aba_read_structure_ontology(
+"http://api.brain-map.org/api/v2/structure_graph_download/10.json")
+mouse_ontology <- aba_read_structure_ontology(
+"http://api.brain-map.org/api/v2/structure_graph_download/1.json")
 
 # Check ontology sharing
 gplots::venn(list(human_ontology$id,mouse_ontology$id))
