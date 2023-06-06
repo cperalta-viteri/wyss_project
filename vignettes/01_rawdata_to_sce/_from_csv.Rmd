@@ -1,0 +1,14 @@
+---
+title: "Load counts from big CSV files"
+output: html_notebook
+---
+
+
+Sometime gene expression matrices are given into big CSV or tab-delimited files.
+This notebook show how to convert them into H5 format.
+
+
+```{r}
+read.table("note")
+```
+
