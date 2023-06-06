@@ -73,6 +73,6 @@
 #' @description Imports atlas data into R.
 #' @param outdir Path to directory from where to read the data files.
 #' @export
-ABAHumanSSv4 <- function(outdir="ABAHumanSS") {
+ABAHumanSSv4 <- function(outdir="ABAHumanSSv4") {
   SingleCellExperimentCachedDataset(outdir,.download_ABAHumanSSv4, .load_ABAHumanSSv4)
 }

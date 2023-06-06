@@ -67,7 +67,7 @@
 
 #' Allen Brain SmartSeq V4 Mouse Atlas
 #'
-#' Return a SingleCellExperiment object with 73k cells annotated
+#' @return a SingleCellExperiment object with 73k cells annotated
 #' @param outdir name of the directory to store the dataset
 #' @export
 ABAMouseSSv4 <- function(outdir="ABAMouseSSv4") {

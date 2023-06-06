@@ -26,9 +26,16 @@ R CMD INSTALL Rpackages/ABAData
 
 - Add ISH data to ABAData
 - Create `data/` with ABA datasets
-- Build `.tar.gz` files of the packages
 - `standardize_metadata` shiny app
-- Example code to create a SingleCellExperiment from 10x or CSV
+- implement scml::train_DNN()
+- Apply train_DNN() classifier on Allen dataset and save the model into data/
+- Example notebook to create a SingleCellExperiment from 10x, CSV, or H5AD
+- QC function
+- Example notebook to 1) download a GSE; 2) create a SingleCellExperiment; 3) apply QC; 
+  4) predict cell type; 5) train a new classifier with train_DNN(); 6) save the model
+- Build `.tar.gz` files of the packages
+
+
 
 
 
@@ -39,8 +46,7 @@ R CMD INSTALL Rpackages/ABAData
 shiny::runApp("apps/geo_download/")
 ```
 
-The dataset you have downloaded with the app will be made available into directory `apps/geo_downloads/downloads/`. 
-At this step, depending on the format of the data deposited on GEO, you have to implement a custom R-script to produce `SingleCellExperiment` objects from the downloaded datasets. To help you in this step, you can reuse example scripts available into `apps/geo_downloads/data-examples/`.
+The dataset you have downloaded with the app will be made available into directory `apps/geo_downloads/downloads/`. At this step, depending on the format of the data deposited on GEO, you have to implement a custom R-script to produce `SingleCellExperiment` objects from the downloaded datasets. To help you in this step, you can reuse example scripts available into `vignettes/raw2sce/`.
 
 
 
