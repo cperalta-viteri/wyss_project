@@ -1,0 +1,75 @@
+---
+title: "scml"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{scml}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r message=FALSE}
+library(scml)
+library(torch)
+library(luz)
+```
+
+
+
+# Train a classifier on iris dataset
+```{r message=FALSE}
+ds <- list(x=data.matrix(iris[1:4]),y=iris$Species)
+
+fm <- nn_cell_scorer |>
+  setup(
+    optimizer = optim_adam,
+    metrics = list(
+      luz_metric_accuracy()
+    ),
+    loss = nn_multi_margin_loss(margin=1)
+  ) |>
+  set_hparams(colnames(ds$x),levels(ds$y)) |>
+  set_opt_hparams(weight_decay=0,lr=0.001) |>
+  fit(
+    epoch = 300L,
+    data = ds,
+    valid_data = ds,
+    accelerator = accelerator(cpu = TRUE),
+    callbacks = list(
+      luz_callback_lr_scheduler(lr_lambda,verbose=TRUE,function(epoch) {0.1^(((epoch * 4L) %/% 150L) %% 4L)}),
+      luz_callback_prune("layer1.linear.weight",n=1,at_epoch=149L)
+    )
+  )
+
+
+#luz_save(fm,"model.luz")
+```
+
+learning curves
+```{r}
+plot(fm)
+```
+
+# performance on training set
+```{r eval=FALSE, warning=FALSE}
+#rec <- lr_finder(fm,ds,accelerator=accelerator(cpu = TRUE))
+predict(fm,ds,accelerator = accelerator(cpu = TRUE))$max(dim=2)[[2]] |> 
+  as_array() |>
+  table(iris$Species)
+```
+
+
+
+
+
+
+
+
+
+

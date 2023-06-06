@@ -15,9 +15,10 @@
     G$id,cocoframer::get_aba_ish_data,values="energy"
   ) |> setNames(paste0(G$gene_symbol,"/",G$id))
   
-  # Simplify into a 4D dataset
+  # Simplify into a 4D array
   V <- simplify2array(V)
   
+  # Save array into a H5
   HDF5Array::writeHDF5Array(V,file.path(dir,"mouse_ish.h5"),"/energy",with.dimnames = TRUE)
 }
 
