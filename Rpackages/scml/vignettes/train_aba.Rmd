@@ -80,8 +80,9 @@ make_celltype_ds <- function() {
   
   # Bind the datasets
   mcols(allen10x) <- mcols(allenSSq) <- NULL
-  colData(allen10x) <- colData(allen10x)[c("source","class_label","neighborhood_label","subclass_label","cluster_label","sum")]
-  colData(allenSSq) <- colData(allenSSq)[c("source","class_label","neighborhood_label","subclass_label","cluster_label","sum")]
+  mcol <- intersect(names(colData(allen10x)),names(colData(allenSSq)))
+  colData(allen10x) <- colData(allen10x)[mcol]
+  colData(allenSSq) <- colData(allenSSq)[mcol]
   allen <- cbind(allen10x,allenSSq)
   allen$source <- factor(allen$source)
   
@@ -94,9 +95,9 @@ make_celltype_ds <- function() {
     prob = c(0.7,0.15,0.15)
   )
   
-  # Save allen dataset into an H5 optimized for learning
+  # Save allen dataset into an H5 format optimized for learning
   HDF5Array::saveHDF5SummarizedExperiment(
-    allen,"~/Downloads/allen",chunkdim = c(nrow(allen),1L),level = 1L
+    allen,"~/Downloads/allen",chunkdim = c(nrow(allen),1L),level = 1L,replace = TRUE
   )
 }
 ```
@@ -105,6 +106,7 @@ make_celltype_ds <- function() {
 ```{r}
 # Load dataset
 allen <- HDF5Array::loadHDF5SummarizedExperiment("~/Downloads/allen")
+allen <- allen[,!is.na(allen$subclass_label)]
 
 # Compute target labels to predict
 allen$y_true <- paste(allen$class_label,allen$neighborhood_label,allen$subclass_label,sep=" --- ") |>
