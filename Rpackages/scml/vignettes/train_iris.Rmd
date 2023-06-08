@@ -24,31 +24,15 @@ library(luz)
 
 # Train a classifier on iris dataset
 ```{r message=FALSE}
-ds <- list(x=data.matrix(iris[1:4]),y=iris$Species)
-
-fm <- nn_cell_scorer |>
-  setup(
-    optimizer = optim_adam,
-    metrics = list(
-      luz_metric_accuracy()
-    ),
-    loss = nn_multi_margin_loss(margin=1)
-  ) |>
-  set_hparams(colnames(ds$x),levels(ds$y)) |>
-  set_opt_hparams(weight_decay=0,lr=0.001) |>
-  fit(
-    epoch = 300L,
-    data = ds,
-    valid_data = ds,
-    accelerator = accelerator(cpu = TRUE),
-    callbacks = list(
-      luz_callback_lr_scheduler(lr_lambda,verbose=TRUE,function(epoch) {0.1^(((epoch * 4L) %/% 150L) %% 4L)}),
-      luz_callback_prune("layer1.linear.weight",n=1,at_epoch=149L)
-    )
-  )
-
-
-#luz_save(fm,"model.luz")
+fm <- train_delayed_classifier(
+  data.matrix(iris[1:4]),
+  iris$Species,
+  batch_size = 150L,
+  valid_data = 0.1,
+  epoch = 200L,
+  prune_at_epoch = NA,
+  accelerator = accelerator(cpu=TRUE)
+)
 ```
 
 learning curves
@@ -58,10 +42,9 @@ plot(fm)
 
 # performance on training set
 ```{r eval=FALSE, warning=FALSE}
-#rec <- lr_finder(fm,ds,accelerator=accelerator(cpu = TRUE))
-predict(fm,ds,accelerator = accelerator(cpu = TRUE))$max(dim=2)[[2]] |> 
-  as_array() |>
-  table(iris$Species)
+pred <- predict_delayed(data.matrix(iris[1:4]),fm)$to(device="cpu") |> 
+  as_array()
+table(iris$Species,max.col(pred))
 ```
 
 
