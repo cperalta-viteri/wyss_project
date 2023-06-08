@@ -44,5 +44,41 @@ nn_cell_scorer <- torch::nn_module(
 )
 
 
+#' @title train_torch_NN
+#' @description Allows user-friendly training set up of a torch model.
+#' @param x Count matrix.
+#' @param y Array containing the cell type class label.
+#' @param batch_size Size of data loaded at training.
+#' @param epoch Number of epochs.
+#' @param prune_size
+#' @param lr
+#' @export
+train_cell_scorer <- function(x, y, n_epoch=100L, batch_size=128L, prune_size=50L, lr=c(1e-3,1e-4,1e-5,1e-6)) {
+  y <- as.factor(y)
 
+  sch_epoch <- n_epoch %/% 2L
+  prune_epoch <- sch_epoch - 1L
+
+  # stop("lr not implemented yet: use approx to implement")
+
+  fm <- nn_cell_scorer |>
+    setup(optimizer=optim_adam,
+          metrics = list(luz_metric_accuracy()),
+          loss = nn_multi_margin_loss(margin = 1)
+    ) |>
+    set_hparams(feature_names=colnames(x), class_names=levels(y)) |>
+    set_opt_hparams(weight_decay=0, lr=0.001) |>
+    fit(
+      epoch = n_epoch,
+      data = delayed_xy_dataset(x,as.integer(y)),
+      valid_data = delayed_xy_dataset(x,as.integer(y)),
+      dataloader_options = list(batch_size=batch_size,drop_last=FALSE),
+      # accelerator = accelerator(cpu=TRUE),
+      callbacks = list(
+        luz_callback_lr_scheduler(lr_lambda, verbose=TRUE, function(epoch) {0.1^(((epoch * 4L) %/% sch_epoch) %% 4L)}),
+        luz_callback_prune("layer1.linear.weight", n=prune_size, at_epoch=prune_epoch)
+      )
+    )
+  fm
+}
 

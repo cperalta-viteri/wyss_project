@@ -25,54 +25,14 @@ DelayedArray::setAutoBPPARAM(BiocParallel::MulticoreParam(workers = 6L,progressb
 
 
 
-```{r}
-#' @title train_torch_NN
-#' @description Allows user-friendly training set up of a torch model.
-#' @param x Count matrix.
-#' @param y Array containing the cell type class label.
-#' @param batch_size Size of data loaded at training.
-#' @param epoch Number of epochs.
-#' @param train_size Size for the training set. Default to 70%.
-#' @param random_state Value to set random seed. Default to 12.
-#' @export
-train_cell_scorer <- function(x, y, n_epoch=100L, batch_size=128L, prune_size=50L, lr=c(1e-3,1e-4,1e-5,1e-6)) {
-  y <- as.factor(y)
-  
-  sch_epoch <- n_epoch %/% 2L
-  prune_epoch <- sch_epoch - 1L
-  
-  stop("lr not implemented yet: use approx to implement")
-  
-  fm <- nn_cell_scorer |>
-    setup(optimizer=optim_adam,
-          metrics = list(luz_metric_accuracy()),
-          loss = nn_multi_margin_loss(margin = 1)
-    ) |>
-    set_hparams(feature_names=colnames(x), class_names=levels(y)) |>
-    set_opt_hparams(weight_decay=0, lr=0.001) |>
-    fit(
-      epoch = n_epoch,
-      data = delayed_xy_dataset(x,as.integer(y)),
-      valid_data = delayed_xy_dataset(x,as.integer(y)),
-      dataloader_options = list(batch_size=batch_size,drop_last=FALSE),
-      accelerator = accelerator(cpu=TRUE),
-      callbacks = list(
-        luz_callback_lr_scheduler(lr_lambda, verbose=TRUE, function(epoch) {0.1^(((epoch * 4L) %/% sch_epoch) %% 4L)}),
-        luz_callback_prune("layer1.linear.weight", n=prune_size, at_epoch=prune_epoch)
-      )
-    )
-  fm
-}
-```
-
-
 # Train a classifier on allen dataset
 
 ```{r}
-make_celltype_ds <- function() {
+make_celltype_ds <- function(ss_dir="ABAMouseSSv4", tenx_dir="ABAMouseTENx", save_dir=".") {
+  
   # Load 10x and smart-seq cells
-  allenSSq <- ABAHumanSSv4("../../data/ABAMouseSSv4/");allenSSq$source <- "ssv4"
-  allen10x <- ABAMouseTENx("../../data/ABAMouseTENx/");allen10x$source <- "10x"
+  allenSSq <- ABAHumanSSv4(outdir = ss_dir);allenSSq$source <- "ssv4"
+  allen10x <- ABAMouseTENx(outdir = tenx_dir);allen10x$source <- "10x"
   
   # Subset to common genes only
   allen10x <- allen10x[intersect(rownames(allen10x),rownames(allenSSq))]
@@ -97,15 +57,17 @@ make_celltype_ds <- function() {
   
   # Save allen dataset into an H5 format optimized for learning
   HDF5Array::saveHDF5SummarizedExperiment(
-    allen,"~/Downloads/allen",chunkdim = c(nrow(allen),1L),level = 1L,replace = TRUE
+    allen, save_dir, chunkdim = c(nrow(allen),1L), level = 1L, replace = TRUE
   )
 }
+
+make_celltype_ds(ss_dir = "../../data/ABAMouseSSv4/", tenx_dir = "../../data/ABAMouseTENx/", save_dir = "../../data/allen")
 ```
 
 
 ```{r}
 # Load dataset
-allen <- HDF5Array::loadHDF5SummarizedExperiment("~/Downloads/allen")
+allen <- HDF5Array::loadHDF5SummarizedExperiment("../../data/allen")
 allen <- allen[,!is.na(allen$subclass_label)]
 
 # Compute target labels to predict
@@ -140,10 +102,51 @@ print(table(val_ds$y_true,val_ds$source))
 ```
 
 
+```{r}
+trn_val_balancer <- function(){
+  # Load dataset
+  allen <- HDF5Array::loadHDF5SummarizedExperiment("../../data/allen")
+  allen <- allen[,!is.na(allen$subclass_label)]
+
+  # Compute target labels to predict
+  allen$y_true <- paste(allen$class_label,allen$neighborhood_label,allen$subclass_label,sep=" --- ") |>
+    factor()
+  stopifnot(all(!is.na(allen$y_true)))
+
+  # Normalize counts
+  allen <- scuttle::logNormCounts(allen,center_size_factors=FALSE,size.factors=allen$sum/1e4)
+
+  # Balance training set
+  trn_ds <- local({
+    trn_ds <- allen[,allen$mlset %in% "trn"]
+    trn_ids <- splitAsList(colnames(trn_ds),paste(trn_ds$y_true,trn_ds$source)) |>
+      lapply(sample,150,replace=TRUE) |>
+      unlist() |>
+      sample()
+    trn_ds[,trn_ids]
+    })
+  
+  # Balance validation set
+  val_ds <- local({
+    val_ds <- allen[,allen$mlset %in% "val"]
+    val_ids <- splitAsList(colnames(val_ds),paste(val_ds$y_true,val_ds$source)) |>
+      lapply(sample,30,replace=TRUE) |>
+      unlist() |>
+      sample()
+    val_ds[,val_ids]
+  })
+  
+  return(list(trn_ds=trn_ds, val_ds=val_ds))
+}
+
+train_test <- trn_val_balancer()
+
+```
+
 
 ```{r}
-model <- train_cell_scorer(x=t(logcounts(trn_ds)), y=trn_ds$y_true)
-luz_save(model,"~/Download/aba_model.luz")
+model <- train_cell_scorer(x=t(logcounts(train_test$trn_ds)), y=train_test$trn_ds$y_true)
+luz_save(model,"../../aba_model/aba_model.luz")
 ```
 
 

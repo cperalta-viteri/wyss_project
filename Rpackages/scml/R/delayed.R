@@ -62,44 +62,5 @@ predict_delayed <- function(N,luz_model,ignore.case=FALSE,batch_size=1024L,...) 
 
 
 
-# NN, optimizer=optim_adam, metrics=list(), loss, hparams=list(), epoch,
-#                      train_data, test_data, dataloader_options=list(), callbacks=list()
-
-#' @title train_torch_NN
-#' @description Allows user-friendly training set up of a torch model
-#' @param NN Torch module.
-#' @param optimizer Torch optimizer, by default set to `optim_adam`.
-#' @param metrics Luz metrics to evaluate model performance. See Luz documentation for reference.
-#' @param loss Torch loss.
-#' @param hparams Module's parameters, passed as list: `hparams=list(feature_names=rownames(train), class_names=train$subclass_label)`.
-#' @param weight_decay Weight decay parameter for optimizer. Default set to 0.
-#' @param lr Learning rate for optimizer. Default set to 100.
-#' @param epoch Number of epochs. Default set to 100.
-#' @param train_data Dataset used for fitting the model.
-#' @param test_data Dataset used model performance assessment.
-#' @param dataloader_options Options to be passed to `torch::dataloader()` as list. By default it is setting the batch size to 100:
-#' `dataloader_options=list(batch_size=100)`.
-#' @param callbacks Argument list containing Luz callbacks.
-#' @export
-train_torch_NN <- function(NN, optimizer=optim_adam, metrics=NULL, loss=NULL, hparams=NULL,
-                           weight_decay=0, lr=0.001, epoch=100L,
-                           train_data, test_data, dataloader_options=list(batch_size=100), callbacks=list()){
-  NN |>
-    setup(optimizer=optim_adam,
-          metrics = metrics,
-          loss=loss
-    ) |>
-    set_hparams(unlist(hparams)) |>
-    set_opt_hparams(weight_decay=weight_decay, lr=lr) |>
-    fit(
-      epoch = epoch,
-      data = train_data,
-      valid_data = test_data,
-      dataloader_options=dataloader_options,
-      accelerator = accelerator(cpu=TRUE),
-      callbacks = callbacks
-    )
-}
-
 
 
