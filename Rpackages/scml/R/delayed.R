@@ -5,11 +5,10 @@
 #' @param x Count matrix.
 #' @param y Cell type array.
 #' @param dtypes torch types.
-#' @param ...  ###łæßðđðsdfgw
 #' @export
 #' @import torch
 #' @import DelayedArray
-delayed_xy_dataset <- torch::dataset(
+delayed_classifier_dataset <- torch::dataset(
   name = "delayed_dataset",
   initialize = function(x,y=rep(0L,nrow(m)),x_dtype=torch_float(),y_dtype=torch_long()) {
     stopifnot(identical(length(y), nrow(x)))
@@ -53,7 +52,7 @@ predict_delayed <- function(N,luz_model,ignore.case=FALSE,batch_size=1024L,...) 
   # Compute prediction by batch
   pred <- predict(
     luz_model,
-    delayed_xy_dataset(m),
+    delayed_classifier_dataset(m),
     dataloader_options = list(batch_size=batch_size),
     ...
   )
@@ -62,44 +61,63 @@ predict_delayed <- function(N,luz_model,ignore.case=FALSE,batch_size=1024L,...) 
 
 
 
-# NN, optimizer=optim_adam, metrics=list(), loss, hparams=list(), epoch,
-#                      train_data, test_data, dataloader_options=list(), callbacks=list()
+
 
 #' @title train_torch_NN
-#' @description Allows user-friendly training set up of a torch model
-#' @param NN Torch module.
-#' @param optimizer Torch optimizer, by default set to `optim_adam`.
-#' @param metrics Luz metrics to evaluate model performance. See Luz documentation for reference.
-#' @param loss Torch loss.
-#' @param hparams Module's parameters, passed as list: `hparams=list(feature_names=rownames(train), class_names=train$subclass_label)`.
-#' @param weight_decay Weight decay parameter for optimizer. Default set to 0.
-#' @param lr Learning rate for optimizer. Default set to 100.
-#' @param epoch Number of epochs. Default set to 100.
-#' @param train_data Dataset used for fitting the model.
-#' @param test_data Dataset used model performance assessment.
-#' @param dataloader_options Options to be passed to `torch::dataloader()` as list. By default it is setting the batch size to 100:
-#' `dataloader_options=list(batch_size=100)`.
-#' @param callbacks Argument list containing Luz callbacks.
+#' @description Allows user-friendly training set up of a torch model.
+#' @param x Count matrix.
+#' @param y Array containing the cell type class label.
+#' @param epoch Total number of epoch to train
+#' @param pruning_epoch The epoch at which we prune the model. Set to NA to train without pruning.
+#' @param batch_size Size of batch of data loaded at each training step.
+
+#' @param train_size Size for the training set. Default to 70%.
+#' @param random_state Value to set random seed. Default to 12.
+#' @param ... additional parameters are passed to fit() call
 #' @export
-train_torch_NN <- function(NN, optimizer=optim_adam, metrics=NULL, loss=NULL, hparams=NULL,
-                           weight_decay=0, lr=0.001, epoch=100L,
-                           train_data, test_data, dataloader_options=list(batch_size=100), callbacks=list()){
-  NN |>
-    setup(optimizer=optim_adam,
-          metrics = metrics,
-          loss=loss
+train_delayed_classifier <- function(x, y, epoch=100L, pruning_epoch=epoch%/%2L, batch_size=128L, prune_size=50L, lr=10^(-3:-6),auto_resume_path=NA,...) {
+  #stopifnot(epoch>=2L)
+  if (!identical(lr,sort(lr,decreasing = TRUE))) stop("lr must be a decreasing numeric vector")
+  y <- as.factor(y)
+
+
+  # Define the function which compute lr from a given epoch number
+  lr_fun <- if (!is.na(pruning_epoch)) {
+    stopifnot(pruning_epoch<=epoch)
+    stepfun(
+      c(seq(1L,pruning_epoch,length.out=length(lr)+1L),seq(pruning_epoch+1L,max(epoch,pruning_epoch+1L),length.out=length(lr)+1L)),
+      c(max(lr),lr,min(lr),lr,min(lr))
+    )
+  } else {
+    stepfun(
+      seq(1L,epoch,length.out=length(lr)+1L),
+      c(max(lr),lr,min(lr))
+    )
+  }
+
+
+  fm <- nn_cell_scorer |>
+    setup(optimizer = optim_adam,
+          metrics = list(luz_metric_accuracy()),
+          loss = nn_multi_margin_loss(margin = 1)
     ) |>
-    set_hparams(unlist(hparams)) |>
-    set_opt_hparams(weight_decay=weight_decay, lr=lr) |>
+    set_hparams(feature_names=colnames(x), class_names=levels(y)) |>
+    set_opt_hparams(weight_decay=0, lr=max(lr)) |>
     fit(
       epoch = epoch,
-      data = train_data,
-      valid_data = test_data,
-      dataloader_options=dataloader_options,
-      accelerator = accelerator(cpu=TRUE),
-      callbacks = callbacks
+      data = delayed_xy_dataset(x,as.integer(y)),
+      valid_data = delayed_classifier_dataset(x,as.integer(y)),
+      dataloader_options = list(batch_size=batch_size,drop_last=FALSE),
+      ...,
+      callbacks = c(
+        list(
+          luz_callback_lr_scheduler(lr_lambda, verbose=TRUE, lr_fun),
+          luz_callback_prune("layer1.linear.weight", n=prune_size, at_epoch=prune_epoch)
+        ),
+        if (is.na(auto_resume_path)) NULL else luz_callback_auto_resume(path = auto_resume_path)
+      )
     )
+  fm
 }
-
 
 
