@@ -103,7 +103,7 @@ plot(model)
 ```
 
 
-```{r eval=FALSE}
+```{r,eval=FALSE}
 pred <- predict_delayed(t(logcounts(trn_ds)),model,accelerator = accelerator(cpu = TRUE))
 table(trn_ds$y_true,colnames(pred)[max.col(pred)])
 ```
