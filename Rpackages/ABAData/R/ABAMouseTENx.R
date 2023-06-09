@@ -15,10 +15,9 @@
   #.download_url('ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE185nnn/GSE185862/suppl/GSE185862_CTX_HPF_2021_10x_readme.txt',dir)
 }
 
-#' @import HDF5Array
-#' @import SingleCellExperiment
-#' @import rhdf5
-#' @import S4Vectors
+#' @importFrom HDF5Array HDF5Array
+#' @importFrom SingleCellExperiment SingleCellExperiment
+#' @importFrom rhdf5 h5read
 .load_ABAMouseTENx <- function(dir) {
   #dir <- "../../notebooks/01_data_collection/allen_brain_atlas/data/GSE185862/"
   files <- list(
@@ -31,9 +30,9 @@
   dend <- aba_read_dend_json(file.path(dir,"dend.json"))
 
   # Load count matrix
-  M <- HDF5Array::HDF5Array(files$h5,"data/counts")
-  colnames(M) <- as.character(rhdf5::h5read(files$h5,"data/gene"))
-  rownames(M) <- as.character(rhdf5::h5read(files$h5,"data/samples"))
+  M <- HDF5Array(files$h5,"data/counts")
+  colnames(M) <- as.character(h5read(files$h5,"data/gene"))
+  rownames(M) <- as.character(h5read(files$h5,"data/samples"))
   M <- t(M)
 
   # Process cells meta-data

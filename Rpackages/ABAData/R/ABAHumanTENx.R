@@ -14,8 +14,8 @@
 }
 
 
-#' @import SingleCellExperiment
-#' @import S4Vectors
+#' @importFrom SingleCellExperiment SingleCellExperiment
+#' @importFrom S4Vectors DataFrame
 .load_ABAHumanTENx <- function(dir) {
   #dir <- "../../notebooks/01_data_collection/allen_brain_atlas/data/GSE185862/"
   files <- list(
@@ -56,10 +56,10 @@
   stopifnot(all(colnames(M) == rownames(meta)))
 
   # Build the object
-  e <- SingleCellExperiment::SingleCellExperiment(
+  e <- SingleCellExperiment(
     list(counts = M),
     colData = meta,
-    rowData = S4Vectors::DataFrame(symbol=rownames(M)),
+    rowData = DataFrame(symbol=rownames(M)),
     reducedDims = list(UMAP=tsne),
     metadata = list(taxonomy=dend)
   )

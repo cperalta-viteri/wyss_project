@@ -19,8 +19,10 @@ human_ontology <- aba_read_structure_ontology(
 mouse_ontology <- aba_read_structure_ontology(
 "http://api.brain-map.org/api/v2/structure_graph_download/1.json")
 
+\donttest{
 # Check ontology sharing
 gplots::venn(list(human_ontology$id,mouse_ontology$id))
 gplots::venn(list(na.exclude(human_ontology$atlas_id),na.exclude(mouse_ontology$atlas_id)))
 gplots::venn(list(na.exclude(human_ontology$acronym),na.exclude(mouse_ontology$acronym)))
+}
 }

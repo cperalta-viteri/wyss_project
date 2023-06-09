@@ -16,9 +16,8 @@
 
 
 
-#' @import Matrix
-#' @import SingleCellExperiment
-#' @import S4Vectors
+#' @importFrom SingleCellExperiment SingleCellExperiment
+#' @importFrom S4Vectors DataFrame
 .load_ABAHumanSSv4 <- function(dir) {
   files <- list(
     metadata = file.path(dir,"metadata.csv"),
@@ -58,10 +57,10 @@
   stopifnot(all(colnames(M) == rownames(meta)))
 
   # Build the object
-  e <- SingleCellExperiment::SingleCellExperiment(
+  e <- SingleCellExperiment(
     list(counts = M),
     colData = meta,
-    rowData = S4Vectors::DataFrame(symbol=rownames(M)),
+    rowData = DataFrame(symbol=rownames(M)),
     reducedDims = list(UMAP=tsne),
     metadata = list(taxonomy=dend)
   )

@@ -6,13 +6,13 @@
 #' Important: only counts() assay is saved, raise a warning if more assays available
 #' @param e a SingleCellExperiment object to write
 #' @param dir directory to write dataset in
-#' @import HDF5Array
-#' @import SingleCellExperiment
-#' @import SummarizedExperiment
+#' @importFrom HDF5Array writeHDF5Array
+#' @importFrom SummarizedExperiment assayNames 
+#' @importFrom SingleCellExperiment reducedDimNames rowData colData reducedDim counts
 #' @export
 writeSingleCellExperiment <- function(e,dir) {
   stopifnot(!anyDuplicated(reducedDimNames(e)))
-  stopifnot("counts" %in% SummarizedExperiment::assayNames(e))
+  stopifnot("counts" %in% assayNames(e))
   if (!identical(assayNames(e),"counts")) warning("only counts assay will be saved.")
   dir.create(dir)
 
@@ -41,8 +41,8 @@ writeSingleCellExperiment <- function(e,dir) {
 #' Read a SingleCellExperiment from a directory saved with .save_SCE
 #'
 #' @param dir a length-one character containing the directory to load data from
-#' @import HDF5Array
-#' @import SingleCellExperiment
+#' @importFrom HDF5Array HDF5Array
+#' @importFrom SingleCellExperiment SingleCellExperiment
 #' @import utils
 #' @export
 readSingleCellExperiment <- function(dir) {
@@ -74,10 +74,9 @@ readSingleCellExperiment <- function(dir) {
 #' Generic function to create a cached SingleCellExperiment dataset
 #'
 #' The function automaticaly handle download and caching of the data
-#' @param  outdir path to directory used for I/O
+#' @param outdir path to directory used for I/O
 #' @param download_fun function used to download the data into a given directory
 #' @param load_fun function used to load the downloaded data from the given directory into a SingleCellExperiment object
-#' @import SingleCellExperiment
 #' @export
 SingleCellExperimentCachedDataset <- function(outdir,download_fun,load_fun) {
   # Download data and prepare QC

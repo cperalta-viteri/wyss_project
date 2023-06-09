@@ -20,7 +20,6 @@ Imports:
     HDF5Array,
     rjson,
     rhdf5,
-    gplots,
     methods
 Suggests: 
     scater,
@@ -31,6 +30,7 @@ Suggests:
     igraph,
     bluster,
     ggplot2,
+    gplots,
     qpdf
 Config/testthat/edition: 3
 VignetteBuilder: knitr
