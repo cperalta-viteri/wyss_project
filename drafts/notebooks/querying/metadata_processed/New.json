@@ -1,0 +1,17 @@
+{
+  "organism": "human",
+  "donor_id": "qp_well_fq",
+  "sex_col": "gender",
+  "sex_male_value": " m",
+  "sex_female_value": "f",
+  "sex_default": {},
+  "donor_age_col": "na",
+  "donor_age": "p3",
+  "data_mod": "scRNA",
+  "brain_injec": "neural plate",
+  "brain_origin": "forebrain (prosencephalon)",
+  "cell_type_col": "na",
+  "cell_type": "",
+  "barcode_col": "barcode",
+  "condition_col": "qp_well_fq"
+}

@@ -1,0 +1,295 @@
+---
+title: "Cellranger input"
+output: html_notebook
+---
+
+```{r,message=FALSE}
+library(SingleCellExperiment)
+library(scater)
+library(BiocParallel)
+library(BiocSingular)
+```
+
+# Load Cellranger count
+
+```{r,message=FALSE}
+# Load 10x dataset
+o <- DropletUtils::read10xCounts("filtered_feature_bc_matrix.h5")
+o <- splitAltExps(o,rowData(o)$Type,ref = "Gene Expression")
+rownames(o) <- make.unique(mcols(o)$Symbol)
+```
+
+# Demultiplex HTO tags
+
+## Load HTO counts
+
+```{r}
+# Add HTO information (filtering for missing cells)
+o <- local({
+  hto <- DropletUtils::read10xCounts("filtered_feature_bc_matrix_HTO.h5")
+  o <- o[,o$Barcode %in% hto$Barcode] # Remove cell with none matching barcode in the HTO
+  altExp(o,"Antibody Capture") <- hto[,match(o$Barcode,hto$Barcode)]
+  o
+})
+```
+
+## Perform HTO demultiplexing
+
+```{r}
+o$hto_call <- local({
+  hto <- altExp(o,"Antibody Capture") |> 
+    assay() |>
+    as.matrix()
+  hto <- hto[1:10,]
+  hto <- t(hto/rowMeans(hto))
+  
+  plot(sort(hto),log="y")
+  heatmap(log1p(hto[sample(nrow(hto),1000),]),scale="none")
+  
+  hto_call <- colnames(hto)[max.col(hto)]
+  hto_call[-rowQ(-hto,1) < 1] <- "unclear"
+  hto_call[-rowQ(-hto,1) - -rowQ(-hto,2) < 0.3] <- "unclear"
+  hto_call
+})
+ggcells(o) + 
+  geom_bar(aes(y=hto_call))
+```
+
+# Merge multiple experiments
+
+
+# Metadata
+```{r}
+o$cond <- o$hto_call # Set experimental condition
+#o$sex
+#o$sex_predicted
+#o$genotype
+#o$age
+```
+
+# Add gene annotations
+
+```{r,message=FALSE}
+# Add genes annotations
+rowData(o) <- cbind(
+  rowData(o),
+  local({
+    meta <- read.table("../01_genome/mouse/data/gene_info.tsv",sep="\t",header=TRUE)
+    meta[match(rowData(o)$ID,meta$ensembl_gene_id),]
+  })
+)
+#rowData(o)$go_ids <- CharacterList(strsplit(rowData(o)$go_ids,";"))
+```
+
+
+
+
+
+# QC 
+
+## Compute QC metrics
+
+```{r}
+o <- scuttle::addPerCellQCMetrics(o,subsets=list(mt=grep("^mt-",rownames(o)),Rp=grep("^Rp",rownames(o))))
+o$qc <- "pass"
+o$qc[o$hto_call %in% "unclear"] <- "fail_hto"
+```
+
+### Transcriptomics
+
+```{r}
+o$qc[o$subsets_Rp_percent >= 15] <- "rna_high_Rp"
+o$qc[o$subsets_mt_percent >= 15] <- "rna_high_mt"
+o$qc[o$sum < 1000] <- "rna_low_count"
+o$qc[o$detected < 1000] <- "rna_low_detected"
+```
+
+### ATAC
+```{r}
+o$qc[o$altexps_Peaks_sum < 3000] <- "atac_low_count"
+o$qc[o$altexps_Peaks_detected < 1000] <- "atac_low_detected"
+```
+
+
+## QC summary
+```{r}
+ggcells(o) + 
+  geom_bar(aes(fill=qc,y=cond),color="black") + 
+  ylab("")
+```
+
+
+
+### Read count
+
+```{r}
+ggcells(o) + 
+  geom_violin(aes(x=sum,y=cond),scale="width") + 
+  geom_vline(xintercept=min(o$sum[o$qc %in% "pass"]),linetype=2) + 
+  scale_x_log10() + 
+  xlab("Read count") + ylab("")
+```
+
+### Detected genes
+
+```{r}
+ggcells(o) + 
+  geom_violin(aes(x=detected,y=cond),scale="width") + 
+  geom_vline(xintercept=min(o$detected[o$qc %in% "pass"]),linetype=2) + 
+  xlab("Num. detected gene") + ylab("")
+```
+
+### Mitochondrial genes
+
+```{r}
+ggcells(o) + 
+  geom_violin(aes(x=subsets_mt_percent,y=cond),scale="width") + 
+  geom_vline(xintercept=max(o$subsets_mt_percent[o$qc %in% "pass"]),linetype=2) +
+  xlab("% Mitochondrial") + ylab("")
+```
+
+### Ribosomal proteins
+
+```{r}
+ggcells(o) + 
+  geom_violin(aes(x=subsets_Rp_percent,y=cond),scale="width") + 
+  geom_vline(xintercept=max(o$subsets_Rp_percent[o$qc %in% "pass"]),linetype=2) +
+  xlab("% Ribosomal protein") + ylab("")
+```
+
+### Read-count / Detected-gene
+
+```{r}
+ggcells(o) + 
+  geom_point(aes(x=sum,y=detected,color=qc)) + 
+  scale_x_log10() + 
+  xlab("Read count") + ylab("Num. detected gene") + theme(legend.position = "none")
+
+```
+
+## ATAC-seq QC
+
+```{r}
+ggcells(o) + 
+  geom_violin(aes(x=altexps_Peaks_sum,y=cond),scale="width") + 
+  geom_vline(xintercept=min(o$altexps_Peaks_sum[o$qc %in% "pass"]),linetype=2) + 
+  scale_x_log10() + 
+  xlab("ATAC read count") + ylab("")
+```
+
+```{r}
+ggcells(o) + 
+  geom_violin(aes(x=altexps_Peaks_detected,y=cond),scale="width") + 
+  geom_vline(xintercept=min(o$altexps_Peaks_detected[o$qc %in% "pass"]),linetype=2) + 
+  xlab("Num. ATAC peak") + ylab("")
+```
+
+```{r}
+ggcells(o) + 
+  geom_point(aes(x=sum,y=altexps_Peaks_sum,color=qc)) + 
+  scale_x_log10() + 
+  scale_y_log10() + 
+  coord_equal() + 
+  xlab("Transcriptomics read-count") + ylab("ATAC read-count")
+
+ggcells(o) + 
+  geom_point(aes(x=detected,y=altexps_Peaks_detected,color=qc)) + 
+  scale_x_log10() + 
+  scale_y_log10() + 
+  coord_equal() + 
+  xlab("Num. detected gene") + ylab("Num. ATAC peak")
+```
+
+## Peak size distribution
+
+## TSS
+
+## see https://stuartlab.org/signac/articles/pbmc_vignette.html
+
+
+# MERGIN OBJECT:
+ see https://stuartlab.org/signac/articles/merging.html
+
+
+
+## Run doublet finder
+
+```{r}
+```
+
+## Predict Neuronal cell type
+
+```{r}
+```
+
+## Predict sex
+
+```{r}
+```
+
+## Cell cycle
+
+```{r}
+```
+
+# Expression Normalization
+
+```{r}
+o <- o[,o$qc %in% "pass"]
+o <- logNormCounts(o,BPPARAM=BiocParallel::MulticoreParam())
+```
+
+# Regressing Variables
+
+```{r}
+```
+
+# Dimensionality reduction
+
+## PCA
+
+```{r}
+o <- runPCA(o,BSPARAM=IrlbaParam(),BPPARAM=MulticoreParam())
+```
+
+```{r}
+ggcells(o) + 
+  geom_point(aes(x=PCA.1,y=PCA.2,color=log10(detected))) + 
+  coord_equal()
+
+ggcells(o) + 
+  geom_point(aes(x=PCA.1,y=PCA.2,color=cond)) + 
+  coord_equal()
+```
+
+## UMAP
+
+```{r}
+set.seed(123456)
+o <- runUMAP(o,dimred="PCA",BPPARAM=BiocParallel::MulticoreParam())
+```
+
+```{r}
+ggcells(o) + 
+  geom_point(aes(x=UMAP.1,y=UMAP.2,color=log10(detected))) + 
+  coord_equal()
+
+ggcells(o) + 
+  geom_point(aes(x=UMAP.1,y=UMAP.2,color=cond)) + 
+  coord_equal()
+```
+
+
+
+
+
+# Save object
+```{r}
+source("../lib_sce.R")
+saveHDF5SingleCellExperiment(o,"qc_filtered_exp")
+```
+
+
+
+
+

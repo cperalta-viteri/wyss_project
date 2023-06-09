@@ -1,0 +1,37 @@
+---
+title: "Pathway analysis"
+output: html_notebook
+---
+
+
+# Functionality 
+- Hierachical organization of terms
+- Test multiple sets at the same time
+
+# Available tools
+- EdgeR
+- ReactomePA
+- clusterProfiler
+
+# Data format
+- GMT (MsigDB)
+- OBO
+- GAF, GPAD, GPI (http://geneontology.org/docs/download-go-annotations/)
+
+# Databases
+- Reactome
+- MsigDB
+- GO
+- KEGG
+- Other ?
+
+# Graphical representations
+- Hierachical ?
+- circlepack
+- treemap
+- folder tree
+- dotplot
+
+# More to discuss
+- Protein-Protein interaction network ? Database: IntAct ?
+

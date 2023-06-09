@@ -1,0 +1,8 @@
+{
+  "organism": "mouse",
+  "strain": {},
+  "acq_mode": "scRNA",
+  "stage": "adult",
+  "brain_orig": "Central amygdalar nucleus",
+  "brain_inject": "root"
+}

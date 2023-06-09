@@ -1,0 +1,212 @@
+---
+title: "Make Mouse gene_id mapping table"
+output: html_notebook
+---
+
+
+```{r, setup, include=FALSE}
+knitr::opts_knit$set(root.dir = '.')
+```
+
+# Introduction
+
+This notebook retrieve gene information and functional annotation about of the Mouse genome. We choose to prioritize Ensembl identifier.
+
+
+# Reference genome from GENCODE
+```{bash,eval=FALSE}
+curl -LO --output-dir data/ 'https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M32/gencode.vM32.annotation.gtf.gz'
+curl -LO --output-dir data/ 'https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M32/GRCm39.primary_assembly.genome.fa.gz'
+```
+
+# Reactome pathways
+```{r,eval=FALSE}
+curl -LO --output-dir data/ 'https://reactome.org/download/current/Ensembl2Reactome.txt'
+curl -LO --output-dir data/ 'https://reactome.org/download/current/ReactomePathways.txt'
+curl -LO --output-dir data/ 'https://reactome.org/download/current/ReactomePathwaysRelation.txt'
+pigz data/*.txt
+```
+
+
+# IUPHAR categories
+```{bash,eval=FALSE}
+curl -LO --output-dir data/ 'https://www.guidetopharmacology.org/DATA/targets_and_families.tsv'
+pigz data/*.tsv
+```
+
+
+# KEGG
+```{bash,eval=FALSE}
+# Ontology
+#curl -L 'https://rest.kegg.jp/get/br:br08901/json' > 'data/kegg_brite_br08901_pathways.json'
+#curl -L 'https://rest.kegg.jp/get/br:ko00002/json' > 'data/kegg_brite_ko00002_modules.json'
+
+# Mouse annotations
+#curl -L "https://rest.kegg.jp/link/pathway/mmu" > "data/kegg_link_mmu_pathway.tsv"
+#curl -L "https://rest.kegg.jp/link/module/mmu" > "data/kegg_link_mmu_module.tsv"
+```
+
+
+# MsigDB (GSEA)
+
+warning: this chunk require user authentication to run => download the zip manually from the website.
+
+```{bash,eval=FALSE}
+curl -LO --output-dir data/ 'http://www.gsea-msigdb.org/gsea/msigdb/download_file.jsp?filePath=/msigdb/release/2023.1.Mm/msigdb_v2023.1.Mm_files_to_download_locally.zip'
+```
+
+
+# Gene Ontology
+```{bash,eval=FALSE}
+curl -LO --output-dir data/ 'http://purl.obolibrary.org/obo/go/go-basic.obo' 
+pigz data/*.obo
+```
+
+
+
+```{r}
+library(biomaRt)
+source("../lib_obo.R")
+source("../lib_kegg.R")
+```
+
+
+
+
+
+# From Ensembl
+
+## Retreive informations about genes from Ensembl using biomaRt package
+```{r}
+mart <- useEnsembl('genes','mmusculus_gene_ensembl')
+gene_info <- getBM(
+  mart = mart,
+  attributes = c("ensembl_gene_id","entrezgene_id","mgi_id","external_gene_name","gene_biotype","chromosome_name","start_position","end_position","strand")
+)
+gene_info$position_GRCm39 <- as.character(with(gene_info,GRanges(chromosome_name,IRanges(start_position,end_position),strand = strand)))
+gene_info$strand <- gene_info$start_position <- gene_info$end_position <- NULL
+gene_info <- as(gene_info,"DataFrame")
+```
+
+
+## GO terms
+
+```{r}
+gene_info$go_ids <- local({
+  x <- getBM(
+          mart = mart,
+          attributes = c("ensembl_gene_id","go_id")
+        ) |>
+        subset(go_id != "")
+  x$ensembl_gene_id <- factor(x$ensembl_gene_id,unique(gene_info$ensembl_gene_id))
+  x <- splitAsList(x$go_id,x$ensembl_gene_id)
+  unique(x[gene_info$ensembl_gene_id])
+})
+```
+
+
+```{r}
+gene_info$goslim_goa_accession <- local({
+  x <- getBM(
+    mart = mart,
+    attributes = c("ensembl_gene_id","goslim_goa_accession")
+  ) |>
+  subset(goslim_goa_accession != "")
+  x$ensembl_gene_id <- factor(x$ensembl_gene_id,unique(gene_info$ensembl_gene_id))
+  x <- splitAsList(x$goslim_goa_accession,x$ensembl_gene_id)
+  x[gene_info$ensembl_gene_id] |> unique() |> unname()
+})
+```
+
+
+
+```{r}
+gene_info$reactom_id <- local({
+  x <- read.table(
+    "data/Ensembl2Reactome.txt.gz",sep = "\t",comment="",header=FALSE,quote="",
+    colClasses = c("character","character","NULL","NULL","character","character")
+  )
+  names(x) <- c("ensembl_id","reactome_id","evidence","organism")
+  x <- x[x$organism %in% "Mus musculus",]
+  x$ensembl_id <- factor(x$ensembl_id,unique(gene_info$ensembl_gene_id))
+  x <- splitAsList(x$reactome_id,x$ensembl_id) |> unique()
+  x[gene_info$ensembl_gene_id] |> unname()
+})
+```
+
+
+
+
+
+```{r}
+gene_info$iuphar_family <- local({
+  x <- read.table("data/iuphar_targets_and_families.tsv",sep="\t",quote='"',comment="",skip = 1,header=TRUE,check.names = FALSE)
+
+  # Check that family is a subgroup of type
+  stopifnot(max(lengths(unique(splitAsList(x$Type,x$`Family name`))))==1)
+  
+  x$`Mouse Ensembl Gene` <- factor(x$`Mouse Ensembl Gene`,unique(gene_info$ensembl_gene_id))
+  x$iuphar_family <- paste(x$Type,x$`Family name`,sep="///")
+  iuphar_family <- splitAsList(x$iuphar_family,x$`Mouse Ensembl Gene`) |> unique()
+
+  iuphar_family[gene_info$ensembl_gene_id] |> unname()
+})
+```
+
+
+
+
+
+
+
+```{r,eval=FALSE}
+# gene_info$kegg_pathway_id <- local({
+#   p <- read_kegg_link("data/kegg_link_mmu_pathway.tsv")
+#   p$locus_tag <- factor(p$locus_tag,unique(gene_info$entrezgene_id))
+#   p <- splitAsList(p$pathway_id,p$locus_tag)
+#   c(CharacterList(character()),p)[match(gene_info$entrezgene_id,names(p),nomatch = 0)+1L] |> unname() |> unique()
+# })
+# 
+# gene_info$kegg_module_id <- local({
+#   p <- read_kegg_link("data/kegg_link_mmu_module.tsv")
+#   p$locus_tag <- factor(p$locus_tag,unique(gene_info$entrezgene_id))
+#   p <- splitAsList(p$pathway_id,p$locus_tag)
+#   c(CharacterList(character()),p)[match(gene_info$entrezgene_id,names(p),nomatch = 0)+1L] |> unname() |> unique()
+# })
+```
+
+
+
+
+
+```{r}
+gene_info$msigdb <- local({
+  gmt <- unz(
+    'data/msigdb_v2023.1.Mm_files_to_download_locally.zip',
+    'msigdb_v2023.1.Mm_files_to_download_locally/msigdb_v2023.1.Mm_GMTs/msigdb.v2023.1.Mm.entrez.gmt'
+  ) |> read_gmt()
+  gmt <- setNames(gmt$MEMBERS,gmt$STANDARD_NAME) |> 
+    stack("msigdb","entrezgene_id")
+  gmt$entrezgene_id <- factor(gmt$entrezgene_id,unique(gene_info$entrezgene_id))
+  gmt <- splitAsList(as.character(gmt$msigdb),gmt$entrezgene_id)
+  c(CharacterList(character()),gmt)[match(gene_info$entrezgene_id,names(gmt),nomatch = 0)+1L] |> unname()
+})
+```
+
+
+
+# Save annotations
+```{r}
+# binary version
+saveRDS(gene_info,"data/gene_info.rds")
+
+# text version
+local({
+  gene_info <- readRDS("data/gene_info.rds")
+  msk <- sapply(gene_info,is,"CharacterList")
+  gene_info[msk] <- gene_info[msk] |> lapply(unstrsplit,";")
+  write.table(as(gene_info,"data.frame"),gzfile("data/gene_info.tsv.gz","w"),sep="\t",row.names = FALSE)
+  closeAllConnections()
+})
+```
+

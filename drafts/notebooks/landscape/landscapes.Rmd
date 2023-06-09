@@ -1,0 +1,183 @@
+---
+title: "Landscapes Notebook"
+output: html_notebook
+---
+        
+```{r}
+library(igraph)
+source("lib_landscape.R")
+source("lib_hclust.R")
+```
+
+
+
+# generate a random dataset for testing
+```{r}
+set.seed(123)
+e <- random_SE()
+mcols(e)$is_variable <- sample(c(TRUE,FALSE),replace=TRUE,size=nrow(e))
+
+# show position of the cells onto the landscape
+ggplot(as.data.frame(colData(e))) +
+        geom_point(aes(x=x,y=y)) +
+        coord_equal() + 
+        theme_classic()
+```
+
+
+
+# make a knn grid
+```{r}
+g <- knn_array(e$x,e$y,k=100L)
+```
+
+
+# Compute all landscapes, i.e. average expression of each gene according to the knn-grid
+```{r}
+mcols(e)$landscape <- knn_rowMeans(assay(e),g)
+```
+
+
+# plot first 10 landscapes
+```{r}
+gg_landscape(mcols(e[1:10])$landscape,attr(g,"x"),attr(g,"y"))
+```
+
+
+
+# Perform dimensionality reduction of the landscapes
+```{r}
+# Compute PCA of the landscapes
+mcols(e)$landscape_pca <- local({
+        M <- as.array(mcols(e)$landscape)
+        dim(M) <- c(dim(M)[1],prod(dim(M)[-1]))
+        irlba::prcomp_irlba(t(M),n=8,scale. = FALSE)$rotation
+})
+
+# Compute UMAP of the landscapes
+mcols(e)$landscape_umap <- umap::umap(mcols(e)$landscape_pca,n_neighbors=31L,n_components=2L,min_dist=0.1)$layout
+```
+
+
+# Cluster the landscapes from UMAP position
+```{r}
+# build nearest neighbor graph
+G <- FNN::knn.index(mcols(e)$landscape_umap,11L)
+G <- igraph::graph_from_edgelist(cbind(as.vector(row(G)),as.vector(G)),directed = FALSE)
+
+# Perform hierarchical clustering of the graph nodes, and cut at 15 groups
+h <- as.hclust(igraph::cluster_walktrap(G))
+H <- hclust_cut(h,k=15L)
+mcols(e)$landscape_cluster <- factor(H$leafs$cluster)
+
+# Display Full Tree
+ggplot() + 
+  geom_segment(aes(x=x,y=y,xend=x,yend=parent_y),data=H$nodes) +
+  geom_segment(aes(x=x,y=parent_y,xend=parent_x,yend=parent_y),data=H$nodes) +
+  geom_segment(aes(x=x,y=y,xend=x,yend=parent_y),data=H$leafs) +
+  geom_segment(aes(x=x,y=parent_y,xend=parent_x,yend=parent_y),data=H$leafs) +
+  #geom_point(aes(x=x,y=y,color=factor(cluster)),data=H$nodes) +
+  geom_point(aes(x=x,y=y,color=factor(cluster)),data=H$leafs)
+
+# Subset on uniform top branches
+H$nodes <- H$nodes[H$nodes$type %in% c("mix","unif_root"),]
+H$leafs <- H$leafs[H$leafs$type %in% "mix_child",]
+H$nodes$y[!H$nodes$type%in%"mix"] <- min(H$nodes$y[H$nodes$type %in% "mix"]) - 3 # Hang layout
+
+
+# Display Tree Subset 
+p0 <- ggplot() + 
+  geom_segment(aes(x=x,y=y,xend=x,yend=parent_y),data=H$nodes) +
+  geom_segment(aes(x=x,y=parent_y,xend=parent_x,yend=parent_y),data=H$nodes) +
+  geom_segment(aes(x=x,y=y,xend=x,yend=parent_y),data=H$leafs) +
+  geom_segment(aes(x=x,y=parent_y,xend=parent_x,yend=parent_y),data=H$leafs) +
+  geom_point(aes(x=x,y=y,color=factor(cluster)),data=H$leafs) +
+  theme_void() + theme(legend.position = "none")
+
+p0 + geom_label(aes(x=x,y=y,label=sprintf("%s:%s\nn=%d",id,cluster,num_leaf),fill=factor(cluster)),data=H$nodes)
+
+# Compute average landscape for each cluster
+M <- as.array(mcols(e)$landscape)
+dim(M) <- c(dim(M)[1],prod(dim(M)[-1]))
+M <- t(scale(t(M),scale=FALSE,center=TRUE))
+M <- rowmean(M,mcols(e)$landscape_cluster)
+
+# Extrapolate the cluster landscapes to higher nodes of the hierarchy
+M <- (H$nodes$clusters / rowSums(H$nodes$clusters)) %*% M
+dim(M) <- c(nrow(M),dim(mcols(e)$landscape)[-1])
+H$nodes$landscapes <- M
+
+# Display the landscape images on the tree layout
+p <- local({
+  p <- p0
+  for(i in 1:nrow(H$nodes)) {
+    gi <- ggplotGrob(gg_landscape_image(H$nodes$landscape[i,,]))
+    p <- p + annotation_custom(gi,H$nodes$x[i]-200,H$nodes$x[i]+200,H$nodes$y[i]-5,H$nodes$y[i]+5)
+  }
+  p
+})
+p
+```
+
+
+
+# Display the landscape UMAP
+```{r}
+local({
+  centers <- with(mcols(e),data.frame(
+    cluster_name = levels(landscape_cluster),
+    landscape_umap.1 = tapply(landscape_umap[,1],landscape_cluster,mean),
+    landscape_umap.2 = tapply(landscape_umap[,2],landscape_cluster,mean)
+  ))
+  # Compute average landscape for each cluster
+  M <- as.array(mcols(e)$landscape)
+  dim(M) <- c(dim(M)[1],prod(dim(M)[-1]))
+  M <- t(scale(t(M),scale=FALSE,center=TRUE))
+  M <- rowmean(M,mcols(e)$landscape_cluster)
+  dim(M) <- c(nrow(M),dim(mcols(e)$landscape)[-1])
+  
+  p <- ggplot(as(mcols(e),"data.frame"),aes(x=landscape_umap.1,y=landscape_umap.2)) + 
+          geom_point(aes(color=landscape_cluster)) +
+          geom_density_2d(aes(group=landscape_cluster),color="black",breaks=0.1) +
+          coord_equal() +
+          theme_void() + theme(legend.position="none")
+  for(i in 1:nrow(M)) {
+    gi <- ggplotGrob(gg_landscape_image(M[i,,]))
+    p <- p + annotation_custom(gi,
+      centers$landscape_umap.1[i]-0.3,centers$landscape_umap.1[i]+0.3,
+      centers$landscape_umap.2[i]-0.3,centers$landscape_umap.2[i]+0.3)
+  }
+  p <- p + geom_text(aes(label=cluster_name),data=centers,size=3)
+  p  
+})
+```
+
+# Average cluster profile
+```{r}
+local({
+        M <- as.array(mcols(e)$landscape)
+        dim(M) <- c(dim(M)[1],prod(dim(M)[-1]))
+        M <- t(scale(t(M),scale=FALSE,center=TRUE))
+        M <- rowmean(M,mcols(e)$landscape_cluster)
+        dim(M) <- c(nrow(M),dim(mcols(e)$landscape)[-1])
+        gg_landscape(M)
+})
+```
+
+
+
+
+
+
+# Generate a PDF of all landscapes in landscapes_32x32/ folder
+```{r eval=FALSE}
+local({
+  for(i in seq(nrow(e))) {
+    gg_landscape(mcols(e)$landscape[i,,,drop=FALSE],attr(g,"x"),attr(g,"y"))
+    ggsave(file.path("landscapes_32x32",paste0("gene",i,".pdf")),width = 3,height=3)
+  }
+})
+```
+
+
+
