@@ -13,9 +13,9 @@ library(ggraph)
 
 # retreive the structure ontology
 ```{r,message=FALSE}
-o <- get_mba_ontology()
-o <- flatten_mba_ontology(o)
-o <- generate_taxons(o)
+o <- get_mba_ontology() |>
+  flatten_mba_ontology() |>
+  generate_taxons()
 ```
 
 

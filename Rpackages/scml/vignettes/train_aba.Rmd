@@ -28,7 +28,7 @@ DelayedArray::setAutoBPPARAM(BiocParallel::MulticoreParam(workers = 6L,progressb
 
 # Train a classifier on allen dataset
 
-```{r}
+```{r,eval=FALSE}
 make_celltype_ds <- function() {
   # Load 10x and smart-seq cells
   allenSSq <- ABAHumanSSv4("../../data/ABAMouseSSv4/");allenSSq$source <- "ssv4"
@@ -60,6 +60,7 @@ make_celltype_ds <- function() {
     allen,"~/Downloads/allen",chunkdim = c(nrow(allen),1L),level = 1L,replace = TRUE
   )
 }
+make_celltype_ds()
 ```
 
 
@@ -80,43 +81,31 @@ allen <- scuttle::logNormCounts(allen,center_size_factors=FALSE,size.factors=all
 trn_ds <- local({
   trn_ds <- allen[,allen$mlset %in% "trn"]
   trn_ids <- splitAsList(colnames(trn_ds),paste(trn_ds$y_true,trn_ds$source)) |>
-    lapply(sample,150,replace=TRUE) |>
+    lapply(sample,1000,replace=TRUE) |>
     unlist() |>
     sample()
   trn_ds[,trn_ids]
 })
 print(table(trn_ds$y_true,trn_ds$source))
-  
-# Balance validation set
-val_ds <- local({
-  val_ds <- allen[,allen$mlset %in% "val"]
-  val_ids <- splitAsList(colnames(val_ds),paste(val_ds$y_true,val_ds$source)) |>
-    lapply(sample,30,replace=TRUE) |>
-    unlist() |>
-    sample()
-  val_ds[,val_ids]
-})
-print(table(val_ds$y_true,val_ds$source))
 ```
 
+
+
+```{r,eval=FALSE}
+model <- train_delayed_classifier(x=t(logcounts(trn_ds)), y=trn_ds$y_true,accelerator=accelerator(cpu=TRUE),valid_data=0.1,epoch=50)
+luz_save(model,"~/Downloads/aba_mouse_subclass_classifier.luz")
+```
 
 
 ```{r}
-model <- train_cell_scorer(x=t(logcounts(trn_ds)), y=trn_ds$y_true)
-luz_save(model,"~/Download/aba_model.luz")
-```
-
-
-```{r eval=FALSE}
+model <- luz_load("~/Downloads/aba_mouse_subclass_classifier.luz")
 plot(model)
 ```
 
 
 ```{r eval=FALSE}
-pred <- predict_delayed(t(logcounts(val_ds)),accelerator = accelerator(cpu = TRUE))
-pred$max(dim=2L)[[2L]] |> 
-  as_array() |>
-  table(val_ds$y_true)
+pred <- predict_delayed(t(logcounts(trn_ds)),model,accelerator = accelerator(cpu = TRUE))
+table(trn_ds$y_true,colnames(pred)[max.col(pred)])
 ```
 
 

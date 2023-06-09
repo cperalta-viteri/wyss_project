@@ -56,6 +56,8 @@ predict_delayed <- function(N,luz_model,ignore.case=FALSE,batch_size=1024L,...) 
     dataloader_options = list(batch_size=batch_size),
     ...
   )
+  pred <- as_array(pred$to(device="cpu"))
+  colnames(pred) <- luz_model$model$class_names
   pred
 }
 

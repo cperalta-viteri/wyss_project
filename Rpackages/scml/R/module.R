@@ -23,7 +23,7 @@ nn_linear_rescale <- nn_module(
 #' @description Cell type classifier NN.
 #' @param feature_names Names of the features.
 #' @param class_names Class of the cells
-#' @param ...  ###łæßðđðsdfgw
+#' @param ... additional argument are forwarded to nn_linear_rescale()
 #' @import torch
 #' @export
 nn_cell_scorer <- torch::nn_module(
