@@ -103,8 +103,10 @@ plot(model)
 ```
 
 
+Compute performance on the training set
 ```{r,eval=FALSE}
 pred <- predict_delayed(t(logcounts(trn_ds)),model,accelerator = accelerator(cpu = TRUE))
+mean(trn_ds$y_true==colnames(pred)[max.col(pred)])
 table(trn_ds$y_true,colnames(pred)[max.col(pred)])
 ```
 
