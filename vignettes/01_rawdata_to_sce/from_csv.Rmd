@@ -1,0 +1,91 @@
+---
+title: "Load counts from big CSV files"
+output: html_notebook
+---
+
+
+```{r,message=FALSE}
+library(SingleCellExperiment)
+library(scater)
+library(BiocParallel)
+library(BiocSingular)
+bp <-BiocParallel::MulticoreParam(10)
+```
+
+
+Sometime gene expression matrices are given into big CSV or tab-delimited files.
+This notebook show how to convert them into H5 format.
+
+
+# Demo with GEO dataset GSE190012
+https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE213828 
+
+```{r}
+count_m <- read.delim("apps/geo_download/downloads/GSE213828/GSE213828_merged_counts.txt.gz")
+metaD <- read.delim("apps/geo_download/downloads/GSE213828/GSE213828_merged_sample_info.txt.gz",row.names = "qp_well_fq")
+
+o <- SingleCellExperiment(list(counts=data.matrix(count_m[,-1:-2])),
+                     rowData=count_m[,1:2],
+                     colData=metaD,mainExpName = "Gene Expression")
+rownames(o) <- make.unique(mcols(o)$gene_name)
+```
+
+The SingleCellEperiment object is ready to use.
+
+
+#Save object
+
+```{r}
+ABAData::writeSingleCellExperiment(o, "datasets/GSE213828")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
