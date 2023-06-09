@@ -64,7 +64,7 @@ ui <- dashboardPage(
 
 server <- function(input, output, session) {
   input_df <- reactive({iris})
-
+  
   output_df <- reactive({
     input_df() |>
       filter(Sepal.Length>5)

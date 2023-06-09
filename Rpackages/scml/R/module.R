@@ -1,9 +1,9 @@
-
+# source("R/delayed.R")
 
 #' @title nn_linear_rescale
-#' @description  A linear layer a rescaled output.
+#' @description  A linear layer returning a re-scaled output.
 #' @param in_features Input number of features.
-#' @param out_features Output number of features
+#' @param out_features Output number of features.
 #' @import torch
 #' @export
 nn_linear_rescale <- nn_module(
@@ -20,10 +20,10 @@ nn_linear_rescale <- nn_module(
 
 
 #' @title nn_cell_scorer
-#' @description Cell type classifier NN.
+#' @description Cell type classifier NN-based.
 #' @param feature_names Names of the features.
-#' @param class_names Class of the cells
-#' @param ... additional argument are forwarded to nn_linear_rescale()
+#' @param class_names Class of the cells.
+#' @param ... additional argument are forwarded to `nn_linear_rescale()`.
 #' @import torch
 #' @export
 nn_cell_scorer <- torch::nn_module(
@@ -44,14 +44,16 @@ nn_cell_scorer <- torch::nn_module(
 )
 
 
-#' @title train_torch_NN
-#' @description Allows user-friendly training set up of a torch model.
+#' @title train_cell_scorer
+#' @description Allows user-friendly training set up of a `nn_cell_scorer` model.
 #' @param x Count matrix.
 #' @param y Array containing the cell type class label.
+#' @param n_epoch Number of epochs.
 #' @param batch_size Size of data loaded at training.
-#' @param epoch Number of epochs.
-#' @param prune_size
-#' @param lr
+#' @param prune_size Number of nodes to be pruned.
+#' @param lr Learning rates values.
+#' @import torch
+#' @import luz
 #' @export
 train_cell_scorer <- function(x, y, n_epoch=100L, batch_size=128L, prune_size=50L, lr=c(1e-3,1e-4,1e-5,1e-6)) {
   y <- as.factor(y)

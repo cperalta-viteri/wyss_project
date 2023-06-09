@@ -2,7 +2,7 @@
 title: "scml"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{scml}
+  %\VignetteIndexEntry{scml_iris}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

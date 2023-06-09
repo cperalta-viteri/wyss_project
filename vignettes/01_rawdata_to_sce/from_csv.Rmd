@@ -31,7 +31,7 @@ The SingleCellEperiment object is ready to use.
 
 #Save object
 
-```{r}
+```{r eval=FALSE}
 ABAData::writeSingleCellExperiment(o, "datasets/GSE213828")
 ```
 

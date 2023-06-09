@@ -14,8 +14,8 @@ library(BiocSingular)
 
 ```{r,message=FALSE}
 # Load 10x dataset
-o <- DropletUtils::read10xCounts("filtered_feature_bc_matrix.h5")
-o <- splitAltExps(o,rowData(o)$Type,ref = "Gene Expression")
+o <- DropletUtils::read10xCounts("/mnt/Data/Bioinfo_platf/wyss_project/docker_envi/apps/geo_download/downloads/GSE224407/GSM7021828_E19_raw_feature_bc_matrix.h5")
+# o <- splitAltExps(o,rowData(o)$Type,ref = "Gene Expression")
 rownames(o) <- make.unique(mcols(o)$Symbol)
 ```
 
@@ -23,7 +23,7 @@ rownames(o) <- make.unique(mcols(o)$Symbol)
 
 ## Load HTO counts
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 # Add HTO information (filtering for missing cells)
 o <- local({
   hto <- DropletUtils::read10xCounts("filtered_feature_bc_matrix_HTO.h5")

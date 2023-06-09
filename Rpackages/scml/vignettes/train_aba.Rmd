@@ -2,7 +2,7 @@
 title: "scml"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{scml}
+  %\VignetteIndexEntry{scml_ABA}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -10,7 +10,8 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  eval = FALSE
 )
 ```
 

@@ -1,0 +1,38 @@
+---
+title: "Cellranger input"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r,message=FALSE}
+library(SingleCellExperiment)
+library(scater)
+library(BiocParallel)
+library(BiocSingular)
+```
+
+# Load Cellranger count
+
+```{r,message=FALSE}
+# Load 10x dataset
+o <- DropletUtils::read10xCounts("../../apps/geo_download/downloads/GSE195510/GSE195510_ORGANOIDSEQ_COUNTS_FILTERED.h5ad")
+
+```
+
+
+```{r}
+o
+```
+
+
+
+# Save object
+```{r eval=FALSE}
+ABAData::writeSingleCellExperiment(o, "qc_filtered_exp")
+```
+
+
+
+
+

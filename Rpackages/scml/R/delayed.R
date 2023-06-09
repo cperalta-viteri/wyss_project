@@ -1,13 +1,14 @@
 
 
-#' @title delayed_dataset
+#' @title delayed_classifier_dataset
 #' @description A torch dataset which accepts DelayedArrays.
 #' @param x Count matrix.
 #' @param y Cell type array.
-#' @param dtypes torch types.
-#' @export
+#' @param x_dtype torch types.
+#' @param y_dtype torch types.
 #' @import torch
 #' @import DelayedArray
+#' @export
 delayed_classifier_dataset <- torch::dataset(
   name = "delayed_dataset",
   initialize = function(x, y = rep(0L, nrow(x)), x_dtype = torch_float(), y_dtype = torch_long()) {
@@ -38,13 +39,15 @@ delayed_classifier_dataset <- torch::dataset(
 
 
 #' @title predict_delayed
-#' @description Predict cell type given a torch model
-#' @param N expression matrix, ideally log1p(RPM/100)/log(2) counts, but raw counts seems to work too
-#' @param luz_model model to be fitted
+#' @description Predict cell type given a torch model.
+#' @param N expression matrix, ideally log1p(RPM/100)/log(2) counts, but raw counts seems to work too.
+#' @param luz_model model to be fitted.
 #' @param ignore.case if TRUE ignore case when aligning feature names (=gene names). It is useful for easy Human-Mouse gene-name matching.
-#' @return a prediction matrix giving each input cell a score for each cell type
-#' @export
+#' @param batch_size Size of data loaded at training.
+#' @param ... Additional argument to be passed to predict function.
+#' @return A prediction matrix giving each input cell a score for each cell type.
 #' @importFrom stats predict
+#' @export
 predict_delayed <- function(N, luz_model, ignore.case = FALSE, batch_size = 1024L, ...) {
   # Align the input matrix to desired matrix format, adding 0 when genes are missing
   if (isTRUE(ignore.case)) {
@@ -71,21 +74,25 @@ predict_delayed <- function(N, luz_model, ignore.case = FALSE, batch_size = 1024
 
 
 
-#' @title train_torch_NN
+#' @title train_delayed_classifier
 #' @description Allows user-friendly training set up of a torch model.
 #' @param x Count matrix.
 #' @param y Array containing the cell type class label.
-#' @param epoch Total number of epoch to train
+#' @param epoch Total number of epoch to train.
 #' @param prune_at_epoch The epoch at which we prune the model. Set to NA to train without pruning.
 #' @param batch_size Size of batch of data loaded at each training step.
 #' @param prune_size number of top/down gene to keep for each node of layer1 when pruning
 #' @param lr a numeric vector of decreasing learning rates
 #' @param loss the loss function to use
 #' @param auto_resume_path a character to specify a file to store weights at each epoch,
-#'                         so training can be resumed when stoped. Set to NA to disable.
+#'                         so training can be resumed when stopped. Set to NA to disable.
 #' @param ... additional parameters are passed to fit() call
+#' @importFrom stats stepfun
 #' @export
-train_delayed_classifier <- function(x, y, epoch = 100L, prune_at_epoch = epoch %/% 2L, batch_size = 128L, prune_size = pmin(50L, ncol(x)), lr = 10^(-3:-6), auto_resume_path = NA, loss = nn_multi_margin_loss(margin = 1), ...) {
+train_delayed_classifier <- function(x, y, epoch = 100L, prune_at_epoch = epoch %/% 2L,
+                                     batch_size = 128L, prune_size = pmin(50L, ncol(x)),
+                                     lr = 10^(-3:-6), auto_resume_path = NA,
+                                     loss = nn_multi_margin_loss(margin = 1), ...) {
   # stopifnot(epoch>=2L)
   if (!identical(lr, sort(lr, decreasing = TRUE))) stop("lr must be a decreasing numeric vector")
   y <- as.factor(y)
@@ -94,12 +101,12 @@ train_delayed_classifier <- function(x, y, epoch = 100L, prune_at_epoch = epoch 
   # Define the function which compute lr from a given epoch number
   lr_fun <- if (!is.na(prune_at_epoch)) {
     stopifnot(prune_at_epoch <= epoch)
-    stepfun(
+    stats::stepfun(
       c(seq(1L, prune_at_epoch, length.out = length(lr) + 1L), seq(prune_at_epoch + 1L, max(epoch, prune_at_epoch + 1L), length.out = length(lr) + 1L)),
       c(max(lr), lr, min(lr), lr, min(lr))
     )
   } else {
-    stepfun(
+    stats::stepfun(
       seq(1L, epoch, length.out = length(lr) + 1L),
       c(max(lr), lr, min(lr))
     )
