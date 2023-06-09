@@ -4,7 +4,7 @@
 \alias{ABAHumanSSv4}
 \title{ABAHumanTENx}
 \usage{
-ABAHumanSSv4(outdir = "ABAHumanSS")
+ABAHumanSSv4(outdir = "ABAHumanSSv4")
 }
 \arguments{
 \item{outdir}{Path to directory from where to read the data files.}

@@ -12,15 +12,15 @@ RoxygenNote: 7.2.3
 Imports: 
     scuttle,
     Matrix,
+    S4Vectors,
+    utils,
     BiocParallel,
     SummarizedExperiment,
     SingleCellExperiment,
     HDF5Array,
     rjson,
-    S4Vectors,
     rhdf5,
     gplots,
-    utils,
     methods
 Suggests: 
     scater,

@@ -9,6 +9,9 @@ ABAMouseTENx(outdir = "ABAMouseTENx")
 \arguments{
 \item{outdir}{name of the directory to store the dataset}
 }
+\value{
+a SingleCellExperiment object with 1M cells annotated
+}
 \description{
-Return a SingleCellExperiment object with 1M cells annotated
+Allen Brain 10x Mouse Atlas
 }

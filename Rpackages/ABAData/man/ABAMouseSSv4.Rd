@@ -9,6 +9,9 @@ ABAMouseSSv4(outdir = "ABAMouseSSv4")
 \arguments{
 \item{outdir}{name of the directory to store the dataset}
 }
+\value{
+a SingleCellExperiment object with 73k cells annotated
+}
 \description{
-Return a SingleCellExperiment object with 73k cells annotated
+Allen Brain SmartSeq V4 Mouse Atlas
 }
