@@ -42,8 +42,7 @@ plot(fm)
 
 # performance on training set
 ```{r eval=FALSE, warning=FALSE}
-pred <- predict_delayed(data.matrix(iris[1:4]),fm)$to(device="cpu") |> 
-  as_array()
+pred <- predict_delayed(data.matrix(iris[1:4]),fm)
 table(iris$Species,max.col(pred))
 ```
 
