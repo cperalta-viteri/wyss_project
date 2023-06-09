@@ -6,10 +6,6 @@ output: html_notebook
 
 ```{r,message=FALSE}
 library(SingleCellExperiment)
-library(scater)
-library(BiocParallel)
-library(BiocSingular)
-bp <-BiocParallel::MulticoreParam(10)
 ```
 
 
