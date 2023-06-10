@@ -9,10 +9,8 @@
 #' @export
 #' @import torch
 nnf_ordinal_regression_loss <- function(pred,target,C,margin=1.0) {
-  pred <- pred$squeeze(-1L)
-  target <- target$squeeze(-1L)
-  stopifnot(pred$ndim == 1L)
-  stopifnot(target$ndim == 1L)
+  pred <- pred$flatten()
+  target <- target$flatten()
   stopifnot(identical(ncol(C),nrow(C)))
 
   ij <- torch_combinations(torch_arange(1L,length(pred)+1L, dtype = torch_long()))
@@ -32,6 +30,8 @@ nnf_ordinal_regression_loss <- function(pred,target,C,margin=1.0) {
 #' @param C a square 2D float tensor representing the cost matrix.
 #' @export
 #' @import torch
+#' @examples
+#' nn_ordinal_regression_loss(1 - torch::torch_eye(3L))
 nn_ordinal_regression_loss <- torch::nn_module(
   "nn_ordinal_regression_loss",
   initialize = function(C) {

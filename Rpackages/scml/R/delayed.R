@@ -83,16 +83,17 @@ predict_delayed <- function(N, luz_model, ignore.case = FALSE, batch_size = 1024
 #' @param batch_size Size of batch of data loaded at each training step.
 #' @param prune_size number of top/down gene to keep for each node of layer1 when pruning
 #' @param lr a numeric vector of decreasing learning rates
-#' @param loss the loss function to use
 #' @param auto_resume_path a character to specify a file to store weights at each epoch,
 #'                         so training can be resumed when stopped. Set to NA to disable.
+#' @param weight_decay value passed to the optim_adam optimizer.
+#' @param input_dropout_rate Dropout rate to apply on input values when training
 #' @param ... additional parameters are passed to fit() call
 #' @importFrom stats stepfun
 #' @export
-train_delayed_classifier <- function(x, y, epoch = 100L, prune_at_epoch = epoch %/% 2L,
-                                     batch_size = 128L, prune_size = pmin(50L, ncol(x)),
+train_delayed_classifier <- function(x, y, epoch = 40L, prune_at_epoch = epoch %/% 2L,
+                                     batch_size = 256L, prune_size = pmin(50L, ncol(x)),
                                      lr = 10^(-3:-6), auto_resume_path = NA,
-                                     loss = nn_multi_margin_loss(margin = 1), ...) {
+                                     weight_decay = 0, input_dropout_rate = 0.5,...) {
   # stopifnot(epoch>=2L)
   if (!identical(lr, sort(lr, decreasing = TRUE))) stop("lr must be a decreasing numeric vector")
   y <- as.factor(y)
@@ -111,16 +112,15 @@ train_delayed_classifier <- function(x, y, epoch = 100L, prune_at_epoch = epoch 
       c(max(lr), lr, min(lr))
     )
   }
-  # plot(lr_fun(seq(epoch)));abline(v=prune_at_epoch)
 
   fm <- nn_cell_scorer |>
     setup(
       optimizer = optim_adam,
       metrics = list(luz_metric_accuracy()),
-      loss = loss
+      loss = nn_multi_margin_loss(margin = 1)
     ) |>
-    set_hparams(feature_names = colnames(x), class_names = levels(y)) |>
-    set_opt_hparams(weight_decay = 0, lr = 1) |>
+    set_hparams(feature_names = colnames(x), class_names = levels(y),input_dropout_rate=input_dropout_rate) |>
+    set_opt_hparams(weight_decay = weight_decay, lr = 1) |>
     fit(
       epoch = epoch,
       data = delayed_classifier_dataset(x, as.integer(y)),

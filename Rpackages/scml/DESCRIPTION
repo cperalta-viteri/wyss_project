@@ -1,7 +1,7 @@
 Package: scml
 Type: Package
 Title: Mining Single Cell with torch
-Version: 0.1.0
+Version: 1.0.0
 Author: Julien Prados
 Maintainer: Julien Prados <julien.prados@unige.ch>
 Description: More about what it does (maybe more than one line)

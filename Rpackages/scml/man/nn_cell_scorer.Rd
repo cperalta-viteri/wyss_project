@@ -4,12 +4,14 @@
 \alias{nn_cell_scorer}
 \title{nn_cell_scorer}
 \usage{
-nn_cell_scorer(feature_names, class_names, ...)
+nn_cell_scorer(feature_names, class_names, input_dropout_rate = 0.5, ...)
 }
 \arguments{
 \item{feature_names}{Names of the features.}
 
 \item{class_names}{Class of the cells.}
+
+\item{input_dropout_rate}{Dropout rate to apply on input values when training}
 
 \item{...}{additional argument are forwarded to `nn_linear_rescale()`.}
 }

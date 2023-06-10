@@ -7,13 +7,15 @@
 train_delayed_classifier(
   x,
   y,
-  epoch = 100L,
+  epoch = 40L,
   prune_at_epoch = epoch\%/\%2L,
-  batch_size = 128L,
+  batch_size = 256L,
   prune_size = pmin(50L, ncol(x)),
   lr = 10^(-3:-6),
   auto_resume_path = NA,
   loss = nn_multi_margin_loss(margin = 1),
+  weight_decay = 0.01,
+  input_dropout_rate = 0.5,
   ...
 )
 }
@@ -36,6 +38,10 @@ train_delayed_classifier(
 so training can be resumed when stopped. Set to NA to disable.}
 
 \item{loss}{the loss function to use}
+
+\item{weight_decay}{value passed to the optim_adam optimizer.}
+
+\item{input_dropout_rate}{Dropout rate to apply on input values when training}
 
 \item{...}{additional parameters are passed to fit() call}
 }

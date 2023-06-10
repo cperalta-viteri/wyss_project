@@ -29,8 +29,9 @@ fm <- train_delayed_classifier(
   iris$Species,
   batch_size = 150L,
   valid_data = 0.1,
-  epoch = 200L,
+  epoch = 30L,
   prune_at_epoch = NA,
+  input_dropout_rate = 0.1,  
   accelerator = accelerator(cpu=TRUE)
 )
 ```
@@ -48,6 +49,19 @@ table(iris$Species,max.col(pred))
 
 
 
+```{r}
+fm <- train_delayed_classifier(
+  data.matrix(iris[1:4]),
+  iris$Species,
+  batch_size = 150L,
+  valid_data = 0.1,
+  epoch = 30L,
+  prune_at_epoch = NA,
+  input_dropout_rate = 0.1,
+  loss = nn_ordinal_regression_loss(1 - torch::torch_eye(3L)),
+  accelerator = accelerator(cpu=TRUE)
+)
+```
 
 
 
