@@ -1,6 +1,7 @@
 *.Rproj
 *.user
 *.Rhistory
+*.Rproj
 *.RData
 *.Ruserdata
 *.Renviron
@@ -22,8 +23,6 @@ data/
 *.zip
 *.code-workspace
 .bash_history
-drafts/ludo_test
-drafts/my_notebooks
 *.csv
 *.deb
 notebooks/01_data_collection/allen_brain_atlas/out/
