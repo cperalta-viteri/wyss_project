@@ -1,7 +1,7 @@
 Package: ABAData
 Type: Package
 Title: Data package from Allen Brain Atlas
-Version: 0.1.0
+Version: 1.0.0
 Author: Julien Prados
 Description: Transcriptomics data from Allen Brain Atlas.
 License: GPL-3
