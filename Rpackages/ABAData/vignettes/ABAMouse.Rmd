@@ -18,28 +18,58 @@ knitr::opts_chunk$set(
 library(ABAData)
 library(ggplot2)
 library(scuttle)
+library(scran)
 ```
 
 
-Create a SingleCellExperiment object with 70k cells and normalize counts.
+Load a SingleCellExperiment object with 70k cells of the Allen Mouse Atlas Smart-Seq v4.
+If the dataset is not cached locally yet, the function downloads and prepares it
+(which is time consuming).
 ```{r}
 x <- ABAMouseSSv4("~/Downloads/ABAMouseSSv4/")
-x <- scuttle::logNormCounts(x)
+```
+
+
+Normalize and log-transform read counts
+```{r}
+x <- logNormCounts(x)
 ```
 
 # Standard plotting
+
+Produce a UMAP visualization, color and label according to subclass
 ```{r}
-scater::plotUMAP(x,colour_by="subclass_label",text_by="subclass_label",add_legend=FALSE,point_size=0.3,text_size=3) +
+plotUMAP(x,colour_by="subclass_label",text_by="subclass_label",add_legend=FALSE,point_size=0.3,text_size=3) +
   coord_equal()
-scater::plotUMAP(x,colour_by="Gad1",point_size=0.3) + coord_equal()
-scater::plotDots(x,c("Gad1","Gad2","Neurod1","Neurod2"),group = "subclass_label") + coord_flip()
-scater::plotExpression(x,c("Gad2","Neurod2"))
-scater::plotGroupedHeatmap(x,c("Gad1","Gad2","Neurod1","Neurod2"),group = "subclass_label")
 ```
+
+
+Produce a UMAP visualization, colored according to log-normalized expression of Gad1 gene.
+```{r}
+plotUMAP(x,colour_by="Gad1",point_size=0.3) + coord_equal()
+```
+
+Produce a dotPlot showing expression of selected genes in each subclass
+```{r}
+plotDots(x,c("Gad1","Gad2","Neurod1","Neurod2"),group = "subclass_label") + coord_flip()
+```
+
+Similar to the above dotPlot, but produce a heatmap which sort the genes and cell-types per expression pattern
+```{r}
+plotGroupedHeatmap(x,c("Gad1","Gad2","Neurod1","Neurod2"),group = "subclass_label")
+```
+
+Produce a violin plot showing overall expression of selected genes
+```{r}
+plotExpression(x,c("Gad2","Neurod2"))
+```
+
+
 
 
 
 # Custom plotting
+Show an example to produce custom plots. Here we produce a UMAP using official Allen color palette.
 ```{r}
 makePerCellDF(x) |>
   ggplot() +
@@ -51,29 +81,41 @@ makePerCellDF(x) |>
 
 
 # Dimensionality reduction
+
+Here we show how to compute PCA and UMAP layout from normalized logcounts
 ```{r,eval=FALSE}
 BPPARAM <- BiocParallel::MulticoreParam(10)
 x <- scater::runPCA(x,BPPARAM=BPPARAM)
 x <- scater::runUMAP(x,dimred="PCA",BPPARAM=BPPARAM,name="U")
 ```
 
+
 ## Clustering
+
+The code below cluster the cells according to the UMAP layout.
+Multiple clustering algorithm are available. Here we rely on a hierarchical community detection algorithm on the 30-NearestNeighbors 
+graph to detect 50 clusters. The clusters are stored into the SingleCellExperiment object in slot `my_cluster`.
+
 ```{r}
-k <- scran::clusterCells(x,use.dimred="UMAP",BLUSPARAM=bluster::NNGraphParam(shared = FALSE,k=30),full=TRUE)
+k <- clusterCells(x,use.dimred="UMAP",BLUSPARAM=bluster::NNGraphParam(shared = FALSE,k=30),full=TRUE)
 x$my_cluster <- igraph::cut_at(k$objects$communities,no=50)
 ```
 
-
+Display result of the clustering algorithm on the UMAP layout.
 ```{r}
-scater::plotUMAP(x,colour_by="my_cluster",text_by="my_cluster",add_legend=FALSE,point_size=0.3,text_size=3)
+plotUMAP(x,colour_by="my_cluster",text_by="my_cluster",add_legend=FALSE,point_size=0.3,text_size=3) + coord_equal()
 ```
 
+# Cell-type marker genes
+
+Let's now find marker genes of a given class of cells using wilcox test.
 ```{r}
-markers <- scran::findMarkers(x,x$class_label,test.type="wilcox",pval.type="any",BPPARAM=BiocParallel::MulticoreParam(10))
+markers <- findMarkers(x,x$class_label,test.type="wilcox",pval.type="any",BPPARAM=BiocParallel::MulticoreParam(10))
 ```
 
+And display top 20 GABAergic markers
 ```{r}
-scater::plotDots(x,rownames(markers$GABAergic)[1:20],group = "class_label")
+plotDots(x,rownames(markers$GABAergic)[1:20],group = "class_label")
 ```
 
 
