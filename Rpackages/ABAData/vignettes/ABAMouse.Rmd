@@ -1,8 +1,8 @@
 ---
-title: "ABAMouse"
+title: "ABAMouseSSv4 vignette"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{ABAMouse}
+  %\VignetteIndexEntry{ABAMouseSSv4 vignette}
   %\VignetteEngine{knitr::knitr}
   %\VignetteEncoding{UTF-8}
 ---
