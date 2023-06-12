@@ -11,7 +11,7 @@ library(ggraph)
 ```
 
 
-# retreive the structure ontology
+# retreive the mouse structure ontology
 ```{r,message=FALSE}
 o <- get_mba_ontology()
 o <- flatten_mba_ontology(o)
