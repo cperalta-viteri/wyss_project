@@ -40,7 +40,7 @@ learning curves
 plot(fm)
 ```
 
-# performance on training set
+performance on training set
 ```{r eval=FALSE, warning=FALSE}
 pred <- predict_delayed(data.matrix(iris[1:4]),fm)
 table(iris$Species,max.col(pred))
@@ -48,16 +48,22 @@ table(iris$Species,max.col(pred))
 
 
 
-```{r}
+# Train an ordinal regressor on iris dataset
+```{r,message=FALSE}
 fm <- train_delayed_classifier(
   data.matrix(iris[1:4]),
   iris$Species,
+  y_type = "ordinal",
   batch_size = 150L,
   valid_data = 0.1,
   input_dropout_rate = 0.1,
-  loss = nn_ordinal_regression_loss(1 - torch::torch_eye(3L)),
   accelerator = accelerator(cpu=TRUE)
 )
+```
+show predictions
+```{r}
+pred <- predict_delayed(data.matrix(iris[1:4]),fm)
+plot(pred~iris$Species)
 ```
 
 

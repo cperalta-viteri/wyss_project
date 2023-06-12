@@ -106,6 +106,7 @@ lr_lambda_geometric <- function(epochs,lr_start=1e-3,lr_end=1e-6) {
 #'                         so training can be resumed when stopped. Set to NA to disable.
 #' @param weight_decay value passed to the optim_adam optimizer.
 #' @param input_dropout_rate Dropout rate to apply on input values when training
+#' @param y_type type of target factor: either nominal or ordinal (default: nominal)
 #' @param ... additional parameters are passed to fit() call
 #' @importFrom stats stepfun
 #' @export
@@ -113,16 +114,29 @@ train_delayed_classifier <- function(
     x, y, pre_pruning_epoch = 25L, post_pruning_epoch = 25L,
     batch_size = 256L, prune_size = pmin(50L, ncol(x)),
     lr_start = 1e-3, lr_end = 1e-5, auto_resume_path = NA,
-    weight_decay = 0, input_dropout_rate = 0.5,...)
+    weight_decay = 0, input_dropout_rate = 0.5, y_type=c("nominal","ordinal"),...)
 {
   y <- as.factor(y)
+  y_type <- match.arg(y_type)
+
+  switch(y_type,
+    nominal = {
+      loss <- nn_multi_margin_loss(margin = 1)
+      class_names <- levels(y)
+    },
+    ordinal = {
+      loss <- nn_ordinal_regression_loss(C = 1 - torch_eye(nlevels(y)))
+      class_names <- "ordinal_score"
+    }
+  )
+
   fm <- nn_cell_scorer |>
     setup(
       optimizer = optim_adam,
       metrics = list(luz_metric_accuracy()),
-      loss = nn_multi_margin_loss(margin = 1)
+      loss = loss
     ) |>
-    set_hparams(feature_names = colnames(x), class_names = levels(y),input_dropout_rate=input_dropout_rate) |>
+    set_hparams(feature_names = colnames(x), class_names = class_names,input_dropout_rate = input_dropout_rate) |>
     set_opt_hparams(weight_decay = weight_decay, lr = 1) |>
     fit(
       epoch = pre_pruning_epoch + post_pruning_epoch,
