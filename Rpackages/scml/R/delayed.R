@@ -71,18 +71,37 @@ predict_delayed <- function(N, luz_model, ignore.case = FALSE, batch_size = 1024
 }
 
 
-
+#' Define geometric learning rate series
+#'
+#' @param epochs a vector of positive integers, defining a consecutive number of
+#'        epochs.
+#' @param lr_start a vector of initial learning rate which will be recycled to
+#'        length(epochs)
+#' @param lr_end a vector of ending learning rate which will be recycled to
+#'        length(epochs).
+lr_lambda_geometric <- function(epochs,lr_start=1e-3,lr_end=1e-6) {
+  lr_start <- rep(lr_start,length.out=length(epochs))
+  lr_end <- rep(lr_end,length.out=length(epochs))
+  alpha <- (lr_end/lr_start)^(1/(epochs-1))
+  lr <- rep(lr_start,epochs) * rep(alpha,epochs)^(sequence(epochs)-1)
+  function(epoch) {
+    if (epoch<1L) lr[1L]
+    else if (epoch>length(lr)) lr[length(lr)]
+    else lr[epoch]
+  }
+}
 
 
 #' @title train_delayed_classifier
 #' @description Allows user-friendly training set up of a torch model.
 #' @param x Count matrix.
 #' @param y Array containing the cell type class label.
-#' @param epoch Total number of epoch to train.
-#' @param prune_at_epoch The epoch at which we prune the model. Set to NA to train without pruning.
+#' @param pre_pruning_epoch Number of epoch before pruning
+#' @param post_pruning_epoch Number of epoch after pruning. Set to 0
 #' @param batch_size Size of batch of data loaded at each training step.
 #' @param prune_size number of top/down gene to keep for each node of layer1 when pruning
-#' @param lr a numeric vector of decreasing learning rates
+#' @param lr_start initial learning rate (both at epoch 1 and after pruning)
+#' @param lr_end final learning rate (both at pruning and at last epoch)
 #' @param auto_resume_path a character to specify a file to store weights at each epoch,
 #'                         so training can be resumed when stopped. Set to NA to disable.
 #' @param weight_decay value passed to the optim_adam optimizer.
@@ -90,29 +109,13 @@ predict_delayed <- function(N, luz_model, ignore.case = FALSE, batch_size = 1024
 #' @param ... additional parameters are passed to fit() call
 #' @importFrom stats stepfun
 #' @export
-train_delayed_classifier <- function(x, y, epoch = 40L, prune_at_epoch = epoch %/% 2L,
-                                     batch_size = 256L, prune_size = pmin(50L, ncol(x)),
-                                     lr = 10^(-3:-6), auto_resume_path = NA,
-                                     weight_decay = 0, input_dropout_rate = 0.5,...) {
-  # stopifnot(epoch>=2L)
-  if (!identical(lr, sort(lr, decreasing = TRUE))) stop("lr must be a decreasing numeric vector")
+train_delayed_classifier <- function(
+    x, y, pre_pruning_epoch = 25L, post_pruning_epoch = 25L,
+    batch_size = 256L, prune_size = pmin(50L, ncol(x)),
+    lr_start = 1e-3, lr_end = 1e-5, auto_resume_path = NA,
+    weight_decay = 0, input_dropout_rate = 0.5,...)
+{
   y <- as.factor(y)
-
-
-  # Define the function which compute lr from a given epoch number
-  lr_fun <- if (!is.na(prune_at_epoch)) {
-    stopifnot(prune_at_epoch <= epoch)
-    stats::stepfun(
-      c(seq(1L, prune_at_epoch, length.out = length(lr) + 1L), seq(prune_at_epoch + 1L, max(epoch, prune_at_epoch + 1L), length.out = length(lr) + 1L)),
-      c(max(lr), lr, min(lr), lr, min(lr))
-    )
-  } else {
-    stats::stepfun(
-      seq(1L, epoch, length.out = length(lr) + 1L),
-      c(max(lr), lr, min(lr))
-    )
-  }
-
   fm <- nn_cell_scorer |>
     setup(
       optimizer = optim_adam,
@@ -122,17 +125,22 @@ train_delayed_classifier <- function(x, y, epoch = 40L, prune_at_epoch = epoch %
     set_hparams(feature_names = colnames(x), class_names = levels(y),input_dropout_rate=input_dropout_rate) |>
     set_opt_hparams(weight_decay = weight_decay, lr = 1) |>
     fit(
-      epoch = epoch,
+      epoch = pre_pruning_epoch + post_pruning_epoch,
       data = delayed_classifier_dataset(x, as.integer(y)),
       dataloader_options = list(batch_size = batch_size, drop_last = FALSE, shuffle = TRUE),
       ...,
       callbacks = c(
         list(
-          luz_callback_lr_scheduler(lr_lambda, verbose = TRUE, lr_fun)
+          luz_callback_lr_scheduler(lr_lambda, verbose = TRUE, lr_lambda_geometric(c(pre_pruning_epoch,post_pruning_epoch),lr_start,lr_end))
         ),
-        if (is.na(prune_at_epoch)) NULL else luz_callback_prune("layer1.linear.weight", n = prune_size, at_epoch = prune_at_epoch),
+        if (post_pruning_epoch<=0L) NULL else luz_callback_prune("layer1.linear.weight", n = prune_size, at_epoch = pre_pruning_epoch),
         if (is.na(auto_resume_path)) NULL else luz_callback_auto_resume(path = auto_resume_path)
       )
     )
   fm
 }
+
+
+
+
+
