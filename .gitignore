@@ -33,3 +33,4 @@ notebooks/querying/geo_data/
 *.RDataTmp
 *.png
 *.html
+*.h5
