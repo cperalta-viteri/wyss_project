@@ -3,15 +3,15 @@ library(DT)
 source("lib_std.R")
 
 
-fields <- list(
+std_fields <- list(
   project_id = field_item(),
   batch_id = field_item(),
   cell_name = field_item(),
   donor_organism = field_item(targetval_suggestions=c("mouse","human")),
   donor_sex = field_item(targetval_suggestions=c("M","F"),validation="^[MF]$",rules=list(case_when_item(),case_when_item())),
   donor_age = field_item(targetval_suggestions=c("E18","P0","P1","P2"),validation="[PE][0-9]+(\\.5)?"),
-  donor_mouse_strain = field_item(targetval_suggestions=c("C56BL6","FVB")),
-  donor_mouse_line = field_item(rules=list(case_when_item())),
+  donor_mouse_strain = field_item(targetval_suggestions=readLines("data/jax_inbred_strains.txt")),
+  donor_mouse_line = field_item(targetval_suggestions=readLines("data/mouse_line.txt"),rules=list(case_when_item())),
   donor_mouse_genotype = field_item(rules=list(case_when_item())),
   
   donor_human_genetic_population = field_item(),
@@ -43,9 +43,9 @@ ui <- dashboardPage(
           width=12,
           actionButton(paste0("test_btn"),"test",status = "danger"),
           p("List of standard fields to map"),
-          radioGroupButtons("current_working_field_name",choices = names(fields),status = "info",individual = TRUE),
+          radioGroupButtons("current_working_field_name",choices = names(std_fields),status = "info",individual = TRUE),
           box(title = "Mapping rules",width = 12,collapsible = FALSE,
-            uiOutput("fields"),
+            uiOutput("cwf_rules"),
             actionButton(paste0("rule_add"),"Add rule"),
             textInput(paste0("rule_default"),"default value")
           ),
@@ -75,7 +75,7 @@ server <- function(input, output, session) {
   
   # Copy selected field into cwf
   observeEvent(input$current_working_field_name,{
-      cwf(fields[[input$current_working_field_name]])
+      cwf(std_fields[[input$current_working_field_name]])
   })
   
   # Add a rule at the end of the list
@@ -86,7 +86,7 @@ server <- function(input, output, session) {
     cwf(x)
   })
 
-  output$fields <- renderUI({
+  output$cwf_rules <- renderUI({
       rules <- lapply(seq_along(cwf()$rules),function(i) {
         rule_id <- paste0("rule_",i)
         
