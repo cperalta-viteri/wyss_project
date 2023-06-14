@@ -71,6 +71,31 @@ mutate_string <- function(f) {
 
 
 
+std_fields <- list(
+  project_id = field_item(),
+  batch_id = field_item(),
+  cell_name = field_item(),
+  donor_organism = field_item(targetval_suggestions=c("mouse","human")),
+  donor_sex = field_item(targetval_suggestions=c("M","F"),validation="^[MF]$",rules=list(case_when_item(),case_when_item())),
+  donor_age = field_item(targetval_suggestions=c("E18","P0","P1","P2"),validation="[PE][0-9]+(\\.5)?"),
+  donor_mouse_strain = field_item(targetval_suggestions=readLines("data/jax_inbred_strains.txt")),
+  donor_mouse_line = field_item(targetval_suggestions=readLines("data/mouse_line.txt"),rules=list(case_when_item())),
+  donor_mouse_genotype = field_item(rules=list(case_when_item())),
+  
+  donor_human_genetic_population = field_item(),
+  donor_human_phenotype = field_item(),
+  donor_mouse_genotype = field_item(),
+  
+  sample_protocol_dissociation = field_item(),
+  sample_protocol_chemistry = field_item(),
+  sample_tissue_type = field_item(targetval_suggestions=c("Postnatal","Embryonic","Organoid","Neuronal Culture")),
+  sample_tissue_origin = field_item(),
+  sample_nervous_region = field_item(),
+  
+  default_condition = field_item(),
+  disease_model = field_item()
+)
+
 
 
 
