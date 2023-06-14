@@ -1,66 +1,31 @@
 
 
+library(scml)
+library(ABAData)
+library(SingleCellExperiment)
+library(luz)
+library(ggplot2)
 
-source("notebooks/01_data_collection/lib_sce.R")
-source("notebooks/celltype_prediction/lib_cell_classifier.R")
-
-
-x <- loadHDF5SingleCellExperiment("notebooks/01_data_collection/allen_brain_atlas/out/mouse_ctx_ssv4.h5")
-x <- scuttle::logNormCounts(x,center_size_factors=FALSE,size.factors=x$sum/1e4)
-
-x$p1 <- torch_predict_cell_type(counts(x),"notebooks/celltype_prediction/models/model_subclass_pruned_best_valid_acc.torch")
-x$pred1 <- colnames(x$p1)[max.col(x$p1)]
-
-x$p2 <- torch_predict_cell_type(logcounts(x),"notebooks/celltype_prediction/models/model_subclass_pruned_best_valid_acc.torch")
-x$pred2 <- colnames(x$p2)[max.col(x$p2)]
-
-x$y_true <- paste(x$class_label,x$neighborhood_label,x$subclass_label,sep=" --- ")
-mean(x$pred1 != x$y_true)
-mean(x$pred2 != x$y_true)
-
-
-table(sub("(.*) --- .*","\\1",x$y_true),sub("(.*) --- .*","\\1",x$pred1))
-
-
-
-#-#-#-#-#-#-#-#-#-#-#-#-#
-# Test on human data
-#-#-#-#-#-#-#-#-#-#-#-#-#
-H <- loadHDF5SingleCellExperiment("notebooks/01_data_collection/allen_brain_atlas/out/human_m1_10x.h5")
-H$sum <- local({
-  m <- scuttle::perCellQCMetrics(H,BPPARAM=BiocParallel::MulticoreParam(5))
-  m$sum
-})
-H <- scuttle::logNormCounts(H,center_size_factors=FALSE,size.factors=H$sum/1e4)
-H <- H[,1:1000]
-
-P <- torch_predict_cell_type(logcounts(H),"notebooks/celltype_prediction/models/model_subclass_pruned_best_valid_acc.torch",ignore.case = TRUE)
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# Predict human data with mouse model
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+x <- ABAHumanSSv4("data/ABAHumanSSv4/")
+x <- scuttle::logNormCounts(x,size.factors=x$sum/1e4)
+fm <- luz_load("data/aba_mouse_subclass_classifier.luz")
+P <- predict_delayed(t(logcounts(x)),fm,ignore.case = TRUE)
 pred <- factor(colnames(P)[max.col(P)],colnames(P))
-g <- local({
-  n <- table(label=pred[drop=TRUE]) |> as.data.frame()
-  pat <- "(((.*) --- (.*)) --- (.*))"
-  g <- graph_from_data_frame(
-    rbind(
-      cbind("root",sub(pat,"\\3",n$label)),
-      cbind(sub(pat,"\\3",n$label),sub(pat,"\\2",n$label)),
-      cbind(sub(pat,"\\2",n$label),sub(pat,"\\1",n$label))
-    ) |> unique()
-  )
-  V(g)$size <- n$Freq[match(V(g)$name,n$label)]
-  V(g)$size[is.na(V(g)$size)] <- 0
-  V(g)$label <- sub(".* --- ","",V(g)$name)
-  g
-})
-ggraph(g,"partition",weight=V(g)$size,circular=TRUE,const.area=FALSE) +
-  geom_node_arc_bar(aes(fill=depth)) +
-  geom_node_text(aes(label=label),size=3) +
-  coord_equal()
 
+# show predictions
+n <- table(x$subclass_label,pred)
+(n / rowSums(n)) |>
+  as.data.frame() |>
+  ggplot(aes(x=pred,y=Var1,label=sprintf("%.1f",100*Freq))) + 
+    geom_tile(aes(fill=Freq)) +
+    geom_text(size=3) + 
+    theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
 
-
+# show predictions with ggplot
 ggpred <- function(P) {
-  library(ggplot2)
-  
   pred <- factor(colnames(P)[max.col(P)],colnames(P))
   H <- data.frame(label = pred)
   pat <- "(((.*) --- (.*)) --- (.*))"
@@ -85,8 +50,33 @@ ggpred <- function(P) {
     theme_void()  
 }
 
-
 ggpred(P)
+
+
+
+library(tidygraph)
+library(igraph)
+library(ggraph)
+g <- local({
+  n <- table(label=pred[drop=TRUE]) |> as.data.frame()
+  pat <- "(((.*) --- (.*)) --- (.*))"
+  g <- graph_from_data_frame(
+    rbind(
+      cbind("root",sub(pat,"\\3",n$label)),
+      cbind(sub(pat,"\\3",n$label),sub(pat,"\\2",n$label)),
+      cbind(sub(pat,"\\2",n$label),sub(pat,"\\1",n$label))
+    ) |> unique()
+  )
+  V(g)$size <- n$Freq[match(V(g)$name,n$label)]
+  V(g)$size[is.na(V(g)$size)] <- 0
+  V(g)$label <- sub(".* --- ","",V(g)$name)
+  g
+})
+ggraph(g,"partition",weight=V(g)$size,circular=TRUE,const.area=FALSE) +
+  geom_node_arc_bar(aes(fill=depth)) +
+  geom_node_text(aes(label=label),size=3) +
+  coord_equal()
+
 
 
 
