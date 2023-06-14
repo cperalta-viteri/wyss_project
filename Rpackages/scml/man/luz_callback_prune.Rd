@@ -9,7 +9,7 @@ luz_callback_prune(param, n, at_epoch)
 \arguments{
 \item{param}{Model parameters}
 
-\item{n}{Nodes}
+\item{n}{number of top/bottom features to keep after pruning}
 
 \item{at_epoch}{Epoch at which compute pruning mask.}
 }

@@ -12,3 +12,6 @@ nn_ordinal_regression_loss(C)
 \description{
 Ordinal regression loss module
 }
+\examples{
+nn_ordinal_regression_loss(1 - torch::torch_eye(3L))
+}

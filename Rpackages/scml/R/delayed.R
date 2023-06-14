@@ -109,6 +109,7 @@ lr_lambda_geometric <- function(epochs,lr_start=1e-3,lr_end=1e-6) {
 #' @param y_type type of target factor: either nominal or ordinal (default: nominal)
 #' @param ... additional parameters are passed to fit() call
 #' @importFrom stats stepfun
+#' @importFrom luz fit set_opt_hparams set_hparams setup luz_metric_accuracy luz_callback_lr_scheduler luz_callback_auto_resume
 #' @export
 train_delayed_classifier <- function(
     x, y, pre_pruning_epoch = 25L, post_pruning_epoch = 25L,

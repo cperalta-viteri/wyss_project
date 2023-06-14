@@ -11,7 +11,7 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  eval = FALSE
+  eval = TRUE
 )
 ```
 
@@ -69,7 +69,7 @@ make_celltype_ds()
 
 
 Select a balanced subet of cell to learn a classifier
-```{r}
+```{r,eval=FALSE}
 # Load dataset
 allen <- HDF5Array::loadHDF5SummarizedExperiment("~/Downloads/ABAMouseLearning")
 allen <- allen[,!is.na(allen$subclass_label)]
@@ -95,20 +95,20 @@ print(table(trn_ds$y_true,trn_ds$source))
 ```
 
 
-
+Train the classifier on the selected training cells
 ```{r,eval=FALSE}
 model <- train_delayed_classifier(
-  x = t(logcounts(trn_ds)), 
+  x = t(logcounts(trn_ds)),
   y = trn_ds$y_true,
   accelerator = accelerator(cpu=TRUE),
   valid_data = 0.1,
-  epoch = 20L,
   weight_decay = 1e-4
 )
 luz_save(model,"~/Downloads/aba_mouse_subclass_classifier.luz")
 ```
 
 
+Show learning curve
 ```{r}
 model <- luz_load("~/Downloads/aba_mouse_subclass_classifier.luz")
 plot(model)
@@ -119,6 +119,11 @@ Compute performance on the training set
 ```{r,eval=FALSE}
 pred <- predict_delayed(t(logcounts(trn_ds)),model,accelerator = accelerator(cpu = TRUE))
 mean(trn_ds$y_true==colnames(pred)[max.col(pred)])
+```
+
+
+Contingency matrix
+```{r,eval=FALSE}
 table(trn_ds$y_true,colnames(pred)[max.col(pred)])
 ```
 

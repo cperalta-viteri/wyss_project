@@ -7,15 +7,16 @@
 train_delayed_classifier(
   x,
   y,
-  epoch = 40L,
-  prune_at_epoch = epoch\%/\%2L,
+  pre_pruning_epoch = 25L,
+  post_pruning_epoch = 25L,
   batch_size = 256L,
   prune_size = pmin(50L, ncol(x)),
-  lr = 10^(-3:-6),
+  lr_start = 0.001,
+  lr_end = 1e-05,
   auto_resume_path = NA,
-  loss = nn_multi_margin_loss(margin = 1),
-  weight_decay = 0.01,
+  weight_decay = 0,
   input_dropout_rate = 0.5,
+  y_type = c("nominal", "ordinal"),
   ...
 )
 }
@@ -24,24 +25,26 @@ train_delayed_classifier(
 
 \item{y}{Array containing the cell type class label.}
 
-\item{epoch}{Total number of epoch to train.}
+\item{pre_pruning_epoch}{Number of epoch before pruning}
 
-\item{prune_at_epoch}{The epoch at which we prune the model. Set to NA to train without pruning.}
+\item{post_pruning_epoch}{Number of epoch after pruning. Set to 0}
 
 \item{batch_size}{Size of batch of data loaded at each training step.}
 
 \item{prune_size}{number of top/down gene to keep for each node of layer1 when pruning}
 
-\item{lr}{a numeric vector of decreasing learning rates}
+\item{lr_start}{initial learning rate (both at epoch 1 and after pruning)}
+
+\item{lr_end}{final learning rate (both at pruning and at last epoch)}
 
 \item{auto_resume_path}{a character to specify a file to store weights at each epoch,
 so training can be resumed when stopped. Set to NA to disable.}
 
-\item{loss}{the loss function to use}
-
 \item{weight_decay}{value passed to the optim_adam optimizer.}
 
 \item{input_dropout_rate}{Dropout rate to apply on input values when training}
+
+\item{y_type}{type of target factor: either nominal or ordinal (default: nominal)}
 
 \item{...}{additional parameters are passed to fit() call}
 }
