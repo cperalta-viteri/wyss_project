@@ -8,51 +8,31 @@ output: html_notebook
 library(scater)
 library(ggraph)
 library(igraph)
-source("../lib_sce.R")
+library(ABAData)
 ```
 
 
 # Load object containg Cell type atlas
 ```{r}
-e10x <- loadHDF5SingleCellExperiment("out/mouse_ctx_10x.h5")
-#ssv4 <- loadHDF5SingleCellExperiment("out/mouse_ctx_ssv4.h5")
+x <- ABAMouseSSv4("data/ABAMouseSSv4")
 ```
 
 
 # Display UMAP collored by cell type
 ```{r}
-ggcells(e10x[,sample(ncol(e10x),50000)]) + 
-  geom_point(aes(x=UMAP.1,y=UMAP.2,color=subclass_color),size=1) + 
+plotUMAP(x,color_by="subclass_color",text_by="subclass_label",text_size=3) +
   coord_equal() + 
-  scale_color_identity() +
-  theme_classic() +
-  theme(legend.position="none")
+  scale_color_identity()
 ```
 
 # Example gene expression
 ```{r}
-ggcells(e10x[,sample(ncol(e10x),50000)],features = "Cux1",exprs_values = "counts") + 
-  geom_point(aes(x=UMAP.1,y=UMAP.2,color=Cux1>0),size=1) + 
-  coord_equal() + 
-  theme_classic()
+x <- logNormCounts(x)
+plotUMAP(x,color_by="Htr3a",text_by="subclass_label",text_size=3) +
+  coord_equal()
 ```
 
 
-
-# Display cell type taxonomy
-```{r}
-o <- metadata(e10x)$taxonomy
-g <- graph_from_data_frame(
-  data.frame(factor(basename(dirname(o$path)),o$cell_set_accession),o$cell_set_accession) |> na.exclude(),
-  vertices = cbind(o$cell_set_accession,o)
-)
-V(g)$color[V(g)$color==""] <- NA
-ggraph(g,"tree",flip.y=FALSE) + 
-  coord_flip() +
-  geom_edge_link(color="lightgrey") + 
-  geom_node_text(aes(color=color,label=original_label),hjust=1,size=3) + 
-  scale_color_identity()
-```
 
 
 
