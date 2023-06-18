@@ -34,7 +34,6 @@ caseWhenItemInput <- function(id,incol_choices=NULL,inval_choices=NULL,targetval
       tags$td(
         actionBttn(paste0(id,"_mv"),icon=icon("bars"),size="xs"),
         prettySwitch(inputId = paste0(id,"_switch"),"",inline = TRUE),
-        actionBttn(paste0(id,"_rm"),icon=icon("trash"),size="xs",color="danger")
       ),
       tags$td(
         conditionalPanel(
@@ -46,14 +45,15 @@ caseWhenItemInput <- function(id,incol_choices=NULL,inval_choices=NULL,targetval
               pickerInput(paste0(id,"_inval"),choices = inval_choices,inline = TRUE,multiple = TRUE, options = pickerOptions(style="label label-info")),
               "then"
             ),
-            tags$td(selectizeInput(paste0(id,"_targetval"),label=NULL,choices=targetval_choices,options = list(create=TRUE),width="200px"))
+            tags$td(selectizeInput(paste0(id,"_targetval"),label="lab",choices=targetval_choices,options = list(create=TRUE),width="200px"))
           ))
         ),
         conditionalPanel(
           condition = sprintf("input.%s_switch",id),
           textInput(paste0(id,"_incol"),label="",value = "col1 == col2 ~ col3")
         )
-      )
+      ),
+      tags$td(actionBttn(paste0(id,"_rm"),icon=icon("trash"),size="xs",color="danger"))
     )
   )
   
