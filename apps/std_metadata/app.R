@@ -52,18 +52,16 @@ std_fields <- list(
   # disease_model = field_item()
 )
 
-ruleListInput <- function(x) {
-  "x"
-}
+
 
 fieldInput <- function(f) {
   tags$div(
     id = f$field_name,
     tags$p(tags$b("Description:"),helpText(f$description)),
-    ruleListInput(f$rules)
+    lapply(seq_along(f$rules),\(i) caseWhenItemInput(sprintf("%s_%d",f$field_name,i),targetval_choices = f$targetval_suggestions)),
+    actionBttn(sprintf("%s_add",f$field_name),icon=icon("add"),size="xs")
   )
 }
-
 
 
 ui <- dashboardPage(
@@ -86,14 +84,6 @@ ui <- dashboardPage(
         ),
         fluidRow(
             do.call(what=\(...) tabBox(...,width=12,collapsible = FALSE),lapply(std_fields,\(f) tabPanel(f$field_name,fieldInput(f))))
-          #p("List of standard fields to map"),
-          #radioGroupButtons("current_working_field_name",choices = names(std_fields),status = "info",individual = TRUE),
-          # box(title = "Mapping rules",width = 12,collapsible = FALSE,
-          #   uiOutput("cwf_rules"),
-          #   actionButton(paste0("rule_add"),"Add rule"),
-          #   textInput(paste0("rule_default"),"default value")
-          # ),
-          # actionButton(paste0("next_field"),"Next",status = "primary")
         )
       )
     ),
@@ -166,15 +156,6 @@ server <- function(input, output, session) {
         choices <- unique(as.character(input_df()[[input[[paste0(rule_id,"_incol")]]]]))
         updatePickerInput(session,paste0(rule_id,"_inval"),choices = choices)
       })
-      
-      # When the "_rm" button is pressed
-      # observeEvent(input[[paste0(rule_id,"_rm")]],{
-      #   print("rm")
-      #   print(i)
-      #   x <- isolate(cwf())
-      #   x$rules <- x$rules[-i]
-      #   cwf(x)
-      # })
       
       caseWhenItemInput(
         rule_id,
