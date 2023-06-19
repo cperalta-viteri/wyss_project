@@ -5,30 +5,48 @@ output:
     df_print: paged
 ---
 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,eval=FALSE)
+```
+
+
+# Introduction
+
+This vignette shows how to create a SummarizedExperiment object from an H5AD.
+
+The important steps are: 
+
+1. load counts and metadata stored into H5AD files
+
+2. pre-computing of QC metrics and sizeFactors
+
+3. store object into desired format 
+
+
+
+# Example with GSE195510
+
 ```{r,message=FALSE}
 library(SingleCellExperiment)
-library(scater)
-library(BiocParallel)
-library(BiocSingular)
 ```
-
-# Load Cellranger count
 
 ```{r,message=FALSE}
-# Load 10x dataset
-o <- DropletUtils::read10xCounts("../../apps/geo_download/downloads/GSE195510/GSE195510_ORGANOIDSEQ_COUNTS_FILTERED.h5ad")
+o <- DropletUtils::read10xCounts("apps/geo_download/downloads/GSE195510/GSE195510_ORGANOIDSEQ_COUNTS_FILTERED.h5ad")
 ```
 
-
+## step 2: pre-compute QC metrics and sizeFactors
 ```{r}
-o
+o <- scater::addPerCellQC(o)
+o <- scuttle::computeLibraryFactors(o)
 ```
 
 
 
 # Save object
-```{r eval=FALSE}
-ABAData::writeSingleCellExperiment(o, "GSE195510_sce")
+```{r}
+HDF5Array::saveHDF5SummarizedExperiment(x,"datasets/GSE195510.h5se")
+ABAData::writeSingleCellExperiment(o, "GSE195510.h5txt")
 ```
 
 

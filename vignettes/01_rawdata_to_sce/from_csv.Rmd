@@ -3,17 +3,35 @@ title: "Load counts from big CSV files"
 output: html_notebook
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,eval=FALSE)
+```
+
+
+# Introduction
+
+This vignette shows how to create a SummarizedExperiment object from a CSV file.
+
+The important steps are: 
+
+1. load counts and metadata stored into CSV files
+
+2. make a SummarizedExperiment object and store the count-matrix into an assay named "counts". 
+   This is a standard assay name, and many package rely on this default name so it simplify further processing.
+   
+3. set rownames to unique gene symbol
+
+5. pre-computing of QC metrics and sizeFactors
+
+6. store object into desired format 
+
 
 ```{r,message=FALSE}
 library(SingleCellExperiment)
 ```
 
 
-Sometime gene expression matrices are given into big CSV or tab-delimited files.
-This notebook show how to convert them into H5 format.
-
-
-# Demo with GEO dataset GSE190012
+# Example with GEO dataset GSE190012
 https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE213828 
 
 ```{r}
@@ -31,58 +49,19 @@ rownames(o) <- make.unique(mcols(o)$gene_name)
 The SingleCellEperiment object is ready to use.
 
 
-#Save object
-
-```{r eval=FALSE}
-ABAData::writeSingleCellExperiment(o, "datasets/GSE213828")
+## step 5: pre-compute QC metrics and sizeFactors
+```{r}
+o <- scater::addPerCellQC(o)
+o <- scuttle::computeLibraryFactors(o)
 ```
 
 
+#Save object
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```{r}
+HDF5Array::saveHDF5SummarizedExperiment(o,"datasets/GSE213828.h5se")
+ABAData::writeSingleCellExperiment(o, "datasets/GSE213828.h5txt")
+```
 
 
 

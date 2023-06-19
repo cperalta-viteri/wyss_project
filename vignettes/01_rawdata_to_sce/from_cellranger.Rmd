@@ -5,23 +5,47 @@ output:
     df_print: paged
 ---
 
-```{r,message=FALSE}
-library(SingleCellExperiment)
-library(scater)
-library(BiocParallel)
-library(BiocSingular)
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,eval=FALSE)
 ```
+
+
+
+# Introduction
+
+This vignette shows how to create a SummarizedExperiment object from a CellRanger output, 
+i.e. a file named `raw_feature_bc_matrix.h5`.
+
+The important steps are: 
+
+1. load the counts stored into the h5 using `DropletUtils::read10xCounts`
+
+2. set rownames to unique gene symbol
+
+3. pre-compute QC metrics and sizeFactors
+
+4. store object into desired format 
+
+
 
 # Load Cellranger count
 
+
 ```{r,message=FALSE}
-# Load 10x dataset
+library(SingleCellExperiment)
+```
+
+## Load from h5
+```{r,message=FALSE}
+
 x <- DropletUtils::read10xCounts("apps/geo_download/downloads/GSE224407/GSE224407_RAW/GSM7021828_E19_raw_feature_bc_matrix.h5")
 rownames(x) <- make.unique(mcols(x)$Symbol)
 ```
 
 
-
+## Compute QC metrics and librarySize
 ```{r}
 BPPARAM <- BiocParallel::MulticoreParam(6L,progressbar = TRUE)
 x <- scater::addPerCellQC(x,BPPARAM=BPPARAM)
@@ -29,10 +53,10 @@ x <- scuttle::computeLibraryFactors(x,BPPARAM=BPPARAM)
 ```
 
 
-
-# Save object
-```{r eval=FALSE}
-ABAData::writeSingleCellExperiment(o, "datasets/GSE224407_GSM7021828")
+## Save object
+```{r}
+HDF5Array::saveHDF5SummarizedExperiment(x,"datasets/GSE224407_GSM7021828.h5se")
+ABAData::writeSingleCellExperiment(x, "datasets/GSE224407_GSM7021828.h5txt")
 ```
 
 
