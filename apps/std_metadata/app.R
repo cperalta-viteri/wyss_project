@@ -1,6 +1,7 @@
 
 library(shiny)
 library(DT)
+library(sortable)
 source("lib_std.R")
 
 
@@ -58,7 +59,10 @@ fieldInput <- function(f) {
   tags$div(
     id = f$field_name,
     tags$p(tags$b("Description:"),helpText(f$description)),
-    lapply(seq_along(f$rules),\(i) caseWhenItemInput(sprintf("%s_%d",f$field_name,i),targetval_choices = f$targetval_suggestions)),
+    div(id = sprintf("%s_rules_container",f$field_name),
+        lapply(seq_along(f$rules),\(i) caseWhenItemInput(sprintf("%s_%d",f$field_name,i),targetval_choices = f$targetval_suggestions)),
+    ),
+    sortable_js(css_id=sprintf("%s_rules_container",f$field_name),options = sortable_options(handle=".case_when_item_bar")),
     actionBttn(sprintf("%s_add",f$field_name),icon=icon("add"),size="xs")
   )
 }
