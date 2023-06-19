@@ -166,8 +166,6 @@ do_AnPearson_transform <- function(sce_object, theta=100){
 }
 
 
-
-
 normalize_sce <- function(x,method = c("logNorm","SCTransform","AnPearson")) {
   method <- match.arg(method)
   x <- x[, x$qc %in% "pass"]
@@ -295,7 +293,6 @@ transcriptomic_pipeline <- function(x,
 # PARKING
 function() {
   if (isTRUE(hto)) {x <- demultiplexer(x,project,...)}
-  
 
   if (length(mito.genes) >= 1){
     p2 <- plotColData(x,

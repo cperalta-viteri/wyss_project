@@ -1,9 +1,9 @@
 ---
 title: "Landscapes Notebook"
-output: html_notebook
+output: html_document
 ---
         
-```{r}
+```{r,message=FALSE}
 library(igraph)
 source("lib_landscape.R")
 source("lib_hclust.R")
@@ -11,7 +11,7 @@ source("lib_hclust.R")
 
 
 
-# generate a random dataset for testing
+# Generate a random dataset
 ```{r}
 set.seed(123)
 e <- random_SE()
@@ -25,27 +25,28 @@ ggplot(as.data.frame(colData(e))) +
 ```
 
 
+# Build landscapes
 
-# make a knn grid
+make a knn grid
 ```{r}
 g <- knn_array(e$x,e$y,k=100L)
 ```
 
 
-# Compute all landscapes, i.e. average expression of each gene according to the knn-grid
+Compute all landscapes, i.e. average expression of each gene according to the knn-grid
 ```{r}
 mcols(e)$landscape <- knn_rowMeans(assay(e),g)
 ```
 
 
-# plot first 10 landscapes
+Plot first 10 landscapes
 ```{r}
 gg_landscape(mcols(e[1:10])$landscape,attr(g,"x"),attr(g,"y"))
 ```
 
 
 
-# Perform dimensionality reduction of the landscapes
+# Dimensionality reduction
 ```{r}
 # Compute PCA of the landscapes
 mcols(e)$landscape_pca <- local({
@@ -59,7 +60,7 @@ mcols(e)$landscape_umap <- umap::umap(mcols(e)$landscape_pca,n_neighbors=31L,n_c
 ```
 
 
-# Cluster the landscapes from UMAP position
+# Cluster landscapes
 ```{r}
 # build nearest neighbor graph
 G <- FNN::knn.index(mcols(e)$landscape_umap,11L)
@@ -152,6 +153,7 @@ local({
 })
 ```
 
+
 # Average cluster profile
 ```{r}
 local({
@@ -163,9 +165,6 @@ local({
         gg_landscape(M)
 })
 ```
-
-
-
 
 
 

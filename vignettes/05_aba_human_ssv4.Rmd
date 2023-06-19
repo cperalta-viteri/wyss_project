@@ -1,13 +1,13 @@
 ---
-title: "Cell type atlas"
-output: html_notebook
+title: "Human cell type atlas"
+output: html_document
+date: "2023-06-19"
 ---
 
 # Load dependencies
 ```{r message=FALSE}
+library(tidyverse)
 library(scater)
-library(ggraph)
-library(igraph)
 library(ABAData)
 ```
 
@@ -37,20 +37,21 @@ plotUMAP(x,color_by="GAD2",text_by="subclass_label",text_size=3) +
 
 # Predict human data with mouse model
 ```{r}
-fm <- luz_load("data/aba_mouse_subclass_classifier.luz")
-P <- predict_delayed(t(logcounts(x)),fm,ignore.case = TRUE)
+fm <- luz::luz_load("data/aba_mouse_subclass_classifier.luz")
+P <- scml::predict_delayed(t(logcounts(x)),fm,ignore.case = TRUE)
 x$pred <- factor(colnames(P)[max.col(P)],colnames(P))
 ```
 
 
 show predictions
 ```{r,fig.width=15,fig.height=7}
-n <- table(x$subclass_label,pred=x$pred)
-(n / rowSums(n)) |>
+table(y_true=x$subclass_label,y_pred=x$pred) |>
   as.data.frame() |>
-  ggplot(aes(x=pred,y=Var1,label=sprintf("%.1f",100*Freq))) + 
-    geom_tile(aes(fill=Freq)) +
-    geom_text(size=3) + 
+  group_by(y_true) |>
+  mutate(prop = Freq/sum(Freq)) |>
+  ggplot(aes(x=y_pred,y=y_true)) + 
+    geom_tile(aes(fill=prop)) +
+    geom_text(aes(label=Freq),size=3) + 
     theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
 ```
 

@@ -1,5 +1,5 @@
 ---
-title: "Demo_wyss"
+title: "Wyss Demo"
 date: "2023-02-21"
 output: html_document
 ---
@@ -16,10 +16,9 @@ library(SingleCellExperiment)
 ```
 
 
-
 # Load SCE object
 ```{r}
-sce <- HDF5Array::loadHDF5SummarizedExperiment("../datasets/GSE144136.h5se")
+sce <- HDF5Array::loadHDF5SummarizedExperiment("../../datasets/GSE144136.h5se")
 ```
 
 
@@ -33,7 +32,7 @@ counts(sce) <- as.matrix(counts(sce))
 
 # Run QC pipeline
 ```{r}
-source("03_qc_workflow/lib_QC.R")
+source("lib_QC.R")
 x <- transcriptomic_pipeline(sce,output_dir = "qc_GSE144136",min_nfeatures = 1000)
 ```
 
