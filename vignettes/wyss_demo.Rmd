@@ -1,0 +1,97 @@
+---
+title: "Demo_wyss"
+date: "2023-02-21"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+
+
+```{r message=FALSE}
+library(SingleCellExperiment)
+```
+
+
+
+# Load SCE object
+```{r}
+sce <- HDF5Array::loadHDF5SummarizedExperiment("../datasets/GSE144136.h5se")
+```
+
+
+# Consider a subset of cell to speed-up the demo
+```{r}
+sce <- sce[,1:10000]
+counts(sce) <- as.matrix(counts(sce))
+```
+
+
+
+# Run QC pipeline
+```{r}
+source("03_qc_workflow/lib_QC.R")
+x <- transcriptomic_pipeline(sce,output_dir = "qc_GSE144136",min_nfeatures = 1000)
+```
+
+
+# Use an AI to predict cell types
+```{r}
+library(scml)
+fm <- luz::luz_load("../data/aba_mouse_subclass_classifier.luz")
+
+p <- predict_delayed(log1p(t(counts(x)) / x$sum * 10e3)/log(2),fm,ignore.case = TRUE)
+x$p_lab <- colnames(p)[max.col(p)]
+x$p_lev1 <- sub(" --- .*","",x$p_lab)
+x$p_lev2 <- sub("(.*) --- .*","\\1",x$p_lab)
+
+plotUMAP(x,color_by="p_lev2")
+```
+
+
+# Show prediction accuracy
+```{r,fig.height=8}
+library(tidyverse)
+table(ai=x$p_lab,paper=x$cell_type) |>
+  as.data.frame() |>
+  group_by(paper) |>
+  mutate(pct = Freq/sum(Freq)) |>
+  ggplot() + 
+    geom_tile(aes(y=paper,x=ai,fill=pct)) + 
+    geom_text(aes(y=paper,x=ai,label=Freq)) + 
+    theme(axis.text.x = element_text(angle=90,hjust=1,vjust=0.5))
+```
+
+
+
+
+# Train a new Articficial Intelligence on the data to reconize a given pattern
+```{r,message=FALSE}
+fm <- scml::train_delayed_classifier(
+  log1p(t(counts(x)) / x$sum * 10e3)/log(2),
+  x$disease_state,pre_pruning_epoch = 2,post_pruning_epoch = 2,
+  accelerator = luz::accelerator(cpu=TRUE)
+)
+```
+
+```{r}
+plot(fm)
+```
+
+# performance on training set
+```{r}
+p <- predict_delayed(log1p(t(counts(x)) / x$sum * 10e3)/log(2),fm)
+table(x$disease_state,colnames(p)[max.col(p)])
+x$suicide_score <- p[,"Suicide"] - p[,"Control"]
+```
+
+
+```{r}
+ggcells(x) + 
+  geom_boxplot(aes(y=p_lev1,x=suicide_score,fill=patient_id))
+```
+
+

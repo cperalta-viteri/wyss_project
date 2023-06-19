@@ -275,7 +275,7 @@ transcriptomic_pipeline <- function(x,
   x <- normalize_sce(x,method = normalization_method)
   
   # Compute UMAP layout
-  x <- scater::runUMAP(x, BPPARAM=BiocParallel::MulticoreParam(6L))
+  x <- scater::runUMAP(x, BPPARAM=BiocParallel::MulticoreParam(6L,progressbar = TRUE))
 
   # display UMAP and color by numer of detected genes
   p <- scater::plotUMAP(x[, x$qc=="pass"],point_size=.05, colour_by="detected") + 
