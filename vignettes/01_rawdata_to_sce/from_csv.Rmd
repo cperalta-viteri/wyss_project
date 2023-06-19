@@ -1,6 +1,6 @@
 ---
 title: "Load counts from big CSV files"
-output: html_notebook
+output: html_document
 ---
 
 ```{r setup, include=FALSE}

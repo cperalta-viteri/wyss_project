@@ -31,7 +31,7 @@ counts(sce) <- as.matrix(counts(sce))
 
 
 # Run QC pipeline
-```{r}
+```{r,message=FALSE}
 source("lib_QC.R")
 x <- transcriptomic_pipeline(sce,output_dir = "qc_GSE144136",min_nfeatures = 1000)
 ```
@@ -39,10 +39,9 @@ x <- transcriptomic_pipeline(sce,output_dir = "qc_GSE144136",min_nfeatures = 100
 
 # Use an AI to predict cell types
 ```{r}
-library(scml)
-fm <- luz::luz_load("../data/aba_mouse_subclass_classifier.luz")
+fm <- luz::luz_load("../../data/aba_mouse_subclass_classifier.luz")
 
-p <- predict_delayed(log1p(t(counts(x)) / x$sum * 10e3)/log(2),fm,ignore.case = TRUE)
+p <- scml::predict_delayed(log1p(t(counts(x)) / x$sum * 10e3)/log(2),fm,ignore.case = TRUE)
 x$p_lab <- colnames(p)[max.col(p)]
 x$p_lev1 <- sub(" --- .*","",x$p_lab)
 x$p_lev2 <- sub("(.*) --- .*","\\1",x$p_lab)
@@ -82,7 +81,7 @@ plot(fm)
 
 # performance on training set
 ```{r}
-p <- predict_delayed(log1p(t(counts(x)) / x$sum * 10e3)/log(2),fm)
+p <- scml::predict_delayed(log1p(t(counts(x)) / x$sum * 10e3)/log(2),fm)
 table(x$disease_state,colnames(p)[max.col(p)])
 x$suicide_score <- p[,"Suicide"] - p[,"Control"]
 ```
