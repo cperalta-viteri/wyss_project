@@ -1,3 +1,6 @@
+library(patchwork)
+library(ggplot2)
+
 library(HDF5Array)
 library(SingleCellExperiment)
 library(cellhashR)
@@ -12,18 +15,18 @@ library(ggExtra)
 #' @title plot_UMIvsGene
 #' @description plot_UMIvsGene displays a scatter plot of the relations between log10(UMI) on X axis and log10(genes)  on Y axis. #' a linear regression is fitted to the data and displayed.
 #' @export
-#' @param sce_object A SingleCellExperiment object. It has to contain in the colData: "sum", "detected".
-#' @param colour_by A character vector to set the colour of the data points. It has to be a column in colData(sce_object). 
-#' @param size_by A character vector to set the size of the data points. It has to be a column in colData(sce_object).
+#' @param x A SingleCellExperiment object. It has to contain in the colData: "sum", "detected".
+#' @param colour_by A character vector to set the colour of the data points. It has to be a column in colData(x). 
+#' @param size_by A character vector to set the size of the data points. It has to be a column in colData(x).
 #' @return A  ggplot figure.
-plot_UMIvsGene <- function(sce_object, ...) {
-  p <- plotColData(sce_object, x="sum", y="detected", ...) +
+plot_UMIvsGene <- function(x, ...) {
+  p <- plotColData(x, x="sum", y="detected", ...) +
     scale_x_log10() + scale_y_log10() + 
     scale_colour_gradient(aesthetics = c("colour"),low = "gray90", high = "black") +
     scale_size_area(max_size = 3)+
     geom_smooth(method = "lm", show.legend = FALSE)+
-    xlab("log10(nCount_RNA)")+
-    ylab("log10(nFeature_RNA)") +
+    xlab("nCount_RNA")+
+    ylab("nFeature_RNA") +
     theme_classic() + 
     theme(legend.position = "left") +
     labs(colour="percent.mito") +
@@ -37,14 +40,14 @@ plot_UMIvsGene <- function(sce_object, ...) {
 #' @title plot_QC_Violin
 #' @description plot_QC_Violin generates a violin + scatter + box plot for the variable desired.
 #' @export
-#' @param sce_object A SingleCellExperiment object.
+#' @param x A SingleCellExperiment object.
 #' @param y Character vector from colData information of the SingleCellExperiment object to be displayed.
 #' Default to `sum`which is the total count of UMIs.
 #' @param ylab Character vector to be set as the label to be displayed on the Y axis.
 #' @param title Character vector to be set as the title of the plot.
 #' @return A graphic display of the variable specified.
-plot_QC_Violin <- function(sce_object, y="sum", ylab="nCount_RNA", title="Number of UMIs", ...){
-  plotColData(sce_object, y=y, ...) +
+plot_QC_Violin <- function(x, y="sum", ylab="nCount_RNA", title="Number of UMIs", ...){
+  plotColData(x, y=y, ...) +
     geom_point(size = 0.25, alpha = 0.5, position = position_jitter(width=0.25,seed = 12345)) +
     geom_boxplot(width = 0.3, outlier.size = 0.5, outlier.alpha = 0.8) +
     xlab(NULL) +
@@ -82,45 +85,6 @@ plot_QC_scatter <- function(sce_object, x, y, xthreshold=NULL, ythreshold=NULL, 
   p
 }
 
-
-#' @title set_QC_status
-#' @description set_QC_status Created a column in colData indicating whether cells passed or failed three QC criterias: maximum #' mitochondrial gene percentage, minimum features (detected RNA) and laying above a linear regression line with an offset of 
-#' -0.09. For the last criteria, a linear model is fitted using as formula log10(features) ~ log10(UMIs)
-#' @export
-#' @param sce_object A SingleCellExperimet object containing QC metrics computed with scuttle::addPerCellQCMetrics. For more
-#' information ?scuttle::addPerCellQCMetrics .
-#' @param mito_percent_column Character string indicating the name of the column in colData. This column is added by
-#' scuttle::addPerCellQCMetrics.
-#' @param mito_max Numerical value indicating the threshold for the maximum percentage of mitochondrial genes. 
-#' Default to 15.
-#' @param min_nfeatures Numerical value indicating the threshold for the minimum of features. Default to log10(200).
-#' @return
-set_QC_status <- function(sce_object=NULL,mito_max=15,min_nfeatures=200) {
-  
-  if (isTRUE("subsets_Mito_percent" %in% colnames(colData(sce_object)))) {
-    # Assessing what cells pass the threshold for mitochondrial gene percentage
-    # retrieveCellInfo looks into colData for the column passed and retrieves a list. The second element in the list contains the numerical values.
-    colData(sce_object)$qc <- gsub("TRUE", "passed", gsub("FALSE", "fails_maxMito", retrieveCellInfo(sce_object, by="subsets_Mito_percent")[[2]] <= mito_max))
-  }
-  
-  # filtering by passed cells from mito_percent criteria and assess whether those cells passe or no the min_feature criteria.
-  colData(sce_object)$qc <- replace(
-    x = colData(sce_object)$qc,
-    list = which(sce_object$qc == "passed"),
-    values = gsub("TRUE", "passed", gsub("FALSE", "fails_minFeat",sce_object[,sce_object$qc == "passed"]$detected>=min_nfeatures))
-  )
-  
-  # fitting linear model with the formula log10(features) ~ log10(UMI)
-  lm <- lm(log10(sce_object[, sce_object$qc == "passed"]$detected) ~ log10(sce_object[, sce_object$qc == "passed"]$sum))
-  
-  # Assessing what cells passed the criteria of laying above a linear model with a offset of -0.09.
-  colData(sce_object)$qc <- replace(
-    x = colData(sce_object)$qc,
-    list = which(sce_object$qc =="passed"),
-    values = gsub("TRUE", "passed", gsub("FALSE", "fails_lm", log10(sce_object[, sce_object$qc == "passed"]$detected) > log10(sce_object[, sce_object$qc == "passed"]$sum) * lm$coefficients[2] + (lm$coefficients[1]-.09)))
-  )
-  sce_object
-}
 
 
 
@@ -196,155 +160,146 @@ do_AnPearson_transform <- function(sce_object, theta=100){
   mu <- DelayedArray(crossprod(t(counts_sum0), counts_sum1) / counts_sum)
   z <- DelayedArray((DelayedArray(assay(sce_object)) - mu) / sqrt(mu + (mu**2/theta)))
   z <- replace(z, is.na(z), c(0))
-  z <- z[, order(match(colnames(sce_object[, sce_object$qc=="passed"]), colnames(z)))]
+  z <- z[, order(match(colnames(sce_object[, sce_object$qc=="pass"]), colnames(z)))]
   altExp(sce_object, "Gene_Expression_PearNorm") <- SingleCellExperiment(list(count_AP=z), colData = colData(sce_object))
   sce_object
 }
 
 
-QC <- function(sce_object,
-               organism = "mouse",
-               hto = TRUE,
-               project = "New_project",
+
+
+normalize_sce <- function(x,method = c("logNorm","SCTransform","AnPearson")) {
+  method <- match.arg(method)
+  x <- x[, x$qc %in% "pass"]
+  x <- switch(method,
+      "logNorm" = scuttle::logNormCounts(x),
+      "SCTransform" = do_vst_transform(x),
+      "AnPearson" = do_AnPearson_transform(x)
+  )
+  x
+}
+
+make_transcriptomic_qc_pdf <- function(sce,pdf_dir,suffix="",mito_max=15,min_nfeatures=200) {
+  
+  # Violin of each variable independently
+  local({
+    p1 <- plot_QC_Violin(sce, y="subsets_Mito_percent", ylab="percent_mito", title = "Mitochondial genes")
+    p2 <- plot_QC_Violin(sce, y="subsets_Ribo_percent", ylab="percent_ribo", title = "Ribosomal genes")
+    p3 <- plot_QC_Violin(sce, y="sum", ylab="nCount_RNA", title = "Number of UMI")
+    p4 <- plot_QC_Violin(sce, y="detected", ylab="nFeature_RNA", title = "Number of genes")
+    print(p1 + p2 + p3 + p4)
+    ggplot2::ggsave(
+      filename = file.path(pdf_dir, sprintf("01-violin%s.pdf",suffix)),
+      width = 297, height = 210, units = "mm"
+    )
+  })
+  
+  # UMI vs Detected
+  local({
+    p <- plot_UMIvsGene(
+      sce,
+      colour_by = "subsets_Mito_percent",
+      size_by = "subsets_Ribo_percent"
+    )
+    p <- ggExtra::ggMarginal(p,type = "densigram",bins=100, fill="grey", alpha=0.3)
+    print(p)
+    ggplot2::ggsave(plot=p,
+      filename = file.path(pdf_dir, sprintf("02-UMI-vs-detected%s.pdf",suffix)),
+      width = 297, height = 210, units = "mm"
+    )
+  })
+  
+  # Mitochondria and detection criteria
+  local({
+    p <- plot_QC_scatter(
+      sce,
+      x = "detected", y = "subsets_Mito_percent",
+      xthreshold = min_nfeatures,ythreshold = mito_max,
+      xlab="Num. Detected Gene",ylab="% mito"
+    ) +
+      annotate(geom="rect",xmin=min_nfeatures,xmax=+Inf,ymin=0,ymax=mito_max,fill="green",alpha=0.3)
+    p <- ggExtra::ggMarginal(p,type = "densigram",bins=100, fill="grey",  alpha=0.3)
+    print(p)
+    ggplot2::ggsave(plot=p,
+      filename = file.path(pdf_dir,sprintf("03-MT-vs-detected%s.pdf",suffix)),
+      width = 297, height = 210, units = "mm"
+    )
+  })
+}
+
+
+
+
+
+
+transcriptomic_pipeline <- function(x,
+               output_dir = "qc_out",
                mito_max = 15,
                min_nfeatures = 200,
-               normalization_method="logNorm",
-               seed = 12,
-               BPPARAM = BiocParallel::MulticoreParam(8L),
+               normalization_method = "logNorm",
                ...) {
-  set.seed(seed = seed)
-  Sys.setenv(RETICULATE_PYTHON="/usr/bin/python3")
+  dir.create(output_dir)
+  pdf_dir <- file.path(output_dir,"pdf")
+  dir.create(pdf_dir)
+
+  #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+  # Compute per cell QC metrics
+  #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+  mito.genes <- grep(pattern = "^mt-", x = rownames(x), value = TRUE, ignore.case = TRUE)
+  ribo.genes <- grep(pattern = "^(Rpl|Rps|Mrp)", x = rownames(x), value = TRUE, ignore.case = TRUE)
+  x <- scuttle::addPerCellQCMetrics(x, subset = list(Mito = mito.genes,Ribo = ribo.genes))
+
+  
+  #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+  # Compute QC status of each cell and filter at each step
+  #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+  x$qc <- "pass"
+  make_transcriptomic_qc_pdf(x,pdf_dir,suffix="_00-before-qc")
+  
+  x$qc[(x$qc %in% "pass") & (x$detected<min_nfeatures)] <- "fails_minFeat"
+  make_transcriptomic_qc_pdf(x[,x$qc %in% "pass"],pdf_dir,suffix="_01-after-detect")
+  
+  x$qc[(x$qc %in% "pass") & x$subsets_Mito_percent > mito_max] <- "fails_maxMito"
+  make_transcriptomic_qc_pdf(x[,x$qc %in% "pass"],pdf_dir,suffix="_02-after-mito")
+  
+  # fitting linear model on UMI vs detected only on previously QC passing cells
+  lm <- lm(log10(x$detected[x$qc %in% "pass"]) ~ log10(x$sum[x$qc %in% "pass"]))
+  x$qc[(x$qc %in% "pass") & (log10(x$detected) - predict(lm,data.frame(x$sum)) > -0.09)] <- "fails_lm"
+  print(table(x$qc))
+  
+  x <- x[,x$qc %in% "pass"]
+  make_transcriptomic_qc_pdf(x,pdf_dir,suffix="_03-after-lm")
+  
+  
+  # Normalize
+  x <- normalize_sce(x,method = normalization_method)
+  
+  # Compute UMAP layout
+  x <- scater::runUMAP(x, BPPARAM=BiocParallel::MulticoreParam(6L))
+  
+
+  # display UMAP and color by numer of detected genes
+  p <- scater::plotUMAP(x[, x$qc=="pass"],point_size=.05, colour_by="detected") + 
+    coord_equal() + 
+    guides(colour=guide_legend(NULL, override.aes = list(size=2)))
+  print(p)
+  ggplot2::ggsave(
+    filename = file.path(pdf_dir,"XX_UMAP_detected.pdf"),
+    plot = p, width = 297, height = 210, units = "mm")
+  return(x)
+}
 
 
-  pdf_dir <- file.path("pdf/1-Loading",project)
-  dir.create(pdf_dir,showWarnings = FALSE)
-  if (isTRUE(hto)){sce_object <- demultiplexer(sce_object,project,...)}
-  switch (organism,
-    mouse = sce_object <- addPerCellQCMetrics(sce_object, subset=list(Mito=grep("mt-", rownames(sce_object),value=TRUE),
-                             Ribo=grep("(^Rpl|^Rps|Mrp)", rownames(sce_object), value = TRUE))),
-    human = sce_object <- addPerCellQCMetrics(sce_object, subset=list(Mito=grep("MT-", rownames(sce_object),value=TRUE),
-                             Ribo=grep("(^Rpl|^Rps|Mrp)", rownames(sce_object), value = TRUE)))
-  )
+
+
+# This is the parking with code to eventually integrate to the pipeline
+function() {
+
+  if (isTRUE(hto)) {x <- demultiplexer(x,project,...)}
   
-  sce_object <- set_QC_status(sce_object)
-  
-  mito.genes <- grep(pattern = "^mt-", x = rownames(sce_object), value = TRUE, ignore.case = TRUE)
+
   if (length(mito.genes) >= 1){
-    p1 <- plot_QC_Violin(sce_object, y="subsets_Mito_percent", ylab="percent_mito", title = "Mitochondial genes")
-    p2 <- plot_QC_Violin(sce_object, y="subsets_Ribo_percent", ylab="percent_ribo", title = "Ribosomal genes")
-    p3 <- plot_QC_Violin(sce_object, y="sum", ylab="nCount_RNA", title = "Number of UMI")
-    p4 <- plot_QC_Violin(sce_object, y="detected", ylab="nFeature_RNA", title = "Number of genes")
-    cowplot::plot_grid(
-      plotlist = list(p1, p2, p3, p4),
-      ncol=2,
-      align = "hv",
-      rel_widths = c(1, 1, 1, 1),
-      rel_heights =  c(1, 1, 1, 1)
-    )
-    ggplot2::ggsave(
-      filename = file.path(pdf_dir, "violin_plot_QC_before_filtering.pdf"),
-      device = cairo_pdf, width = 297, height = 210, units = "mm"
-    )
-
-  #p <- plot_UMIvsGene(sce_object)
-  #p <- ggExtra::ggMarginal(p, type = "densigram",bins=100, fill="grey", alpha=0.3)
-  
-    if (isTRUE(hto)) {
-        plot_QC_scatter(
-          sce_object,
-          x = "detected", y = "subsets_Mito_percent",
-          color_by = "consensus_call_global",
-          xthreshold = min_nfeatures,ythreshold = mito_max,
-          xlab="Num. Detected Gene",ylab="% mito"
-        ) |>
-        ggExtra::ggMarginal(type = "densigram",bins=100, fill="grey",  alpha=0.3)
-        ggplot2::ggsave(
-          filename = file.path(pdf_dir,"/percent.mitoVSnGenes.pdf"),
-          device = cairo_pdf, width = 297, height = 210, units = "mm"
-        )
-
-        if (sum(sce_object$subsets_Mito_percent <= mito_max)!=length(sce_object$subsets_Mito_percent <= mito_max) &
-            sum(sce_object$subsets_Mito_percent > mito_max)!=length(sce_object$subsets_Mito_percent <= mito_max)) {
-          
-            p <- plotColData(sce_object, x="detected", y="subsets_Mito_percent", color_by = "consensus_call_global") +
-                    geom_hline(aes(yintercept = mito_max), colour = "red", linetype = 2) +
-                    geom_vline(aes(xintercept = min_nfeatures), colour = "red", linetype = 2) +
-                    xlab("nFeature_RNA") + ylab("percent.mito") +
-                    annotate(geom = "text",size=4, 
-                             label = paste0(as.numeric(table( sce_object$subsets_Mito_percent <= mito_max)[1])," cells removed\n",
-                                            as.numeric(table( sce_object$subsets_Mito_percent <= mito_max)[2]), " cells remain"),
-                              x = max(sce_object$detected)-1000, y = mito_max+5)
-            p <- ggExtra::ggMarginal(p, type = "densigram",bins=100, fill="grey",  alpha=0.3)
-            ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/percent.mitoVSnGenes.pdf"),
-                   plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
-        }
-    } else {
-        if (sum(sce_object$subsets_Mito_percent <= mito_max) == length(sce_object$subsets_Mito_percent <= mito_max)){
-          p <- plotColData(sce_object, x="detected", y="subsets_Mito_percent")+
-            geom_hline(aes(yintercept = mito_max), colour = "red", linetype = 2) +
-            geom_vline(aes(xintercept = min_nfeatures), colour = "red", linetype = 2) +
-            xlab("nFeature_RNA")+
-            ylab("percent.mito")+
-            annotate(geom = "text",size=4, 
-                     label = paste0(as.numeric(table( sce_object$subsets_Mito_percent <= mito_max)[1])," cells remain"),
-                     x = max(sce_object$detected)-1000, y = mito_max+5)
-          p <- ggExtra::ggMarginal(p, type = "densigram",bins=100, fill="grey",  alpha=0.3)
-          ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/percent.mitoVSnGenes.pdf"),
-                 plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
-        }
-      
-      if (sum(sce_object$subsets_Mito_percent > mito_max)==length(sce_object$subsets_Mito_percent <= mito_max)){
-        p <- plotColData(sce_object, x="detected", y="subsets_Mito_percent")+
-          geom_hline(aes(yintercept = mito_max), colour = "red", linetype = 2) +
-          geom_vline(aes(xintercept = min_nfeatures), colour = "red", linetype = 2) +
-          xlab("nFeature_RNA")+
-          ylab("percent.mito")+
-          annotate(geom = "text",size=4, 
-                   label = paste0(as.numeric(table( sce_object$subsets_Mito_percent <= mito_max)[1])," cells removed"),
-                   x = max(sce_object$detected)-1000, y = mito_max+5)
-        p <- ggExtra::ggMarginal(p, type = "densigram",bins=100, fill="grey",  alpha=0.3)
-        
-        ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/percent.mitoVSnGenes.pdf"),
-               plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
-        
-        
-      }
-      
-      if (sum(sce_object$subsets_Mito_percent <= mito_max)!=length(sce_object$subsets_Mito_percent <= mito_max)&
-          sum(sce_object$subsets_Mito_percent > mito_max)!=length(sce_object$subsets_Mito_percent <= mito_max)){
-        
-        p <- plotColData(sce_object, x="detected", y="subsets_Mito_percent")+
-          geom_hline(aes(yintercept = mito_max), colour = "red", linetype = 2) +
-          geom_vline(aes(xintercept = min_nfeatures), colour = "red", linetype = 2) +
-          xlab("nFeature_RNA")+
-          ylab("percent.mito")+
-          annotate(geom = "text",size=4, 
-                   label = paste0(as.numeric(table( sce_object$subsets_Mito_percent <= mito_max)[1]),"cells removed\n",
-                                  as.numeric(table( sce_object$subsets_Mito_percent <= mito_max)[2]), "cells remain"),
-                   x = max(sce_object$detected)-1000, y = mito_max+5)
-        p <- ggExtra::ggMarginal(p, type = "densigram",bins=100, fill="grey",  alpha=0.3)
-        
-        ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/percent.mitoVSnGenes.pdf"),
-               plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
-      }
-    }
-    
-    ######## filtering by mito percent
-    
-    ######## Gene/UMI scatter plot before filtering
-    p1 <- plot_UMIvsGene(sce_object[, !sce_object$qc == "fails_maxMito"],
-                   colour_by = "subsets_Mito_percent",
-                   size_by = "subsets_Ribo_percent")
-    #p1 <- ggExtra::ggMarginal(p1, type = "densigram",bins=100, fill="grey",  alpha=0.3)
-    
-    ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/nGenesvsnUMIs_beforefiltering.pdf"),
-           plot = p1, device =cairo_pdf, width = 297, height = 210, units = "mm")
-    
-    ####### Filter cells base on mito and feature
-    lm <- lm(log10(sce_object[, sce_object$qc != "fails_maxMito" & sce_object$qc != "fails_minFeat"]$detected) ~ 
-               log10(sce_object[, sce_object$qc != "fails_maxMito" & sce_object$qc != "fails_minFeat"]$sum))
-    
-    p2 <- plotColData(sce_object[, !sce_object$qc == "fails_maxMito" & !sce_object$qc == "fails_minFeat"],
+    p2 <- plotColData(x,
                       x="sum", y="detected",
                       colour_by="subsets_Mito_percent",
                       size_by="subsets_Ribo_percent") +
@@ -354,13 +309,13 @@ QC <- function(sce_object,
       geom_smooth(method = "lm", show.legend = FALSE)+
       geom_hline(aes(yintercept = min_nfeatures), colour = "darkgreen", linetype = 2)+
       geom_abline(intercept = lm$coefficients[1] - 0.09, slope = lm$coefficients[2], color="orange") +
-      xlab("log10(nCount_RNA)")+
-      ylab("log10(nFeature_RNA)") +
+      xlab("nCount_RNA")+
+      ylab("nFeature_RNA") +
       theme_classic() + 
       theme(legend.position = "left") +
       labs(colour="percent.mito") +
       guides(size=guide_legend("percent.ribo")) +
-      annotate(geom = "text",size=4, label = paste0(dim(sce_object[, !sce_object$qc == "fails_maxMito" & !sce_object$qc == "fails_minFeat"])[2], " QC passed cells"),
+      annotate(geom = "text",size=4, label = paste0(dim(x[, !x$qc == "fails_maxMito" & !x$qc == "fails_minFeat"])[2], " QC passed cells"),
                x = 1000, y = 5000)
     
     p2 <- ggExtra::ggMarginal(p2, type = "densigram",bins=100, fill="grey", alpha=.3)
@@ -369,7 +324,7 @@ QC <- function(sce_object,
            plot = p2, device =cairo_pdf, width = 297, height = 210, units = "mm")
     
     ######## Cells to exclude lie below an intercept offset of -0.09
-    p3 <- plotColData(sce_object[, !sce_object$qc == "fails_maxMito" & !sce_object$qc == "fails_minFeat"],
+    p3 <- plotColData(x[, !x$qc == "fails_maxMito" & !x$qc == "fails_minFeat"],
                       x="sum", y="detected",
                       colour_by = "qc") +
       scale_x_log10() + scale_y_log10() +
@@ -383,8 +338,8 @@ QC <- function(sce_object,
       labs(colour="valid cells") +
       annotate(geom = "text",size=4,
                label = paste0(
-                 table(sce_object[, !sce_object$qc == "fails_maxMito" & !sce_object$qc == "fails_minFeat"]$qc)[[2]], " QC passed cells\n",
-                 table(sce_object[, !sce_object$qc == "fails_maxMito" & !sce_object$qc == "fails_minFeat"]$qc)[[1]], " QC filtered"),
+                 table(x[, !x$qc == "fails_maxMito" & !x$qc == "fails_minFeat"]$qc)[[2]], " QC passed cells\n",
+                 table(x[, !x$qc == "fails_maxMito" & !x$qc == "fails_minFeat"]$qc)[[1]], " QC filtered"),
                x = 2000, y = 10000)
     
     p3 <- ggExtra::ggMarginal(p3, type = "densigram",bins=100, fill="grey", alpha=.3)
@@ -399,7 +354,7 @@ QC <- function(sce_object,
   if (!length(mito.genes) >= 1){
     
     ######## Gene/UMI scatter plot before filtering
-    p1 <- plot_UMIvsGene(sce_object,
+    p1 <- plot_UMIvsGene(x,
                          colour_by = "subsets_Mito_percent",
                          size_by = "subsets_Ribo_percent")
     p1 <- p1 + geom_hline(aes(yintercept = log10(min_nfeatures)), colour = "darkgreen", linetype = 2)
@@ -411,10 +366,10 @@ QC <- function(sce_object,
     ####### Filter cells base on min features and lm
     # line 477
     lm <- lm(
-      log10(sce_object[, !sce_object$qc == "fails_minFeat"]$detected) ~ 
-        log10(sce_object[, !sce_object$qc == "fails_minFeat"]$sum))
+      log10(x[, !x$qc == "fails_minFeat"]$detected) ~ 
+        log10(x[, !x$qc == "fails_minFeat"]$sum))
     
-    p2 <- plotColData(sce_object[, !sce_object$qc == "fails_minFeat"],
+    p2 <- plotColData(x[, !x$qc == "fails_minFeat"],
                       x="sum", y="detected",
                       colour_by="subsets_Mito_percent",
                       size_by="subsets_Ribo_percent") +
@@ -430,7 +385,7 @@ QC <- function(sce_object,
       theme(legend.position = "left") +
       labs(colour="percent.mito") +
       guides(size=guide_legend("percent.ribo")) +
-      annotate(geom = "text",size=4, label = paste0(dim(sce_object[, !sce_object$qc == "fails_minFeat"])[2], " QC passed cells"),
+      annotate(geom = "text",size=4, label = paste0(dim(x[, !x$qc == "fails_minFeat"])[2], " QC passed cells"),
                x = 1000, y = 5000)
     
     p2 <- ggExtra::ggMarginal(p2, type = "densigram",bins=100, fill="grey", alpha=.3)
@@ -440,7 +395,7 @@ QC <- function(sce_object,
     
     
     ######## Cells to exclude lie below an intercept offset of -0.09
-    p3 <- plotColData(sce_object[, !sce_object$qc == "fails_minFeat"],
+    p3 <- plotColData(x[, !x$qc == "fails_minFeat"],
                       x="sum", y="detected",
                       colour_by = "qc") +
       scale_x_log10() + scale_y_log10() +
@@ -454,8 +409,8 @@ QC <- function(sce_object,
       labs(colour="valid cells") +
       annotate(geom = "text",size=4,
                label = paste0(
-                 table(sce_object[, !sce_object$qc == "fails_minFeat"]$qc)[[2]], " QC passed cells\n",
-                 table(sce_object[, !sce_object$qc == "fails_minFeat"]$qc)[[1]], " QC filtered"),
+                 table(x[, !x$qc == "fails_minFeat"]$qc)[[2]], " QC passed cells\n",
+                 table(x[, !x$qc == "fails_minFeat"]$qc)[[1]], " QC filtered"),
                x = 2000, y = 10000)
     
     p3 <- ggExtra::ggMarginal(p3, type = "densigram",bins=100, fill="grey", alpha=.3)
@@ -470,21 +425,21 @@ QC <- function(sce_object,
   
   ##### filtering by solely valid cells "passed"
   p1 <- plot_QC_Violin(
-    sce_object[, sce_object$qc == "passed"],
+    x[, x$qc == "pass"],
     y="sum", ylab="nCount_RNA", title = "Number of UMI")
   
   
   p2 <- plot_QC_Violin(
-    sce_object[, sce_object$qc == "passed"],
+    x[, x$qc == "pass"],
     y="detected", ylab="nFeature_RNA", title="Number of Genes")
   
   if (length(mito.genes)>=1) {
     p3 <- plot_QC_Violin(
-      sce_object[, sce_object$qc == "passed"],
+      x[, x$qc == "pass"],
       y="subsets_Mito_percent", ylab="mito percent", title = "Mitochondrial Genes")
     
     p4 <- plot_QC_Violin(
-      sce_object[, sce_object$qc == "passed"],
+      x[, x$qc == "pass"],
       y="subsets_Ribo_percent", ylab = "ribo percent", title = "Ribosomal Genes")
     
     p <- cowplot::plot_grid(plotlist = list(p3, p4, p1, p2), ncol = 2, align = "hv",
@@ -493,7 +448,7 @@ QC <- function(sce_object,
     ggsave(filename = paste0("pdf/1-Loading/",project,"/violin_plot_QC_after_filtering.pdf"),
            plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
     
-    p1 <- plot_UMIvsGene(sce_object[, sce_object$qc == "passed"],
+    p1 <- plot_UMIvsGene(x[, x$qc == "pass"],
                         colour_by = "subsets_Mito_percent",
                         size_by = "subsets_Ribo_percent")
     p1 <- ggExtra::ggMarginal(p1, type = "densigram",bins=100, fill="grey", alpha=0.3)
@@ -509,100 +464,8 @@ QC <- function(sce_object,
            plot = p2, device =cairo_pdf, width = 297, height = 210, units = "mm")
   }
   
-  #### skipped scrublet == TRUE
-  switch (normalization_method,
-    "logNorm" = {
-      # normalization
-      #browser()
-      sce_object <- scuttle::logNormCounts(sce_object[, sce_object$qc=="passed"])
-      # UMAP computation
-      sce_object <- scater::runUMAP(sce_object[, sce_object$qc=="passed"], BPPARAM=BPPARAM)
-      if (isTRUE("consensus_call" %in% colnames(colData(sce_object)))){
-        # color by consensus call individual
-        p <- scater::plotUMAP(sce_object[, sce_object$qc=="passed"],
-                              point_size=.05, colour_by="consensus_call")+
-          coord_equal()+guides(colour=guide_legend(NULL, override.aes = list(size=2)))
-        ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP_Predicted_id.pdf"),
-                        plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
-        # color by consensus call global
-        p <- scater::plotUMAP(sce_object[, sce_object$qc=="passed"],
-                              point_size=.05, colour_by="consensus_call_global")+
-          coord_equal()+guides(colour=guide_legend(NULL, override.aes = list(size=2)))
-        ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP_Predicted_global.pdf"),
-                        plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
-      } else{
-        p <- scater::plotUMAP(sce_object[, sce_object$qc=="passed"],
-                              point_size=.05)+
-          coord_equal()+guides(colour=guide_legend(NULL, override.aes = list(size=2)))
-        ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP.pdf"),
-                        plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
-      }
-      
-      },
-    "SCTransform" = {
-      # normalization
-      sce_object <- do_vst_transform(sce_object[, sce_object$qc=="passed"])
-      sce_object <- swapAltExp(sce_object, "Gene_Expression_VST")
-      # UMAP computation
-      sce_object <- scater::runUMAP(sce_object, exprs_values="count_vst", BPPARAM=BPPARAM)
-      if (isTRUE("consensus_call" %in% colnames(colData(sce_object)))){
-        # color by consensus call individual
-        p <- scater::plotUMAP(sce_object,
-                              by_exprs_values="count_vst",
-                              point_size=.05, colour_by="consensus_call")+
-          coord_equal()+guides(colour=guide_legend(NULL, override.aes = list(size=2)))
-        ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP_Predicted_id.pdf"),
-                        plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
-        # color by consensus call global
-        p <- scater::plotUMAP(sce_object,
-                              by_exprs_values="count_vst",
-                              point_size=.05, colour_by="consensus_call_global")+
-          coord_equal()+guides(colour=guide_legend(NULL, override.aes = list(size=2)))
-        ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP_Predicted_global.pdf"),
-                        plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
-      } else {
-        p <- scater::plotUMAP(sce_object,
-                              by_exprs_values="count_vst",
-                              point_size=.05)+
-          coord_equal()+guides(colour=guide_legend(NULL, override.aes = list(size=2)))
-        ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP.pdf"),
-                        plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
-      }
-      },
-    "AnPearson" = {
-      # normalization
-      sce_object <- do_AnPearson_transform(sce_object[, sce_object$qc=="passed"])
-      sce_object <- swapAltExp(sce_object, "Gene_Expression_PearNorm")
-      # UMAP computation
-      sce_object <- scater::runUMAP(sce_object, exprs_values="count_AP", BPPARAM=BPPARAM)
-      if (isTRUE("consensus_call" %in% colnames(colData(sce_object)))){
-        # color by consensus call individual
-        p <- scater::plotUMAP(sce_object,
-                              by_exprs_values="count_AP",
-                              point_size=.05, colour_by="consensus_call")+
-          coord_equal()+guides(colour=guide_legend(NULL, override.aes = list(size=2)))
-        ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP_Predicted_id.pdf"),
-                        plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
-        # color by consensus call global
-        p <- scater::plotUMAP(sce_object,
-                              by_exprs_values="count_AP",
-                              point_size=.05, colour_by="consensus_call_global")+
-          coord_equal()+guides(colour=guide_legend(NULL, override.aes = list(size=2)))
-        ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP_Predicted_global.pdf"),
-                        plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
-      } else {
-        p <- scater::plotUMAP(sce_object,by_exprs_values="count_AP",point_size=.05) +
-          coord_equal() + 
-          guides(colour=guide_legend(NULL, override.aes = list(size=2)))
-        ggplot2::ggsave(filename = paste0("pdf/1-Loading/",project,"/UMAP.pdf"),
-                        plot = p, device =cairo_pdf, width = 297, height = 210, units = "mm")
-      }
-    }
-  )
-  
-  sce_object
+  x
 }
-
 
 
 
