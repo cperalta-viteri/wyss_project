@@ -263,8 +263,8 @@ transcriptomic_pipeline <- function(x,
   make_transcriptomic_qc_pdf(x[,x$qc %in% "pass"],pdf_dir,suffix="_02-after-mito")
   
   # fitting linear model on UMI vs detected only on previously QC passing cells
-  lm <- lm(log10(x$detected[x$qc %in% "pass"]) ~ log10(x$sum[x$qc %in% "pass"]))
-  x$qc[(x$qc %in% "pass") & (log10(x$detected) - predict(lm,data.frame(x$sum)) > -0.09)] <- "fails_lm"
+  lm <- lm(detected~sum,data=data.frame(detected=log10(x$detected[x$qc %in% "pass"]),sum=log10(x$sum[x$qc %in% "pass"])))
+  x$qc[(x$qc %in% "pass") & (log10(x$detected) - predict(lm,data.frame(sum=log10(x$sum))) < -0.09)] <- "fails_lm"
   print(table(x$qc))
   
   x <- x[,x$qc %in% "pass"]
@@ -276,7 +276,6 @@ transcriptomic_pipeline <- function(x,
   
   # Compute UMAP layout
   x <- scater::runUMAP(x, BPPARAM=BiocParallel::MulticoreParam(6L))
-  
 
   # display UMAP and color by numer of detected genes
   p <- scater::plotUMAP(x[, x$qc=="pass"],point_size=.05, colour_by="detected") + 
@@ -293,8 +292,8 @@ transcriptomic_pipeline <- function(x,
 
 
 # This is the parking with code to eventually integrate to the pipeline
+# PARKING
 function() {
-
   if (isTRUE(hto)) {x <- demultiplexer(x,project,...)}
   
 
