@@ -5,6 +5,24 @@ library(bs4Dash)
 library(rentrez)
 
 
+# Handle pressing return
+jscode <- '
+$(function() {
+  var $els = $("[data-proxy-click]");
+  $.each(
+    $els,
+    function(idx, el) {
+      var $el = $(el);
+      var $proxy = $("#" + $el.data("proxyClick"));
+      $el.keydown(function (e) {
+        if (e.keyCode == 13) {
+          $proxy.click();
+        }
+      });
+    }
+  );
+});
+'
 
 download_hit <- function(h) {
   outdir <- file.path("downloads",h$accession)
@@ -18,27 +36,35 @@ hit_box <- function(h) {
     width = 12,status = "success",collapsible = FALSE,
     title = h$title,
     fluidRow(tags$b("Abstract:"),h$summary),
-    footer = fluidRow(
-      column(width=4,align="center",h$pdat),
-      column(width=4,align="center",tags$b(h$n_samples,"samples")),
-      column(width=4,align="center",actionButton(inputId = btn_id, label = tagList(icon("download"),h$accession), status = "primary"))
-    )
+    footer = 
+      fluidRow(
+        column(width=4,align="center",h$pdat),
+        column(width=4,align="center",tags$b(h$n_samples,"samples")),
+        column(width=4,align="center",actionButton(inputId = btn_id, label = tagList(icon("download"),h$accession), status = "primary")),
+        column(width=12,align="center",tags$a("See record on NCBI",href=sprintf("https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=%s",h$accession),target="_blank"))
+      )
   )
 }
 
 
 ui <- dashboardPage(
-    dashboardHeader(title = "GEO download"),
+    dashboardHeader(
+      title = "GEO download",
+      tags$head(tags$script(HTML(jscode)))
+    ),
     dashboardSidebar(disable = TRUE),
     dashboardBody(
       fluidRow(
         box(width = 12,
           title = "Query",
           pickerInput("query_org",label="Organism",choices=c("Mus musculus", "Homo sapiens"),multiple = FALSE),
-          textInput(
-            inputId = "query_text",
-            label = "Query Text",
-            value = ""
+          tagAppendAttributes(
+            textInput(
+              inputId = "query_text",
+              label = "Query Text",
+              value = ""
+            ),
+            `data-proxy-click` = "submit_query"
           ),
           infoBoxOutput("queryIB",width = 12),
           actionButton(inputId = "submit_query", label = "Submit", status = "primary")

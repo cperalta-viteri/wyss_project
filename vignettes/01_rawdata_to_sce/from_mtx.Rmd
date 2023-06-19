@@ -1,0 +1,91 @@
+---
+title: "Load counts from a MTX"
+output:
+  html_document:
+    df_print: paged
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,eval=FALSE)
+```
+
+
+# Introduction
+
+This vignette shows how to create a SummarizedExperiment object from a MTX file. 
+
+The important steps are: 
+
+1. load the counts stored into the MTX
+
+2. set rownames and colnames of the matrix 
+
+3. make a SummarizedExperiment object and store the count-matrix into an assay named "counts". 
+   This is a standard assay name, and many package rely on this default name so it simplify further processing.
+
+4. eventually parse cell names to extract metadata
+
+5. pre-computing of QC metrics and sizeFactors
+
+6. store object into desired format 
+
+
+# Example with GSE144136
+
+```{r,message=FALSE}
+library(SingleCellExperiment)
+```
+
+
+## step 1-3: load MTX and generate SummarizedExperiment
+```{r,message=FALSE}
+nagy_mdd_2020 <- function(dir) {
+  # Make the SingleCellExperiment object from the count matrix stored in MTX, and add dimnames
+  m <- Matrix::readMM(file.path(dir,"GSE144136_GeneBarcodeMatrix_Annotated.mtx.gz"))
+  colnames(m) <- read.csv(file.path(dir,"GSE144136_CellNames.csv.gz"),check.names = FALSE,quote="",comment="")$x
+  rownames(m) <- read.csv(file.path(dir,"GSE144136_GeneNames.csv.gz"),check.names = FALSE,quote="",comment="")$x
+  
+  # 
+  # This standard naming will 
+  m <- SingleCellExperiment(
+    list(counts = m)
+  )
+  m
+}
+x <- nagy_mdd_2020("apps/geo_download/downloads/GSE144136_bak")
+```
+
+
+## step 4: parse metadata from cell names
+```{r}
+x <- local({
+  # (optional) parse metadata from cell names
+  pat <- "^([^\\.]*)\\.(([^_]+)_([^_]+)_([^_]+)_(.*))$"
+  x$cell_type <- sub(pat,"\\1",colnames(x))
+  x$patient_id <- sub(pat,"\\3",colnames(x))
+  x$disease_state <- sub(pat,"\\4",colnames(x))
+  x$batch <- sub(pat,"\\5",colnames(x))
+  x$barcode_seq <- sub(pat,"\\6",colnames(x))
+  x$sex <- "Male"
+  x$ethnicity <- "Caucasian"
+  x
+})
+```
+
+## step 5: pre-compute QC metrics and sizeFactors
+```{r}
+counts(x) <- as(counts(x), "CsparseMatrix") # Change sparse format to improve speed in the next steps
+x <- scater::addPerCellQC(x)
+x <- scuttle::computeLibraryFactors(x)
+```
+
+
+## step 6: Save object
+```{r}
+HDF5Array::saveHDF5SummarizedExperiment(x,"datasets/GSE144136.h5se")
+ABAData::writeSingleCellExperiment(x, "datasets/GSE144136.h5txt")
+```
+
+
+

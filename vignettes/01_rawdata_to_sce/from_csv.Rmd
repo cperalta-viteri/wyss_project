@@ -19,10 +19,12 @@ https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE213828
 ```{r}
 count_m <- read.delim("apps/geo_download/downloads/GSE213828/GSE213828_merged_counts.txt.gz")
 metaD <- read.delim("apps/geo_download/downloads/GSE213828/GSE213828_merged_sample_info.txt.gz",row.names = "qp_well_fq")
-
-o <- SingleCellExperiment(list(counts=data.matrix(count_m[,-1:-2])),
-                     rowData=count_m[,1:2],
-                     colData=metaD,mainExpName = "Gene Expression")
+o <- SingleCellExperiment(
+  list(counts = data.matrix(count_m[,-1:-2])),
+  rowData = count_m[,1:2],
+  colData = metaD,
+  mainExpName = "Gene Expression"
+)
 rownames(o) <- make.unique(mcols(o)$gene_name)
 ```
 

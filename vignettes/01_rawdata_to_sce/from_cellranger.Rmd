@@ -16,22 +16,23 @@ library(BiocSingular)
 
 ```{r,message=FALSE}
 # Load 10x dataset
-o <- DropletUtils::read10xCounts("../../apps/geo_download/downloads/GSE224407/GSM7021828_E19_raw_feature_bc_matrix.h5")
-
-rownames(o) <- make.unique(mcols(o)$Symbol)
+x <- DropletUtils::read10xCounts("apps/geo_download/downloads/GSE224407/GSE224407_RAW/GSM7021828_E19_raw_feature_bc_matrix.h5")
+rownames(x) <- make.unique(mcols(x)$Symbol)
 ```
 
 
 
 ```{r}
-o
+BPPARAM <- BiocParallel::MulticoreParam(6L,progressbar = TRUE)
+x <- scater::addPerCellQC(x,BPPARAM=BPPARAM)
+x <- scuttle::computeLibraryFactors(x,BPPARAM=BPPARAM)
 ```
 
 
 
 # Save object
 ```{r eval=FALSE}
-ABAData::writeSingleCellExperiment(o, "qc_filtered_exp")
+ABAData::writeSingleCellExperiment(o, "datasets/GSE224407_GSM7021828")
 ```
 
 

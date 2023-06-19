@@ -22,18 +22,6 @@ R CMD INSTALL Rpackages/ABAData
 ```
 
 
-# TODO
-
-- Add ISH data to ABAData
-- Create `data/` with ABA datasets - ##done but not pushe, data too large creates issues##
-- `standardize_metadata` shiny app
-- implement scml::train_DNN()
-- Apply train_DNN() classifier on Allen dataset and save the model into data/
-- Example notebook to create a SingleCellExperiment from 10x, CSV, or H5AD - **check**
-- QC function **check**
-- Example notebook to 1) download a GSE; 2) create a SingleCellExperiment; 3) apply QC; 
-  4) predict cell type; 5) train a new classifier with train_DNN(); 6) save the model
-- Build `.tar.gz` files of the packages
 
 
 
