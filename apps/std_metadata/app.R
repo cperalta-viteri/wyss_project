@@ -63,7 +63,7 @@ fieldInput <- function(f) {
         lapply(seq_along(f$rules),\(i) caseWhenItemInput(sprintf("%s_%d",f$field_name,i),targetval_choices = f$targetval_suggestions)),
     ),
     sortable_js(css_id=sprintf("%s_rules_container",f$field_name),options = sortable_options(handle=".case_when_item_bar")),
-    actionBttn(sprintf("%s_add",f$field_name),icon=icon("add"),size="xs")
+    actionButton(sprintf("%s_add",f$field_name),NULL,icon=icon("add"))
   )
 }
 
@@ -134,41 +134,18 @@ server <- function(input, output, session) {
       paste0("    mutate(",sapply(std_fields,"[[","field_name")," = case_when(\n","    ))",collapse=" |>\n")
     )
   })
+
+  reactive({updatePickerInput(session,"donor_sex_1_incol",choices = colnames(input_df()))})
   
-  # This reactive variable store the current working field (cwf)
-  cwf <- reactiveVal()
-  
-  # Copy selected field into cwf
-  observeEvent(input$current_working_field_name,{
-    cwf(std_fields[[input$current_working_field_name]])
-  })
   
   # Add a rule at the end of the list
-  observeEvent(input$rule_add,{
-    x <- isolate(cwf())
-    x$rules[[length(x$rules) + 1L]] <- case_when_item()
-    print("add")
-    cwf(x)
-  })
-  
-  output$cwf_rules <- renderUI({
-    rules <- lapply(seq_along(cwf()$rules),function(i) {
-      rule_id <- paste0("rule_",i)
-      
-      # When "_incol" change => update _inval
-      observeEvent(input[[paste0(rule_id,"_incol")]],{
-        choices <- unique(as.character(input_df()[[input[[paste0(rule_id,"_incol")]]]]))
-        updatePickerInput(session,paste0(rule_id,"_inval"),choices = choices)
-      })
-      
-      caseWhenItemInput(
-        rule_id,
-        incol_choices = colnames(input_df()),
-        targetval_choices = cwf()$targetval_suggestions
-      )
-    })
-    rules
-  })
+  # for(f in std_fields) {
+  #   add_btn_id <- sprintf("%s_add",f$field_name)
+  #   print(add_btn_id)
+  #   observeEvent(input[[add_btn_id]],{
+  #     print("salut")
+  #   })
+  # }
   
 }
 
