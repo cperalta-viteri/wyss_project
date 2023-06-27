@@ -107,6 +107,7 @@ lr_lambda_geometric <- function(epochs,lr_start=1e-3,lr_end=1e-6) {
 #' @param weight_decay value passed to the optim_adam optimizer.
 #' @param input_dropout_rate Dropout rate to apply on input values when training
 #' @param y_type type of target factor: either nominal or ordinal (default: nominal)
+#' @param C the cost matrix to use in ordinal regression
 #' @param ... additional parameters are passed to fit() call
 #' @importFrom stats stepfun
 #' @importFrom luz fit set_opt_hparams set_hparams setup luz_metric_accuracy luz_callback_lr_scheduler luz_callback_auto_resume
@@ -115,18 +116,22 @@ train_delayed_classifier <- function(
     x, y, pre_pruning_epoch = 25L, post_pruning_epoch = 25L,
     batch_size = 256L, prune_size = pmin(50L, ncol(x)),
     lr_start = 1e-3, lr_end = 1e-5, auto_resume_path = NA,
-    weight_decay = 0, input_dropout_rate = 0.5, y_type=c("nominal","ordinal"),...)
+    weight_decay = 0, input_dropout_rate = 0.5, y_type=c("nominal","ordinal"),C=NULL,...)
 {
   y <- as.factor(y)
   y_type <- match.arg(y_type)
 
   switch(y_type,
     nominal = {
+      if (!is.null(C)) stop("Cost matrix not implemented yet for nominal target.")
       loss <- nn_multi_margin_loss(margin = 1)
       class_names <- levels(y)
     },
     ordinal = {
-      loss <- nn_ordinal_regression_loss(C = 1 - torch_eye(nlevels(y)))
+      if (is.null(C)) {
+        C <- 1 - torch_eye(nlevels(y))
+      }
+      loss <- nn_ordinal_regression_loss(C = C)
       class_names <- "ordinal_score"
     }
   )
