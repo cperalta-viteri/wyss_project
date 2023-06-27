@@ -17,6 +17,7 @@ train_delayed_classifier(
   weight_decay = 0,
   input_dropout_rate = 0.5,
   y_type = c("nominal", "ordinal"),
+  C = NULL,
   ...
 )
 }
@@ -45,6 +46,8 @@ so training can be resumed when stopped. Set to NA to disable.}
 \item{input_dropout_rate}{Dropout rate to apply on input values when training}
 
 \item{y_type}{type of target factor: either nominal or ordinal (default: nominal)}
+
+\item{C}{the cost matrix to use in ordinal regression}
 
 \item{...}{additional parameters are passed to fit() call}
 }
