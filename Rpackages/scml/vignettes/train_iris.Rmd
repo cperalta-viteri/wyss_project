@@ -1,5 +1,5 @@
 ---
-title: "scml"
+title: "scml_iris"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{scml_iris}

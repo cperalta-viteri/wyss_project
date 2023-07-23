@@ -1,5 +1,5 @@
 ---
-title: "scml"
+title: "scml_iris"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{scml_iris}
@@ -27,10 +27,10 @@ library(luz)
 fm <- train_delayed_classifier(
   data.matrix(iris[1:4]),
   iris$Species,
+  pre_pruning_epoch = 50L,post_pruning_epoch = 50L,
   batch_size = 150L,
   valid_data = 0.1,
-  epoch = 200L,
-  prune_at_epoch = NA,
+  input_dropout_rate = 0.1,
   accelerator = accelerator(cpu=TRUE)
 )
 ```
@@ -40,7 +40,7 @@ learning curves
 plot(fm)
 ```
 
-# performance on training set
+performance on training set
 ```{r eval=FALSE, warning=FALSE}
 pred <- predict_delayed(data.matrix(iris[1:4]),fm)
 table(iris$Species,max.col(pred))
@@ -48,6 +48,23 @@ table(iris$Species,max.col(pred))
 
 
 
+# Train an ordinal regressor on iris dataset
+```{r,message=FALSE}
+fm <- train_delayed_classifier(
+  data.matrix(iris[1:4]),
+  iris$Species,
+  y_type = "ordinal",
+  batch_size = 150L,
+  valid_data = 0.1,
+  input_dropout_rate = 0.1,
+  accelerator = accelerator(cpu=TRUE)
+)
+```
+show predictions
+```{r}
+pred <- predict_delayed(data.matrix(iris[1:4]),fm)
+plot(pred~iris$Species)
+```
 
 
 

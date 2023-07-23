@@ -2,16 +2,16 @@
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  eval = FALSE
+  eval = TRUE
 )
 
 ## ----message=FALSE------------------------------------------------------------
-#  library(scml)
-#  library(torch)
-#  library(luz)
-#  library(ABAData)
-#  library(SingleCellExperiment)
-#  DelayedArray::setAutoBPPARAM(BiocParallel::MulticoreParam(workers = 6L,progressbar = TRUE))
+library(scml)
+library(torch)
+library(luz)
+library(ABAData)
+library(SingleCellExperiment)
+DelayedArray::setAutoBPPARAM(BiocParallel::MulticoreParam(workers = 6L,progressbar = TRUE))
 
 ## ----eval=FALSE---------------------------------------------------------------
 #  make_celltype_ds <- function() {
@@ -42,14 +42,14 @@ knitr::opts_chunk$set(
 #  
 #    # Save allen dataset into an H5 format optimized for learning
 #    HDF5Array::saveHDF5SummarizedExperiment(
-#      allen,"~/Downloads/allen",chunkdim = c(nrow(allen),1L),level = 1L,replace = TRUE
+#      allen,"~/Downloads/ABAMouseLearning",chunkdim = c(nrow(allen),1L),replace = TRUE
 #    )
 #  }
 #  make_celltype_ds()
 
-## -----------------------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  # Load dataset
-#  allen <- HDF5Array::loadHDF5SummarizedExperiment("~/Downloads/allen")
+#  allen <- HDF5Array::loadHDF5SummarizedExperiment("~/Downloads/ABAMouseLearning")
 #  allen <- allen[,!is.na(allen$subclass_label)]
 #  
 #  # Compute target labels to predict
@@ -72,15 +72,23 @@ knitr::opts_chunk$set(
 #  print(table(trn_ds$y_true,trn_ds$source))
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  model <- train_delayed_classifier(x=t(logcounts(trn_ds)), y=trn_ds$y_true,accelerator=accelerator(cpu=TRUE),valid_data=0.1,epoch=50)
+#  model <- train_delayed_classifier(
+#    x = t(logcounts(trn_ds)),
+#    y = trn_ds$y_true,
+#    accelerator = accelerator(cpu=TRUE),
+#    valid_data = 0.1,
+#    weight_decay = 1e-4
+#  )
 #  luz_save(model,"~/Downloads/aba_mouse_subclass_classifier.luz")
 
 ## -----------------------------------------------------------------------------
-#  model <- luz_load("~/Downloads/aba_mouse_subclass_classifier.luz")
-#  plot(model)
+model <- luz_load("~/Downloads/aba_mouse_subclass_classifier.luz")
+plot(model)
 
 ## ----eval=FALSE---------------------------------------------------------------
 #  pred <- predict_delayed(t(logcounts(trn_ds)),model,accelerator = accelerator(cpu = TRUE))
 #  mean(trn_ds$y_true==colnames(pred)[max.col(pred)])
+
+## ----eval=FALSE---------------------------------------------------------------
 #  table(trn_ds$y_true,colnames(pred)[max.col(pred)])
 
