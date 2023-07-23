@@ -153,12 +153,23 @@ train_delayed_classifier <- function(
         list(
           luz_callback_lr_scheduler(lr_lambda, verbose = TRUE, lr_lambda_geometric(c(pre_pruning_epoch,post_pruning_epoch),lr_start,lr_end))
         ),
-        if (post_pruning_epoch<=0L) NULL else luz_callback_prune("layer1.linear.weight", n = prune_size, at_epoch = pre_pruning_epoch),
+        if (post_pruning_epoch<=0L) NULL else luz_callback_prune("input_linear_rescaling.linear.weight", n = prune_size, at_epoch = pre_pruning_epoch),
         if (is.na(auto_resume_path)) NULL else luz_callback_auto_resume(path = auto_resume_path)
       )
     )
   fm
 }
+
+
+
+# h5write_learning_optimized_classifier_dataset <- function(x,y,h5_file) {
+#   y <- as.factor(y)
+#   h5write(levels(y),h5_file,"/y_levels")
+#   h5write(as.integer(y),h5_file,"/y")
+#   writeHDF5Array(x,h5_file,"/x",chunkdim = c(1,ncol(x)),with.dimnames = TRUE)
+# }
+
+
 
 
 

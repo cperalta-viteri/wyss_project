@@ -1,13 +1,17 @@
 Package: scml
 Type: Package
 Title: Mining Single Cell with torch
-Version: 1.0.0
-Author: Julien Prados
-Maintainer: Julien Prados <julien.prados@unige.ch>
+Version: 1.1.0
+Authors@R: c(
+  person("Julien","Prados",email = "julien.prados@unige.ch",role=c("aut","cre")),
+  person("Christian","Peralta",email = "christian.peralta@unige.ch",role="aut"),
+  person("Ludovic","Telley",email = "ludovic.telley@unil.ch",role="fnd"),
+  person("Gael","Barthet",email = "gael.barthet@wysscenter.ch",role="fnd"),
+  person("Andrea","Volterra",email = "andrea.volterra@wysscenter.ch",role="fnd"))
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 Imports: torch, luz, DelayedArray, LowRankQP, stats
-License: Artistic-2.0
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
@@ -15,7 +19,6 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
-    qpdf,
     R6,
     rlang
 Config/testthat/edition: 3

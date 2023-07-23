@@ -4,7 +4,13 @@
 \alias{nn_cell_scorer}
 \title{nn_cell_scorer}
 \usage{
-nn_cell_scorer(feature_names, class_names, input_dropout_rate = 0.5, ...)
+nn_cell_scorer(
+  feature_names,
+  class_names,
+  input_dropout_rate = 0.5,
+  n = c(4096L, 1024L, 512L, 256L),
+  dropout_rates = c(0.25, 0.25, 0.1, 0.1)
+)
 }
 \arguments{
 \item{feature_names}{Names of the features.}
@@ -13,7 +19,9 @@ nn_cell_scorer(feature_names, class_names, input_dropout_rate = 0.5, ...)
 
 \item{input_dropout_rate}{Dropout rate to apply on input values when training}
 
-\item{...}{additional argument are forwarded to `nn_linear_rescale()`.}
+\item{n}{A numeric integer vector of length>0 specifying the number of feature in each internal layer.}
+
+\item{dropout_rates}{A numeric vector of length>0 of dropouts to apply before each internal layer.}
 }
 \description{
 Cell type classifier NN-based.

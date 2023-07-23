@@ -24,25 +24,43 @@ nn_linear_rescale <- nn_module(
 #' @param feature_names Names of the features.
 #' @param class_names Class of the cells.
 #' @param input_dropout_rate Dropout rate to apply on input values when training
-#' @param ... additional argument are forwarded to `nn_linear_rescale()`.
+#' @param n A numeric integer vector of length>0 specifying the number of feature in each internal layer.
+#' @param dropout_rates A numeric vector of length>0 of dropouts to apply before each internal layer.
 #' @import torch
 #' @export
 nn_cell_scorer <- torch::nn_module(
-  initialize = function(feature_names,class_names,input_dropout_rate=0.5,...) {
-    self$feature_names <- feature_names
-    self$class_names <- class_names
-    self$input_dropout <- nn_dropout(input_dropout_rate)
-    self$layer1 <- nn_linear_rescale(in_features = length(self$feature_names),out_features = 4096L,...)
-    self$layers <- nn_sequential(
-      nn_tanh(),
-      nn_dropout(0.25), nn_linear(in_features = 4096L, out_features = 1024L), nn_relu(),
-      nn_dropout(0.25), nn_linear(in_features = 1024L, out_features = 512L), nn_relu(),
-      nn_dropout(0.1), nn_linear(in_features = 512L, out_features = 256L), nn_relu(),
-      nn_dropout(0.1), nn_linear(in_features = 256L, out_features = length(self$class_names))
-    )
-  },
-  forward = function(x) {x |> self$input_dropout() |> self$layer1() |> self$layers()},
+  inherit = nn_sequential,
+  initialize = function(feature_names,class_names,input_dropout_rate=0.5,n=c(4096L,1024L,512L,256L),dropout_rates=c(0.25,0.25,0.1,0.1)) {
+    super$initialize()
+
+    # Process parameters
+    self$feature_names <- as.character(feature_names)
+    self$class_names <- as.character(class_names)
+    n <- as.integer(n)
+    stopifnot("n must be a non-empty integer vector"=length(n)>0L)
+    stopifnot("dropout_rates must be a non-empty numeric vector"=length(dropout_rates)>0L)
+    dropout_rates <- as.numeric(dropout_rates)
+    dropout_rates <- rep_len(dropout_rates,length(n)) # Recycle to length(n)
+
+    # First layer
+    self$add_module("input_dropout",nn_dropout(input_dropout_rate))
+    self$add_module("input_linear_rescaling",nn_linear_rescale(in_features = length(self$feature_names),out_features = n[1L]))
+    self$add_module("input_tanh_indicators",nn_tanh())
+
+    # Internal layers
+    for(i in seq_along(n)[-1L]) {
+      self$add_module(paste0(i,":dropout"),nn_dropout(dropout_rates[i-1L]))
+      self$add_module(paste0(i,":linear"),nn_linear(in_features = n[i-1L], out_features = n[i]))
+      self$add_module(paste0(i,":relu"),nn_relu())
+    }
+
+    # Last layer
+    self$add_module("final_dropout",nn_dropout(dropout_rates[length(dropout_rates)]))
+    self$add_module("final_linear",nn_linear(in_features = n[length(n)], out_features = length(self$class_names)))
+  }
 )
+
+
 
 
 
