@@ -30,7 +30,7 @@ nn_linear_rescale <- nn_module(
 #' @export
 nn_cell_scorer <- torch::nn_module(
   inherit = nn_sequential,
-  initialize = function(feature_names,class_names,input_dropout_rate=0.5,n=c(4096L,1024L,512L,256L),dropout_rates=c(0.25,0.25,0.1,0.1)) {
+  initialize = function(feature_names,class_names,input_dropout_rate=0.5,n=256L,dropout_rates=0.25) {
     super$initialize()
 
     # Process parameters

@@ -106,6 +106,8 @@ lr_lambda_geometric <- function(epochs,lr_start=1e-3,lr_end=1e-6) {
 #'                         so training can be resumed when stopped. Set to NA to disable.
 #' @param weight_decay value passed to the optim_adam optimizer.
 #' @param input_dropout_rate Dropout rate to apply on input values when training
+#' @param n A numeric integer vector of length>0 specifying the number of feature in each internal layer.
+#' @param dropout_rates A numeric vector of length>0 of dropouts to apply before each internal layer.
 #' @param y_type type of target factor: either nominal or ordinal (default: nominal)
 #' @param C the cost matrix to use in ordinal regression
 #' @param ... additional parameters are passed to fit() call
@@ -116,6 +118,7 @@ train_delayed_classifier <- function(
     x, y, pre_pruning_epoch = 25L, post_pruning_epoch = 25L,
     batch_size = 256L, prune_size = pmin(50L, ncol(x)),
     lr_start = 1e-3, lr_end = 1e-5, auto_resume_path = NA,
+    n = c(4096L,256L), dropout_rates = 0.25,
     weight_decay = 0, input_dropout_rate = 0.5, y_type=c("nominal","ordinal"),C=NULL,...)
 {
   y <- as.factor(y)
@@ -142,7 +145,7 @@ train_delayed_classifier <- function(
       metrics = list(luz_metric_accuracy()),
       loss = loss
     ) |>
-    set_hparams(feature_names = colnames(x), class_names = class_names,input_dropout_rate = input_dropout_rate) |>
+    set_hparams(feature_names = colnames(x), class_names = class_names,input_dropout_rate = input_dropout_rate, n = n, dropout_rates = dropout_rates) |>
     set_opt_hparams(weight_decay = weight_decay, lr = 1) |>
     fit(
       epoch = pre_pruning_epoch + post_pruning_epoch,
@@ -159,16 +162,6 @@ train_delayed_classifier <- function(
     )
   fm
 }
-
-
-
-# h5write_learning_optimized_classifier_dataset <- function(x,y,h5_file) {
-#   y <- as.factor(y)
-#   h5write(levels(y),h5_file,"/y_levels")
-#   h5write(as.integer(y),h5_file,"/y")
-#   writeHDF5Array(x,h5_file,"/x",chunkdim = c(1,ncol(x)),with.dimnames = TRUE)
-# }
-
 
 
 

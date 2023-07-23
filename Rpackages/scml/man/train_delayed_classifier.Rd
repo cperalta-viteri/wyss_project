@@ -14,6 +14,8 @@ train_delayed_classifier(
   lr_start = 0.001,
   lr_end = 1e-05,
   auto_resume_path = NA,
+  n = c(4096L, 256L),
+  dropout_rates = 0.25,
   weight_decay = 0,
   input_dropout_rate = 0.5,
   y_type = c("nominal", "ordinal"),
@@ -40,6 +42,10 @@ train_delayed_classifier(
 
 \item{auto_resume_path}{a character to specify a file to store weights at each epoch,
 so training can be resumed when stopped. Set to NA to disable.}
+
+\item{n}{A numeric integer vector of length>0 specifying the number of feature in each internal layer.}
+
+\item{dropout_rates}{A numeric vector of length>0 of dropouts to apply before each internal layer.}
 
 \item{weight_decay}{value passed to the optim_adam optimizer.}
 
