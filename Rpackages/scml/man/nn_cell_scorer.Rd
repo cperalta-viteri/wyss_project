@@ -9,7 +9,8 @@ nn_cell_scorer(
   class_names,
   input_dropout_rate = 0.5,
   n = 256L,
-  dropout_rates = 0.25
+  dropout_rates = 0.25,
+  ...
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ nn_cell_scorer(
 \item{n}{A numeric integer vector of length>0 specifying the number of feature in each internal layer.}
 
 \item{dropout_rates}{A numeric vector of length>0 of dropouts to apply before each internal layer.}
+
+\item{...}{additional parameters are passed to nn_linear_rescale() when creating first layer.}
 }
 \description{
 Cell type classifier NN-based.

@@ -4,12 +4,16 @@
 \alias{nn_linear_rescale}
 \title{nn_linear_rescale}
 \usage{
-nn_linear_rescale(in_features, out_features)
+nn_linear_rescale(in_features, out_features, clamp_min = 0.01, clamp_max = 100)
 }
 \arguments{
 \item{in_features}{Input number of features.}
 
 \item{out_features}{Output number of features.}
+
+\item{clamp_min}{Numeric value specifying the minimal scaling factor (should be above 0 to avoid division by 0)}
+
+\item{clamp_max}{Numeric value specifying the maximal scaling factor}
 }
 \description{
 A linear layer returning a re-scaled output.

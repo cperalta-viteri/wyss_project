@@ -1,19 +1,24 @@
-# source("R/delayed.R")
 
 #' @title nn_linear_rescale
 #' @description  A linear layer returning a re-scaled output.
 #' @param in_features Input number of features.
 #' @param out_features Output number of features.
+#' @param clamp_min Numeric positive value specifying the minimal scaling factor (should be above 0 to avoid division by 0)
+#' @param clamp_max Numeric positive value specifying the maximal scaling factor
 #' @import torch
 #' @export
 nn_linear_rescale <- nn_module(
-  initialize = function(in_features,out_features) {
+  initialize = function(in_features,out_features,clamp_min=1e-4,clamp_max=1e4) {
     self$linear <- nn_linear(in_features = in_features, out_features = out_features,bias = FALSE)
+    self$clamp_min <- as.numeric(clamp_min)
+    self$clamp_max <- as.numeric(clamp_max)
   },
   forward = function(x) {
+    x <- nnf_normalize(x,p=1,-1L,eps=1e-3)
+
     # compute normalization factors for each node of layer1 and each instance
     sf <- torch_matmul(x$abs(),self$linear$weight$abs()$transpose(-2L,-1L))
-    sf <- sf$clamp_(0.01,100) # maximal and minimal rescaling factor
+    sf <- sf$clamp_(self$clamp_min,self$clamp_max) # maximal and minimal rescaling factor
     self$linear(x)/sf
   }
 )
@@ -26,11 +31,12 @@ nn_linear_rescale <- nn_module(
 #' @param input_dropout_rate Dropout rate to apply on input values when training
 #' @param n A numeric integer vector of length>0 specifying the number of feature in each internal layer.
 #' @param dropout_rates A numeric vector of length>0 of dropouts to apply before each internal layer.
+#' @param ... additional parameters are passed to nn_linear_rescale() when creating first layer.
 #' @import torch
 #' @export
 nn_cell_scorer <- torch::nn_module(
   inherit = nn_sequential,
-  initialize = function(feature_names,class_names,input_dropout_rate=0.5,n=256L,dropout_rates=0.25) {
+  initialize = function(feature_names,class_names,input_dropout_rate=0.5,n=256L,dropout_rates=0.25,...) {
     super$initialize()
 
     # Process parameters
@@ -44,7 +50,7 @@ nn_cell_scorer <- torch::nn_module(
 
     # First layer
     self$add_module("input_dropout",nn_dropout(input_dropout_rate))
-    self$add_module("input_linear_rescaling",nn_linear_rescale(in_features = length(self$feature_names),out_features = n[1L]))
+    self$add_module("input_linear_rescaling",nn_linear_rescale(in_features = length(self$feature_names),out_features = n[1L],...))
     self$add_module("input_tanh_indicators",nn_tanh())
 
     # Internal layers
@@ -59,8 +65,6 @@ nn_cell_scorer <- torch::nn_module(
     self$add_module("final_linear",nn_linear(in_features = n[length(n)], out_features = length(self$class_names)))
   }
 )
-
-
 
 
 
