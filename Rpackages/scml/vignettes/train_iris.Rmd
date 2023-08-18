@@ -27,7 +27,7 @@ library(luz)
 fm <- train_delayed_classifier(
   data.matrix(iris[1:4]),
   iris$Species,
-  pre_pruning_epoch = 50L,post_pruning_epoch = 50L,
+  pre_pruning_epoch = 100L,post_pruning_epoch = 100L,
   batch_size = 150L,
   valid_data = 0.1,
   input_dropout_rate = 0.1,

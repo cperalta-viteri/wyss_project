@@ -29,3 +29,6 @@ nn_cell_scorer(
 \description{
 Cell type classifier NN-based.
 }
+\examples{
+nn_cell_scorer(1:4,1:3)(torch_rand(32,4))
+}

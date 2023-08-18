@@ -1,31 +1,35 @@
 
-#' @title nn_linear_rescale
-#' @description  A linear layer returning a re-scaled output.
+
+
+
+
+#' @description A nn_cosine_similarity layer.
+#' @title title nn_cosine_similarity
 #' @param in_features Input number of features.
 #' @param out_features Output number of features.
-#' @param clamp_min Numeric positive value specifying the minimal scaling factor (should be above 0 to avoid division by 0)
-#' @param clamp_max Numeric positive value specifying the maximal scaling factor
+#' @param eps a positive scalar value to avoid divisions by 0
 #' @import torch
 #' @export
-nn_linear_rescale <- nn_module(
-  initialize = function(in_features,out_features,clamp_min=1e-4,clamp_max=1e4) {
-    self$linear <- nn_linear(in_features = in_features, out_features = out_features,bias = FALSE)
-    self$clamp_min <- as.numeric(clamp_min)
-    self$clamp_max <- as.numeric(clamp_max)
+#' @examples
+#' p <- nn_cosine(10,5)(torch_rand(32,10))
+#' l <- nnf_soft_margin_loss(p,torch_randint(1,5,c(32,1)))
+#' l$backward()
+nn_cosine_similarity <- nn_module(
+  inherit = nn_linear,
+  initialize = function(in_features,out_features,eps=1e-8) {
+    super$initialize(in_features = in_features, out_features = out_features,bias = FALSE)
+    self$eps <- eps
   },
   forward = function(x) {
-    x <- nnf_normalize(x,p=1,-1L,eps=1e-3)
-
-    # compute normalization factors for each node of layer1 and each instance
-    sf <- torch_matmul(x$abs(),self$linear$weight$abs()$transpose(-2L,-1L))
-    sf <- sf$clamp_(self$clamp_min,self$clamp_max) # maximal and minimal rescaling factor
-    self$linear(x)/sf
+    x_norm <- x$norm(dim=-1L,p = 2,keepdim = TRUE)$clamp_min(self$eps)
+    w_norm <- self$weight$norm(dim=-1L,p=2,keepdim = TRUE)$clamp_min(self$eps)
+    nnf_linear(x/x_norm,self$weight/w_norm)
   }
 )
 
 
-#' @title nn_cell_scorer
 #' @description Cell type classifier NN-based.
+#' @title nn_cell_scorer
 #' @param feature_names Names of the features.
 #' @param class_names Class of the cells.
 #' @param input_dropout_rate Dropout rate to apply on input values when training
@@ -34,6 +38,8 @@ nn_linear_rescale <- nn_module(
 #' @param ... additional parameters are passed to nn_linear_rescale() when creating first layer.
 #' @import torch
 #' @export
+#' @examples
+#' nn_cell_scorer(1:4,1:3)(torch_rand(32,4))
 nn_cell_scorer <- torch::nn_module(
   inherit = nn_sequential,
   initialize = function(feature_names,class_names,input_dropout_rate=0.5,n=256L,dropout_rates=0.25,...) {
@@ -50,8 +56,7 @@ nn_cell_scorer <- torch::nn_module(
 
     # First layer
     self$add_module("input_dropout",nn_dropout(input_dropout_rate))
-    self$add_module("input_linear_rescaling",nn_linear_rescale(in_features = length(self$feature_names),out_features = n[1L],...))
-    self$add_module("input_tanh_indicators",nn_tanh())
+    self$add_module("cosine",nn_cosine_similarity(in_features = length(self$feature_names),out_features = n[1L],...))
 
     # Internal layers
     for(i in seq_along(n)[-1L]) {

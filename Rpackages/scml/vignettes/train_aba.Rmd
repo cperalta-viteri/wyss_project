@@ -77,7 +77,7 @@ allen <- HDF5Array::loadHDF5SummarizedExperiment("../../data/ABAMouseLearning")
 allen <- allen[,!is.na(allen$subclass_label)]
 
 # Compute target labels to predict
-allen$y_true <- paste(allen$class_label,allen$neighborhood_label,allen$subclass_label,sep=" --- ") |>
+allen$y_true <- paste(allen$class_label,allen$neighborhood_label,allen$subclass_label,allen$cluster_label,sep=" --- ") |>
   factor()
 stopifnot(all(!is.na(allen$y_true)))
 
@@ -102,12 +102,13 @@ Train the classifier on the selected training cells
 model <- train_delayed_classifier(
   x = t(logcounts(trn_ds)),
   y = trn_ds$y_true,
+  pre_pruning_epoch = 5,post_pruning_epoch = 5,
   accelerator = accelerator(cpu=TRUE),
   valid_data = 0.1,
   weight_decay = 1e-4,
-  auto_resume_path = "~/Downloads/aba_mouse_subclass_classifier.tmp"
+  auto_resume_path = "~/Downloads/aba_mouse_cluster_classifier.tmp"
 )
-luz_save(model,"~/Downloads/aba_mouse_subclass_classifier.luz")
+luz_save(model,"~/Downloads/aba_mouse_cluster_classifier.luz")
 ```
 
 

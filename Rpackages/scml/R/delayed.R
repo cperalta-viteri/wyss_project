@@ -156,7 +156,7 @@ train_delayed_classifier <- function(
         list(
           luz_callback_lr_scheduler(lr_lambda, verbose = TRUE, lr_lambda_geometric(c(pre_pruning_epoch,post_pruning_epoch),lr_start,lr_end))
         ),
-        if (post_pruning_epoch<=0L) NULL else luz_callback_prune("input_linear_rescaling.linear.weight", n = prune_size, at_epoch = pre_pruning_epoch),
+        if (post_pruning_epoch<=0L) NULL else luz_callback_prune("cosine.weight", n = prune_size, at_epoch = pre_pruning_epoch),
         if (is.na(auto_resume_path)) NULL else luz_callback_auto_resume(path = auto_resume_path)
       )
     )
