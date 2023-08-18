@@ -106,10 +106,10 @@ Train the classifier on the selected training cells
 model <- train_delayed_classifier(
   x = t(logcounts(trn_ds)),
   y = trn_ds$y_true,
-  pre_pruning_epoch = 5,post_pruning_epoch = 5,
+  pre_pruning_epoch = 10,post_pruning_epoch = 10,
   accelerator = accelerator(cpu=TRUE),
   valid_data = 0.1,
-  weight_decay = 1e-4,
+  #weight_decay = 1e-4,
   auto_resume_path = file.path(params$model_dir,"aba_mouse_cluster_classifier.tmp")
 )
 luz_save(model,file.path(params$model_dir,"aba_mouse_cluster_classifier.luz"))
