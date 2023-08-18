@@ -1,3 +1,6 @@
+params <-
+list(data_dir = "/Users/prados/Desktop/wyss_project/data/", model_dir = "/Users/prados/Desktop/wyss_project/data/")
+
 ## ---- include = FALSE---------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -14,10 +17,10 @@ library(SingleCellExperiment)
 DelayedArray::setAutoBPPARAM(BiocParallel::MulticoreParam(workers = 6L,progressbar = TRUE))
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  make_celltype_ds <- function() {
+#  make_aba_ds <- function() {
 #    # Load 10x and smart-seq cells
-#    allenSSq <- ABAHumanSSv4("../../data/ABAMouseSSv4/");allenSSq$source <- "ssv4"
-#    allen10x <- ABAMouseTENx("../../data/ABAMouseTENx/");allen10x$source <- "10x"
+#    allenSSq <- ABAHumanSSv4(file.path(params$data_dir,"ABAMouseSSv4/"));allenSSq$source <- "ssv4"
+#    allen10x <- ABAMouseTENx(file.path(params$data_dir,"ABAMouseTENx/"));allen10x$source <- "10x"
 #  
 #    # Subset to common genes only
 #    allen10x <- allen10x[intersect(rownames(allen10x),rownames(allenSSq))]
@@ -42,23 +45,24 @@ DelayedArray::setAutoBPPARAM(BiocParallel::MulticoreParam(workers = 6L,progressb
 #  
 #    # Save allen dataset into an H5 format optimized for learning
 #    HDF5Array::saveHDF5SummarizedExperiment(
-#      allen,"~/Downloads/ABAMouseLearning",chunkdim = c(nrow(allen),1L),replace = TRUE
+#      allen,file.path(params$data_dir,"ABAMouseLearning"),chunkdim = c(nrow(allen),1L),replace = TRUE
 #    )
 #  }
-#  make_celltype_ds()
+#  #make_aba_ds()
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  # Load dataset
-#  allen <- HDF5Array::loadHDF5SummarizedExperiment("~/Downloads/ABAMouseLearning")
-#  allen <- allen[,!is.na(allen$subclass_label)]
-#  
-#  # Compute target labels to predict
-#  allen$y_true <- paste(allen$class_label,allen$neighborhood_label,allen$subclass_label,sep=" --- ") |>
-#    factor()
-#  stopifnot(all(!is.na(allen$y_true)))
+#  # Load AABA dataset
+#  allen <- HDF5Array::loadHDF5SummarizedExperiment(file.path(params$data_dir,"ABAMouseLearning"))
+#  allen <- allen[,!is.na(allen$subclass_label)] # Keep only cells with an assigned sublcass
+#  allen <- allen[,!is.na(allen$cluster_label)]  # Keep only cells with an assigned cluster
 #  
 #  # Normalize counts
 #  allen <- scuttle::logNormCounts(allen,center_size_factors=FALSE,size.factors=allen$sum/1e4)
+#  
+#  # Compute target labels to predict
+#  allen$y_true <- paste(allen$class_label,allen$neighborhood_label,allen$subclass_label,allen$cluster_label,sep=" --- ") |>
+#    factor()
+#  stopifnot(all(!is.na(allen$y_true)))
 #  
 #  # Balance training set
 #  trn_ds <- local({
@@ -75,15 +79,64 @@ DelayedArray::setAutoBPPARAM(BiocParallel::MulticoreParam(workers = 6L,progressb
 #  model <- train_delayed_classifier(
 #    x = t(logcounts(trn_ds)),
 #    y = trn_ds$y_true,
+#    pre_pruning_epoch = 5,post_pruning_epoch = 5,
 #    accelerator = accelerator(cpu=TRUE),
 #    valid_data = 0.1,
-#    weight_decay = 1e-4
+#    weight_decay = 1e-4,
+#    auto_resume_path = file.path(params$model_dir,"aba_mouse_cluster_classifier.tmp")
 #  )
-#  luz_save(model,"~/Downloads/aba_mouse_subclass_classifier.luz")
+#  luz_save(model,file.path(params$model_dir,"aba_mouse_cluster_classifier.luz"))
 
-## -----------------------------------------------------------------------------
-model <- luz_load("~/Downloads/aba_mouse_subclass_classifier.luz")
-plot(model)
+## ----eval=FALSE---------------------------------------------------------------
+#  model <- luz_load(file.path(params$model_dir,"aba_mouse_cluster_classifier.luz"))
+#  plot(model)
+
+## ----eval=FALSE---------------------------------------------------------------
+#  pred <- predict_delayed(t(logcounts(trn_ds)),model,accelerator = accelerator(cpu = TRUE))
+#  mean(trn_ds$y_true==colnames(pred)[max.col(pred)])
+
+## ----eval=FALSE---------------------------------------------------------------
+#  table(trn_ds$y_true,colnames(pred)[max.col(pred)])
+
+## ----eval=FALSE---------------------------------------------------------------
+#  # Load dataset
+#  allen <- HDF5Array::loadHDF5SummarizedExperiment(file.path(params$data_dir,"ABAMouseLearning"))
+#  allen <- allen[,!is.na(allen$donor_sex_label)]
+#  
+#  # Compute target labels to predict
+#  allen$y_true <- allen$donor_sex_label |>
+#    factor()
+#  
+#  # Normalize counts
+#  allen <- scuttle::logNormCounts(allen,center_size_factors=FALSE,size.factors=allen$sum/1e4)
+#  
+#  # Balance training set
+#  trn_ds <- local({
+#    trn_ds <- allen[,allen$mlset %in% "trn"]
+#    trn_ids <- splitAsList(colnames(trn_ds),paste(trn_ds$external_donor_name_label)) |>
+#      lapply(sample,100,replace=TRUE) |>
+#      unlist() |>
+#      sample()
+#    trn_ds[,trn_ids]
+#  })
+#  print(table(trn_ds$donor_sex_label))
+
+## ----eval=FALSE---------------------------------------------------------------
+#  model <- train_delayed_classifier(
+#    x = t(logcounts(trn_ds)),
+#    y = trn_ds$y_true,
+#    accelerator = accelerator(cpu=TRUE),
+#    n = 32L,
+#    valid_data = 0.1,
+#    pre_pruning_epoch = 5L,
+#    post_pruning_epoch = 5L,
+#    auto_resume_path = file.path(params$model_dir,"aba_mouse_sex_classifier.tmp")
+#  )
+#  luz_save(model,file.path(params$model_dir,"aba_mouse_sex_classifier.luz"))
+
+## ----eval=FALSE---------------------------------------------------------------
+#  model <- luz_load(file.path(params$model_dir,"aba_mouse_sex_classifier.luz"))
+#  plot(model)
 
 ## ----eval=FALSE---------------------------------------------------------------
 #  pred <- predict_delayed(t(logcounts(trn_ds)),model,accelerator = accelerator(cpu = TRUE))

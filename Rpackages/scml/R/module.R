@@ -11,9 +11,7 @@
 #' @import torch
 #' @export
 #' @examples
-#' p <- nn_cosine(10,5)(torch_rand(32,10))
-#' l <- nnf_soft_margin_loss(p,torch_randint(1,5,c(32,1)))
-#' l$backward()
+#' p <- nn_cosine(10,5)(torch::torch_rand(32,10))
 nn_cosine_similarity <- nn_module(
   inherit = nn_linear,
   initialize = function(in_features,out_features,eps=1e-8) {
@@ -39,7 +37,7 @@ nn_cosine_similarity <- nn_module(
 #' @import torch
 #' @export
 #' @examples
-#' nn_cell_scorer(1:4,1:3)(torch_rand(32,4))
+#' nn_cell_scorer(1:4,1:3)(torch::torch_rand(32,4))
 nn_cell_scorer <- torch::nn_module(
   inherit = nn_sequential,
   initialize = function(feature_names,class_names,input_dropout_rate=0.5,n=256L,dropout_rates=0.25,...) {

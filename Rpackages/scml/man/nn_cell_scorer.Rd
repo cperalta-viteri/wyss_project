@@ -30,5 +30,5 @@ nn_cell_scorer(
 Cell type classifier NN-based.
 }
 \examples{
-nn_cell_scorer(1:4,1:3)(torch_rand(32,4))
+nn_cell_scorer(1:4,1:3)(torch::torch_rand(32,4))
 }
