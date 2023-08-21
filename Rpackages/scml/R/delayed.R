@@ -102,6 +102,8 @@ lr_lambda_geometric <- function(epochs,lr_start=1e-3,lr_end=1e-6) {
 #' @param prune_size number of top/down gene to keep for each node of layer1 when pruning
 #' @param lr_start initial learning rate (both at epoch 1 and after pruning)
 #' @param lr_end final learning rate (both at pruning and at last epoch)
+#' @param initial_weights_path a character to specify a file to load initial weights from.
+#'                             Set to NA to disable.
 #' @param auto_resume_path a character to specify a file to store weights at each epoch,
 #'                         so training can be resumed when stopped. Set to NA to disable.
 #' @param weight_decay value passed to the optim_adam optimizer.
@@ -117,7 +119,8 @@ lr_lambda_geometric <- function(epochs,lr_start=1e-3,lr_end=1e-6) {
 train_delayed_classifier <- function(
     x, y, pre_pruning_epoch = 25L, post_pruning_epoch = 25L,
     batch_size = 256L, prune_size = pmin(50L, ncol(x)),
-    lr_start = 1e-3, lr_end = 1e-5, auto_resume_path = NA,
+    lr_start = 1e-3, lr_end = 1e-5,
+    initial_weights_path = NA, auto_resume_path = NA,
     n = c(4096L,256L), dropout_rates = 0.25,
     weight_decay = 0, input_dropout_rate = 0.5, y_type=c("nominal","ordinal"),C=NULL,...)
 {
@@ -156,6 +159,7 @@ train_delayed_classifier <- function(
         list(
           luz_callback_lr_scheduler(lr_lambda, verbose = TRUE, lr_lambda_geometric(c(pre_pruning_epoch,post_pruning_epoch),lr_start,lr_end))
         ),
+        if (is.na(initial_weights_path)) NULL else luz_callback(on_fit_begin=function() {luz_load_model_weights(ctx$model,initial_weights_path)}),
         if (post_pruning_epoch<=0L) NULL else luz_callback_prune("cosine.weight", n = prune_size, at_epoch = pre_pruning_epoch),
         if (is.na(auto_resume_path)) NULL else luz_callback_auto_resume(path = auto_resume_path)
       )
