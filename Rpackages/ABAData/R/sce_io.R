@@ -38,7 +38,7 @@ writeSingleCellExperiment <- function(e,dir) {
 }
 
 
-#' Read a SingleCellExperiment from a directory saved with .save_SCE
+#' Read a SingleCellExperiment from a directory saved with writeSingleCellExperiment
 #'
 #' @param dir a length-one character containing the directory to load data from
 #' @importFrom HDF5Array HDF5Array
@@ -77,6 +77,8 @@ readSingleCellExperiment <- function(dir) {
 #' @param outdir path to directory used for I/O
 #' @param download_fun function used to download the data into a given directory
 #' @param load_fun function used to load the downloaded data from the given directory into a SingleCellExperiment object
+#' @importFrom HDF5Array saveHDF5SummarizedExperiment
+#' @importFrom HDF5Array loadHDF5SummarizedExperiment
 #' @export
 SingleCellExperimentCachedDataset <- function(outdir,download_fun,load_fun) {
   # Download data and prepare QC
@@ -96,7 +98,7 @@ SingleCellExperimentCachedDataset <- function(outdir,download_fun,load_fun) {
     writeLines("Compute QC")
     e <- .add_qc_metrics(e)
     writeLines("Write SingleCellExperiment on disk")
-    writeSingleCellExperiment(e,outdir)
+    saveHDF5SummarizedExperiment(e,file.path(outdir,"sce"),chunkdim=c(nrow(e),1L),replace=TRUE)
     writeLines("DONE",file.path(outdir,"DONE"))
   } else {
     writeLines("Cache already built")
@@ -104,6 +106,6 @@ SingleCellExperimentCachedDataset <- function(outdir,download_fun,load_fun) {
 
   # Load cached data
   writeLines("Read SingleCellExperiment from disk")
-  readSingleCellExperiment(outdir)
+  loadHDF5SummarizedExperiment(file.path(outdir,"sce"))
 }
 

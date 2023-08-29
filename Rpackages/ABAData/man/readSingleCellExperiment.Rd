@@ -2,7 +2,7 @@
 % Please edit documentation in R/sce_io.R
 \name{readSingleCellExperiment}
 \alias{readSingleCellExperiment}
-\title{Read a SingleCellExperiment from a directory saved with .save_SCE}
+\title{Read a SingleCellExperiment from a directory saved with writeSingleCellExperiment}
 \usage{
 readSingleCellExperiment(dir)
 }
@@ -10,5 +10,5 @@ readSingleCellExperiment(dir)
 \item{dir}{a length-one character containing the directory to load data from}
 }
 \description{
-Read a SingleCellExperiment from a directory saved with .save_SCE
+Read a SingleCellExperiment from a directory saved with writeSingleCellExperiment
 }
