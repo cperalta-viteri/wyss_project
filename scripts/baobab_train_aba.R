@@ -6,11 +6,6 @@ library(SingleCellExperiment)
 library(HDF5Array)
 DelayedArray::setAutoBPPARAM(BiocParallel::MulticoreParam(workers = 6L,progressbar = TRUE))
 
-dir.create("/scratch/ABAMouseSSv4")
-file.copy("~/scratch/ABAMouseSSv4/sce","/scratch/ABAMouseSSv4",recursive = TRUE)
-dir.create("/scratch/ABAMouseTENx")
-file.copy("~/scratch/ABAMouseTENx/sce","/scratch/ABAMouseTENx",recursive = TRUE)
-
 
 aba_ds <- function() {
   # Load 10x and smart-seq cells
@@ -42,7 +37,16 @@ aba_ds <- function() {
 }
 
 
+
+# Copy ABA dataset
+print("copy datasets to /scratch")
+dir.create("/scratch/ABAMouseSSv4")
+file.copy("~/scratch/ABAMouseSSv4/sce","/scratch/ABAMouseSSv4",recursive = TRUE)
+dir.create("/scratch/ABAMouseTENx")
+file.copy("~/scratch/ABAMouseTENx/sce","/scratch/ABAMouseTENx",recursive = TRUE)
+
 # Load ABA dataset
+print("load dataset")
 allen <- aba_ds()
 allen <- allen[,!is.na(allen$subclass_label)] # Keep only cells with an assigned sublcass
 allen <- allen[,!is.na(allen$cluster_label)]  # Keep only cells with an assigned cluster
@@ -69,8 +73,6 @@ print(table(trn_ds$y_true,trn_ds$source))
 
 
 
-
-#logcounts(trn_ds) <- as.matrix(logcounts(trn_ds))
 model <- train_delayed_classifier(
   x = t(logcounts(trn_ds)),
   y = trn_ds$y_true,
@@ -78,7 +80,7 @@ model <- train_delayed_classifier(
   #accelerator = accelerator(cpu=TRUE),
   valid_data = 0.1,
   #weight_decay = 1e-4,
-  auto_resume_path = file.path(params$model_dir,"aba_mouse_cluster_classifier.tmp"),
+  auto_resume_path = "~/scratch/aba_mouse_cluster_classifier.tmp",
   #initial_weights_path = "~/Downloads/w.mw"
 )
 luz_save(model,"~/scratch/aba_mouse_cluster_classifier.luz")

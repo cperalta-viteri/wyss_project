@@ -13,6 +13,7 @@ train_delayed_classifier(
   prune_size = pmin(50L, ncol(x)),
   lr_start = 0.001,
   lr_end = 1e-05,
+  initial_weights_path = NA,
   auto_resume_path = NA,
   n = c(4096L, 256L),
   dropout_rates = 0.25,
@@ -39,6 +40,9 @@ train_delayed_classifier(
 \item{lr_start}{initial learning rate (both at epoch 1 and after pruning)}
 
 \item{lr_end}{final learning rate (both at pruning and at last epoch)}
+
+\item{initial_weights_path}{a character to specify a file to load initial weights from.
+Set to NA to disable.}
 
 \item{auto_resume_path}{a character to specify a file to store weights at each epoch,
 so training can be resumed when stopped. Set to NA to disable.}

@@ -14,7 +14,7 @@ params:
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  eval = TRUE
+  eval = FALSE
 )
 ```
 
@@ -33,9 +33,9 @@ DelayedArray::setAutoBPPARAM(BiocParallel::MulticoreParam(workers = 6L,progressb
 
 # Train a Cell-type model on 10x data
 
-```{r,eval=FALSE}
+```{r}
 # Load ABA dataset
-allen <- HDF5Array::loadHDF5SummarizedExperiment(file.path(params$data_dir,"ABAMouseLearning"))
+allen <- HDF5Array::loadHDF5SummarizedExperiment(file.path(params$data_dir,"ABAMouseTENx","sce"))
 allen <- allen[,!is.na(allen$subclass_label)] # Keep only cells with an assigned sublcass
 allen <- allen[,!is.na(allen$cluster_label)]  # Keep only cells with an assigned cluster
 
@@ -61,7 +61,7 @@ print(table(trn_ds$y_true,trn_ds$source))
 
 
 Train the classifier on the selected training cells
-```{r,eval=FALSE}
+```{r}
 model <- train_delayed_classifier(
   x = t(logcounts(trn_ds)),
   y = trn_ds$y_true,
@@ -76,14 +76,14 @@ luz_save(model,file.path(params$model_dir,"aba_mouse_10x_subclass_classifier.luz
 
 
 Show learning curve
-```{r,eval=FALSE}
+```{r}
 model <- luz_load(file.path(params$model_dir,"aba_mouse_10x_subclass_classifier.luz"))
 plot(model)
 ```
 
 
 Compute performance on the training set
-```{r,eval=FALSE}
+```{r}
 tst_ds <- allen[,(allen$source %in% "ssv4")]
 pred <- predict_delayed(t(logcounts(tst_ds)),model,accelerator = accelerator(cpu = TRUE))
 mean(tst_ds$y_true==colnames(pred)[max.col(pred)])
@@ -91,7 +91,7 @@ mean(tst_ds$y_true==colnames(pred)[max.col(pred)])
 
 
 Contingency matrix
-```{r,eval=FALSE}
+```{r}
 table(tst_ds$y_true,colnames(pred)[max.col(pred)])
 ```
 
