@@ -1,20 +1,15 @@
 
 
 
-nnf_dag_triplets <- function(P) {
-  P <- torch_rand(100,100)>0.7 # parents
-}
-
 
 #' @param T a 3-columns integer matrix
 #' @param C a numeric k x k cost matrix: C[i,j] is the loss for mispredicting a sample of class i into class j
 nnf_dag_loss <- function(input,target,triplets,C) {
-
-  C <- torch_rand(100,100)
+  P <- torch_rand(100,100)>0.7 # parent matrix
+  C <- torch_rand(100,100) # cost matrix
   stopifnot(identical(nrow(C),ncol(C)))
+  #A: Ancestors matrix
 
-
-  P$matrix_power(3)
 }
 
 

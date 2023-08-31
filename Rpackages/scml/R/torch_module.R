@@ -21,7 +21,7 @@ nn_cosine_similarity <- nn_module(
   forward = function(x) {
     x_norm <- x$norm(dim=-1L,p = 2,keepdim = TRUE)$clamp_min(self$eps)
     w_norm <- self$weight$norm(dim=-1L,p=2,keepdim = TRUE)$clamp_min(self$eps)
-    nnf_linear(x/x_norm,self$weight/w_norm)
+    nnf_linear(x/x_norm,self$weight/w_norm)$clamp(-1,1)
   }
 )
 

@@ -7,10 +7,27 @@ library(HDF5Array)
 DelayedArray::setAutoBPPARAM(BiocParallel::MulticoreParam(workers = 6L,progressbar = TRUE))
 
 
+
+# Copy ABA dataset
+# print("copy datasets to /scratch")
+# dir.create("/scratch/ABAMouseSSv4")
+# file.copy("~/scratch/ABAMouseSSv4/sce","/scratch/ABAMouseSSv4",recursive = TRUE)
+# dir.create("/scratch/ABAMouseTENx")
+# file.copy("~/scratch/ABAMouseTENx/sce","/scratch/ABAMouseTENx",recursive = TRUE)
+# params <- list(
+#   data_dir = "/scratch",
+#   model_dir = "~/scratch"
+# )
+params <- list(
+  data_dir = "~/Desktop/wyss_project/data",
+  model_dir = "~/Downloads/"
+)
+
+
 aba_ds <- function() {
   # Load 10x and smart-seq cells
-  allenSSq <- loadHDF5SummarizedExperiment("/scratch/ABAMouseSSv4/sce");allenSSq$source <- "ssv4"
-  allen10x <- loadHDF5SummarizedExperiment("/scratch/ABAMouseTENx/sce");allen10x$source <- "10x"
+  allenSSq <- loadHDF5SummarizedExperiment(file.path(params$data_dir,"ABAMouseSSv4/sce"));allenSSq$source <- "ssv4"
+  allen10x <- loadHDF5SummarizedExperiment(file.path(params$data_dir,"ABAMouseTENx/sce"));allen10x$source <- "10x"
 
   # Subset to common genes only
   allen10x <- allen10x[intersect(rownames(allen10x),rownames(allenSSq))]
@@ -37,14 +54,6 @@ aba_ds <- function() {
 }
 
 
-
-# Copy ABA dataset
-print("copy datasets to /scratch")
-dir.create("/scratch/ABAMouseSSv4")
-file.copy("~/scratch/ABAMouseSSv4/sce","/scratch/ABAMouseSSv4",recursive = TRUE)
-dir.create("/scratch/ABAMouseTENx")
-file.copy("~/scratch/ABAMouseTENx/sce","/scratch/ABAMouseTENx",recursive = TRUE)
-
 # Load ABA dataset
 print("load dataset")
 allen <- aba_ds()
@@ -63,7 +72,7 @@ stopifnot(all(!is.na(allen$y_true)))
 trn_ds <- local({
   trn_ds <- allen[,allen$mlset %in% "trn"]
   trn_ids <- splitAsList(colnames(trn_ds),paste(trn_ds$y_true,trn_ds$source)) |>
-    lapply(sample,1000,replace=TRUE) |>
+    lapply(sample,5,replace=TRUE) |>
     unlist() |>
     sample()
   trn_ds[,trn_ids]
@@ -77,13 +86,15 @@ model <- train_delayed_classifier(
   x = t(logcounts(trn_ds)),
   y = trn_ds$y_true,
   pre_pruning_epoch = 25,post_pruning_epoch = 25,
+  batch_size = 512L,
   #accelerator = accelerator(cpu=TRUE),
   valid_data = 0.1,
   #weight_decay = 1e-4,
-  auto_resume_path = "~/scratch/aba_mouse_cluster_classifier.tmp",
-  #initial_weights_path = "~/Downloads/w.mw"
+  auto_resume_path = file.path(params$model_dir,"aba_mouse_cluster_classifier.tmp"),
+  #initial_weights_path = "~/Downloads/w.mw",
+  verbose=TRUE
 )
-luz_save(model,"~/scratch/aba_mouse_cluster_classifier.luz")
+luz_save(model,file.path(params$model_dir,"aba_mouse_cluster_classifier.luz"))
 
 
 

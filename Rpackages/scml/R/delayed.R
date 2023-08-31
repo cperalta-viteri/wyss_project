@@ -85,9 +85,9 @@ lr_lambda_geometric <- function(epochs,lr_start=1e-3,lr_end=1e-6) {
   alpha <- (lr_end/lr_start)^(1/(epochs-1))
   lr <- rep(lr_start,epochs) * rep(alpha,epochs)^(sequence(epochs)-1)
   function(epoch) {
-    if (epoch<1L) lr[1L]
-    else if (epoch>length(lr)) lr[length(lr)]
-    else lr[epoch]
+    epoch <- pmax(epoch,1L)
+    epoch <- pmin(epoch,length(lr))
+    lr[epoch]
   }
 }
 
