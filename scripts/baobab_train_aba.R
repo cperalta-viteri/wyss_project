@@ -8,20 +8,25 @@ DelayedArray::setAutoBPPARAM(BiocParallel::MulticoreParam(workers = 6L,progressb
 
 
 
-# Copy ABA dataset
-# print("copy datasets to /scratch")
-# dir.create("/scratch/ABAMouseSSv4")
-# file.copy("~/scratch/ABAMouseSSv4/sce","/scratch/ABAMouseSSv4",recursive = TRUE)
-# dir.create("/scratch/ABAMouseTENx")
-# file.copy("~/scratch/ABAMouseTENx/sce","/scratch/ABAMouseTENx",recursive = TRUE)
-# params <- list(
-#   data_dir = "/scratch",
-#   model_dir = "~/scratch"
-# )
-params <- list(
-  data_dir = "~/Desktop/wyss_project/data",
-  model_dir = "~/Downloads/"
-)
+
+if (Sys.info()["nodename"] %in% c("CL-L9D3WNC2GY.local","m2.home")) {
+  # Mac 
+  params <- list(
+    data_dir = "~/Desktop/wyss_project/data",
+    model_dir = "~/Downloads/"
+  )
+} else {
+  # Baobab node
+  print("copy datasets to /scratch")
+  dir.create("/scratch/ABAMouseSSv4")
+  file.copy("~/scratch/ABAMouseSSv4/sce","/scratch/ABAMouseSSv4",recursive = TRUE)
+  dir.create("/scratch/ABAMouseTENx")
+  file.copy("~/scratch/ABAMouseTENx/sce","/scratch/ABAMouseTENx",recursive = TRUE)
+  params <- list(
+    data_dir = "/scratch",
+    model_dir = "~/scratch"
+  )
+}
 
 
 aba_ds <- function() {
@@ -72,7 +77,7 @@ stopifnot(all(!is.na(allen$y_true)))
 trn_ds <- local({
   trn_ds <- allen[,allen$mlset %in% "trn"]
   trn_ids <- splitAsList(colnames(trn_ds),paste(trn_ds$y_true,trn_ds$source)) |>
-    lapply(sample,5,replace=TRUE) |>
+    lapply(sample,500,replace=TRUE) |>
     unlist() |>
     sample()
   trn_ds[,trn_ids]
@@ -80,17 +85,17 @@ trn_ds <- local({
 print(table(trn_ds$y_true,trn_ds$source))
 
 
-
-
 model <- train_delayed_classifier(
   x = t(logcounts(trn_ds)),
   y = trn_ds$y_true,
-  pre_pruning_epoch = 25,post_pruning_epoch = 25,
-  batch_size = 512L,
-  #accelerator = accelerator(cpu=TRUE),
+  pre_pruning_epoch = 25L,post_pruning_epoch = 25L,
+  batch_size = 2048L,
+  n = c(8192L,1024L),
+  accelerator = accelerator(cpu=TRUE),
   valid_data = 0.1,
+  lr_start = 1e-2, lr_end = 1e-4,
+  checkpoint_path = file.path(params$model_dir,"aba_mouse_cluster_classifier.luz.{epoch:02d}"),
   #weight_decay = 1e-4,
-  auto_resume_path = file.path(params$model_dir,"aba_mouse_cluster_classifier.tmp"),
   #initial_weights_path = "~/Downloads/w.mw",
   verbose=TRUE
 )

@@ -71,25 +71,26 @@ predict_delayed <- function(N, luz_model, ignore.case = FALSE, batch_size = 1024
 }
 
 
-#' Define geometric learning rate series
-#'
-#' @param epochs a vector of positive integers, defining a consecutive number of
-#'        epochs.
-#' @param lr_start a vector of initial learning rate which will be recycled to
-#'        length(epochs)
-#' @param lr_end a vector of ending learning rate which will be recycled to
-#'        length(epochs).
-lr_lambda_geometric <- function(epochs,lr_start=1e-3,lr_end=1e-6) {
-  lr_start <- rep(lr_start,length.out=length(epochs))
-  lr_end <- rep(lr_end,length.out=length(epochs))
-  alpha <- (lr_end/lr_start)^(1/(epochs-1))
-  lr <- rep(lr_start,epochs) * rep(alpha,epochs)^(sequence(epochs)-1)
-  function(epoch) {
+luz_callback_lr_geometric <- luz_callback(
+  initialize = function(epochs,lr_start=1e-3,lr_end=1e-6) {
+    lr_start <- rep(lr_start,length.out=length(epochs))
+    lr_end <- rep(lr_end,length.out=length(epochs))
+    alpha <- (lr_end/lr_start)^(1/(epochs-1))
+    self$lr <- rep(lr_start,epochs) * rep(alpha,epochs)^(sequence(epochs)-1)
+  },
+  on_epoch_begin = function() {
+    epoch <- ctx$epoch
     epoch <- pmax(epoch,1L)
-    epoch <- pmin(epoch,length(lr))
-    lr[epoch]
+    epoch <- pmin(epoch,length(self$lr))
+    rlang::inform(glue::glue("Update LR to: {self$lr[epoch]}"))
+    for(i in seq_along(ctx$optimizers)) {
+      for(j in seq_along(ctx$optimizers[[i]]$param_groups)) {
+        ctx$optimizers[[i]]$param_groups[[j]]$lr <- self$lr[epoch]
+      }
+    }
   }
-}
+)
+
 
 
 #' @title train_delayed_classifier
@@ -104,14 +105,15 @@ lr_lambda_geometric <- function(epochs,lr_start=1e-3,lr_end=1e-6) {
 #' @param lr_end final learning rate (both at pruning and at last epoch)
 #' @param initial_weights_path a character to specify a file to load initial weights from.
 #'                             Set to NA to disable.
-#' @param auto_resume_path a character to specify a file to store weights at each epoch,
-#'                         so training can be resumed when stopped. Set to NA to disable.
+#' @param autoresume_path a character to specify a file to store model weights at each epoch.
+#'                        Set to NA to disable.
 #' @param weight_decay value passed to the optim_adam optimizer.
 #' @param input_dropout_rate Dropout rate to apply on input values when training
 #' @param n A numeric integer vector of length>0 specifying the number of feature in each internal layer.
 #' @param dropout_rates A numeric vector of length>0 of dropouts to apply before each internal layer.
 #' @param y_type type of target factor: either nominal or ordinal (default: nominal)
 #' @param C the cost matrix to use in ordinal regression
+#' @param callbacks a list of additional callbacks to use
 #' @param ... additional parameters are passed to fit() call
 #' @importFrom stats stepfun
 #' @importFrom luz fit set_opt_hparams set_hparams setup luz_metric_accuracy luz_callback_lr_scheduler luz_callback_auto_resume
@@ -120,9 +122,10 @@ train_delayed_classifier <- function(
     x, y, pre_pruning_epoch = 25L, post_pruning_epoch = 25L,
     batch_size = 256L, prune_size = pmin(50L, ncol(x)),
     lr_start = 1e-3, lr_end = 1e-5,
-    initial_weights_path = NA, auto_resume_path = NA,
+    initial_weights_path = NA, autoresume_path = NA,
     n = c(4096L,256L), dropout_rates = 0.25,
-    weight_decay = 0, input_dropout_rate = 0.5, y_type=c("nominal","ordinal"),C=NULL,...)
+    weight_decay = 0, input_dropout_rate = 0.5, y_type=c("nominal","ordinal"),C=NULL,
+    callbacks=NULL,...)
 {
   y <- as.factor(y)
   y_type <- match.arg(y_type)
@@ -157,11 +160,12 @@ train_delayed_classifier <- function(
       ...,
       callbacks = c(
         list(
-          luz_callback_lr_scheduler(lr_lambda, verbose = TRUE, lr_lambda_geometric(c(pre_pruning_epoch,post_pruning_epoch),lr_start,lr_end))
+          luz_callback_lr_geometric(c(pre_pruning_epoch,post_pruning_epoch),lr_start,lr_end)
         ),
         if (is.na(initial_weights_path)) NULL else luz_callback(initialize=function(){},on_fit_begin=function() {luz_load_model_weights(ctx,initial_weights_path)})(),
         if (post_pruning_epoch<=0L) NULL else luz_callback_prune("cosine.weight", n = prune_size, at_epoch = pre_pruning_epoch),
-        if (is.na(auto_resume_path)) NULL else luz_callback_auto_resume(path = auto_resume_path)
+        if (is.na(autoresume_path)) NULL else luz_callback_auto_resume(path=autoresume_path),
+        callbacks
       )
     )
   fm

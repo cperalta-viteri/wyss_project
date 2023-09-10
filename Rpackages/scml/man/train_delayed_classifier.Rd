@@ -14,13 +14,14 @@ train_delayed_classifier(
   lr_start = 0.001,
   lr_end = 1e-05,
   initial_weights_path = NA,
-  auto_resume_path = NA,
+  autoresume_path = NA,
   n = c(4096L, 256L),
   dropout_rates = 0.25,
   weight_decay = 0,
   input_dropout_rate = 0.5,
   y_type = c("nominal", "ordinal"),
   C = NULL,
+  callbacks = NULL,
   ...
 )
 }
@@ -44,8 +45,8 @@ train_delayed_classifier(
 \item{initial_weights_path}{a character to specify a file to load initial weights from.
 Set to NA to disable.}
 
-\item{auto_resume_path}{a character to specify a file to store weights at each epoch,
-so training can be resumed when stopped. Set to NA to disable.}
+\item{autoresume_path}{a character to specify a file to store model weights at each epoch.
+Set to NA to disable.}
 
 \item{n}{A numeric integer vector of length>0 specifying the number of feature in each internal layer.}
 
@@ -58,6 +59,8 @@ so training can be resumed when stopped. Set to NA to disable.}
 \item{y_type}{type of target factor: either nominal or ordinal (default: nominal)}
 
 \item{C}{the cost matrix to use in ordinal regression}
+
+\item{callbacks}{a list of additional callbacks to use}
 
 \item{...}{additional parameters are passed to fit() call}
 }
