@@ -94,7 +94,7 @@ model <- train_delayed_classifier(
   accelerator = accelerator(cpu=TRUE),
   valid_data = 0.1,
   lr_start = 1e-2, lr_end = 1e-4,
-  checkpoint_path = file.path(params$model_dir,"aba_mouse_cluster_classifier.luz.{epoch:02d}"),
+  autoresume_path = file.path(params$model_dir,"aba_mouse_cluster_classifier.luz.st"),
   #weight_decay = 1e-4,
   #initial_weights_path = "~/Downloads/w.mw",
   verbose=TRUE

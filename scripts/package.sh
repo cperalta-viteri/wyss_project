@@ -15,16 +15,16 @@ tar -C ../ \
 
 
 
-scp Rpackages/scml_1.2.0.tar.gz prados@baobab2.hpc.unige.ch:~/scratch/
-scp scripts/baobab_train_aba.R prados@baobab2.hpc.unige.ch:~/scratch/
+scp Rpackages/scml_1.3.0.tar.gz prados@baobab2.hpc.unige.ch:~/scratch/
+scp scripts/baobab_train_aba.R prados@baobab2.hpc.unige.ch:~/scratch/baobab_train_aba_v2.R
 
 ssh prados@baobab2.hpc.unige.ch
 ml GCC/11.3.0 OpenMPI/4.1.4 R/4.2.1 CUDA/11.7.0
-R CMD INSTALL ~/scratch/scml_1.2.0.tar.gz
+R CMD INSTALL ~/scratch/scml_1.3.0.tar.gz
 
 
 ml GCC/11.3.0 OpenMPI/4.1.4 R/4.2.1 CUDA/11.7.0
-srun -p public-longrun-cpu --time=4-00:00:00 --mem=32G -n1 --cpus-per-task=4 Rscript ~/scratch/baobab_train_aba.R &> ~/scratch/baobab_train_aba2.log &
+srun -p public-longrun-cpu --time=7-00:00:00 --mem=32G -n1 --cpus-per-task=4 Rscript ~/scratch/baobab_train_aba.R &> ~/scratch/baobab_train_aba.log &
 
 salloc -p shared-cpu --time=3:00:00 --mem=64G -n1 --cpus-per-task=4 
 R
