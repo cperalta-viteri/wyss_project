@@ -71,26 +71,6 @@ predict_delayed <- function(N, luz_model, ignore.case = FALSE, batch_size = 1024
 }
 
 
-luz_callback_lr_geometric <- luz_callback(
-  initialize = function(epochs,lr_start=1e-3,lr_end=1e-6) {
-    lr_start <- rep(lr_start,length.out=length(epochs))
-    lr_end <- rep(lr_end,length.out=length(epochs))
-    alpha <- (lr_end/lr_start)^(1/(epochs-1))
-    self$lr <- rep(lr_start,epochs) * rep(alpha,epochs)^(sequence(epochs)-1)
-  },
-  on_epoch_begin = function() {
-    epoch <- ctx$epoch
-    epoch <- pmax(epoch,1L)
-    epoch <- pmin(epoch,length(self$lr))
-    rlang::inform(glue::glue("Update LR to: {self$lr[epoch]}"))
-    for(i in seq_along(ctx$optimizers)) {
-      for(j in seq_along(ctx$optimizers[[i]]$param_groups)) {
-        ctx$optimizers[[i]]$param_groups[[j]]$lr <- self$lr[epoch]
-      }
-    }
-  }
-)
-
 
 
 #' @title train_delayed_classifier
@@ -116,7 +96,7 @@ luz_callback_lr_geometric <- luz_callback(
 #' @param callbacks a list of additional callbacks to use
 #' @param ... additional parameters are passed to fit() call
 #' @importFrom stats stepfun
-#' @importFrom luz fit set_opt_hparams set_hparams setup luz_metric_accuracy luz_callback_lr_scheduler luz_callback_auto_resume
+#' @importFrom luz fit set_opt_hparams set_hparams setup luz_metric_accuracy luz_callback_lr_scheduler luz_callback_auto_resume luz_load_model_weights
 #' @export
 train_delayed_classifier <- function(
     x, y, pre_pruning_epoch = 25L, post_pruning_epoch = 25L,
@@ -135,6 +115,7 @@ train_delayed_classifier <- function(
       if (!is.null(C)) stop("Cost matrix not implemented yet for nominal target.")
       loss <- nn_multi_margin_loss(margin = 1)
       class_names <- levels(y)
+      metrics <- list(luz_metric_accuracy())
     },
     ordinal = {
       if (is.null(C)) {
@@ -142,13 +123,14 @@ train_delayed_classifier <- function(
       }
       loss <- nn_ordinal_regression_loss(C = C)
       class_names <- "ordinal_score"
+      metrics <- NULL
     }
   )
 
   fm <- nn_cell_scorer |>
     setup(
       optimizer = optim_adam,
-      metrics = list(luz_metric_accuracy()),
+      metrics = metrics,
       loss = loss
     ) |>
     set_hparams(feature_names = colnames(x), class_names = class_names,input_dropout_rate = input_dropout_rate, n = n, dropout_rates = dropout_rates) |>

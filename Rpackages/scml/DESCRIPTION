@@ -10,7 +10,7 @@ Authors@R: c(
   person("Andrea","Volterra",email = "andrea.volterra@wysscenter.ch",role="fnd"))
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
-Imports: torch, luz, DelayedArray, LowRankQP, stats
+Imports: torch, luz, DelayedArray, LowRankQP, stats, rlang, glue
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
@@ -19,7 +19,6 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
-    R6,
-    rlang
+    R6
 Config/testthat/edition: 3
 VignetteBuilder: knitr

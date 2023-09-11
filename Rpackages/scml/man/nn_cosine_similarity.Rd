@@ -17,5 +17,5 @@ nn_cosine_similarity(in_features, out_features, eps = 1e-08)
 A nn_cosine_similarity layer.
 }
 \examples{
-p <- nn_cosine(10,5)(torch::torch_rand(32,10))
+p <- nn_cosine_similarity(10,5)(torch::torch_rand(32,10))
 }

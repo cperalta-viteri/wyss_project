@@ -25,3 +25,36 @@ luz_callback_prune <- luz_callback(
     }
   }
 )
+
+
+#' @title luz_callback_lr_geometric
+#' @param epochs a vector of positive integers, defining a consecutive number of
+#'        epochs.
+#' @param lr_start a vector of initial learning rate which will be recycled to
+#'        length(epochs)
+#' @param lr_end a vector of ending learning rate which will be recycled to
+#'        length(epochs).
+#' @import torch
+#' @importFrom luz luz_callback
+#' @importFrom rlang inform
+#' @importFrom glue glue
+#' @export
+luz_callback_lr_geometric <- luz_callback(
+  initialize = function(epochs,lr_start=1e-3,lr_end=1e-6) {
+    lr_start <- rep(lr_start,length.out=length(epochs))
+    lr_end <- rep(lr_end,length.out=length(epochs))
+    alpha <- (lr_end/lr_start)^(1/(epochs-1))
+    self$lr <- rep(lr_start,epochs) * rep(alpha,epochs)^(sequence(epochs)-1)
+  },
+  on_epoch_begin = function() {
+    epoch <- ctx$epoch
+    epoch <- pmax(epoch,1L)
+    epoch <- pmin(epoch,length(self$lr))
+    rlang::inform(glue::glue("Update LR to: {self$lr[epoch]}"))
+    for(i in seq_along(ctx$optimizers)) {
+      for(j in seq_along(ctx$optimizers[[i]]$param_groups)) {
+        ctx$optimizers[[i]]$param_groups[[j]]$lr <- self$lr[epoch]
+      }
+    }
+  }
+)

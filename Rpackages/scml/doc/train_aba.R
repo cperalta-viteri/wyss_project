@@ -17,10 +17,10 @@ library(SingleCellExperiment)
 DelayedArray::setAutoBPPARAM(BiocParallel::MulticoreParam(workers = 6L,progressbar = TRUE))
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  make_aba_ds <- function() {
+#  aba_ds <- function() {
 #    # Load 10x and smart-seq cells
-#    allenSSq <- ABAHumanSSv4(file.path(params$data_dir,"ABAMouseSSv4/"));allenSSq$source <- "ssv4"
-#    allen10x <- ABAMouseTENx(file.path(params$data_dir,"ABAMouseTENx/"));allen10x$source <- "10x"
+#    allenSSq <- ABAMouseSSv4(file.path(params$data_dir,"ABAMouseSSv4"));allenSSq$source <- "ssv4"
+#    allen10x <- ABAMouseTENx(file.path(params$data_dir,"ABAMouseTENx"));allen10x$source <- "10x"
 #  
 #    # Subset to common genes only
 #    allen10x <- allen10x[intersect(rownames(allen10x),rownames(allenSSq))]
@@ -43,16 +43,12 @@ DelayedArray::setAutoBPPARAM(BiocParallel::MulticoreParam(workers = 6L,progressb
 #      prob = c(0.7,0.15,0.15)
 #    )
 #  
-#    # Save allen dataset into an H5 format optimized for learning
-#    HDF5Array::saveHDF5SummarizedExperiment(
-#      allen,file.path(params$data_dir,"ABAMouseLearning"),chunkdim = c(nrow(allen),1L),replace = TRUE
-#    )
+#    allen
 #  }
-#  #make_aba_ds()
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  # Load AABA dataset
-#  allen <- HDF5Array::loadHDF5SummarizedExperiment(file.path(params$data_dir,"ABAMouseLearning"))
+#  # Load ABA dataset
+#  allen <- aba_ds()
 #  allen <- allen[,!is.na(allen$subclass_label)] # Keep only cells with an assigned sublcass
 #  allen <- allen[,!is.na(allen$cluster_label)]  # Keep only cells with an assigned cluster
 #  
@@ -68,7 +64,7 @@ DelayedArray::setAutoBPPARAM(BiocParallel::MulticoreParam(workers = 6L,progressb
 #  trn_ds <- local({
 #    trn_ds <- allen[,allen$mlset %in% "trn"]
 #    trn_ids <- splitAsList(colnames(trn_ds),paste(trn_ds$y_true,trn_ds$source)) |>
-#      lapply(sample,1000,replace=TRUE) |>
+#      lapply(sample,25,replace=TRUE) |>
 #      unlist() |>
 #      sample()
 #    trn_ds[,trn_ids]
@@ -76,14 +72,16 @@ DelayedArray::setAutoBPPARAM(BiocParallel::MulticoreParam(workers = 6L,progressb
 #  print(table(trn_ds$y_true,trn_ds$source))
 
 ## ----eval=FALSE---------------------------------------------------------------
+#  #logcounts(trn_ds) <- as.matrix(logcounts(trn_ds))
 #  model <- train_delayed_classifier(
 #    x = t(logcounts(trn_ds)),
 #    y = trn_ds$y_true,
-#    pre_pruning_epoch = 5,post_pruning_epoch = 5,
-#    accelerator = accelerator(cpu=TRUE),
+#    pre_pruning_epoch = 10,post_pruning_epoch = 10,
+#    #accelerator = accelerator(cpu=TRUE),
 #    valid_data = 0.1,
-#    weight_decay = 1e-4,
-#    auto_resume_path = file.path(params$model_dir,"aba_mouse_cluster_classifier.tmp")
+#    #weight_decay = 1e-4,
+#    #auto_resume_path = file.path(params$model_dir,"aba_mouse_cluster_classifier.tmp"),
+#    #initial_weights_path = "~/Downloads/w.mw"
 #  )
 #  luz_save(model,file.path(params$model_dir,"aba_mouse_cluster_classifier.luz"))
 
