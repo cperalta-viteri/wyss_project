@@ -12,7 +12,7 @@ delayed_classifier_dataset(
 )
 }
 \arguments{
-\item{x}{Count matrix.}
+\item{x}{Expression matrix.}
 
 \item{y}{Cell type array.}
 

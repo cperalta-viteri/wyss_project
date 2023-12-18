@@ -2,7 +2,7 @@
 
 #' @title delayed_classifier_dataset
 #' @description A torch dataset which accepts DelayedArrays.
-#' @param x Count matrix.
+#' @param x Expression matrix.
 #' @param y Cell type array.
 #' @param x_dtype torch types.
 #' @param y_dtype torch types.
@@ -29,9 +29,7 @@ delayed_classifier_dataset <- torch::dataset(
     )
   },
   .getitem = function(index) {
-    if (is.list(index)) {
-      index <- unlist(index)
-    }
+    if (is.list(index)) {index <- unlist(index)}
     self$.getbatch(index)
   }
 )
@@ -41,7 +39,7 @@ delayed_classifier_dataset <- torch::dataset(
 #' @title predict_delayed
 #' @description Predict cell type given a torch model.
 #' @param N expression matrix, ideally log1p(RPM/100)/log(2) counts, but raw counts seems to work too.
-#' @param luz_model model to be fitted.
+#' @param luz_model fitted model to use for predictions
 #' @param ignore.case if TRUE ignore case when aligning feature names (=gene names). It is useful for easy Human-Mouse gene-name matching.
 #' @param batch_size Size of data loaded at training.
 #' @param ... Additional argument to be passed to predict function.

@@ -80,15 +80,15 @@ allen <- allen[,!is.na(allen$cluster_label)]  # Keep only cells with an assigned
 allen <- scuttle::logNormCounts(allen,center_size_factors=FALSE,size.factors=allen$sum/1e4)
 
 # Compute target labels to predict
-allen$y_true <- paste(allen$class_label,allen$neighborhood_label,allen$subclass_label,allen$cluster_label,sep=" --- ") |>
-  factor()
+allen$y_true <- paste(allen$class_label,allen$neighborhood_label,allen$subclass_label,allen$cluster_label,sep=" --- ") |> factor()
+#allen$y_true <- paste(allen$class_label,allen$neighborhood_label,allen$subclass_label,sep=" --- ") |> factor()
 stopifnot(all(!is.na(allen$y_true)))
 
 # Balance training set
 trn_ds <- local({
   trn_ds <- allen[,allen$mlset %in% "trn"]
   trn_ids <- splitAsList(colnames(trn_ds),paste(trn_ds$y_true,trn_ds$source)) |>
-    lapply(sample,25,replace=TRUE) |>
+    lapply(sample,1000,replace=TRUE) |>
     unlist() |>
     sample()
   trn_ds[,trn_ids]
@@ -103,14 +103,15 @@ Train the classifier on the selected training cells
 model <- train_delayed_classifier(
   x = t(logcounts(trn_ds)),
   y = trn_ds$y_true,
-  pre_pruning_epoch = 10,post_pruning_epoch = 10,
-  #accelerator = accelerator(cpu=TRUE),
+  pre_pruning_epoch = 5,post_pruning_epoch = 5,
+  accelerator = accelerator(cpu=TRUE),
   valid_data = 0.1,
-  #weight_decay = 1e-4,
+  #weight_decay = 1e-2,
   #auto_resume_path = file.path(params$model_dir,"aba_mouse_cluster_classifier.tmp"),
   #initial_weights_path = "~/Downloads/w.mw"
 )
 luz_save(model,file.path(params$model_dir,"aba_mouse_cluster_classifier.luz"))
+#luz_save(model,file.path(params$model_dir,"aba_mouse_subclass_classifier.luz"))
 ```
 
 

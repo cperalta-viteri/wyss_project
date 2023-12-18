@@ -88,20 +88,21 @@ print(table(trn_ds$y_true,trn_ds$source))
 model <- train_delayed_classifier(
   x = t(logcounts(trn_ds)),
   y = trn_ds$y_true,
-  pre_pruning_epoch = 25L,post_pruning_epoch = 25L,
+  pre_pruning_epoch = 0L,post_pruning_epoch = 20L,
   batch_size = 2048L,
   n = c(8192L,1024L),
   accelerator = accelerator(cpu=TRUE),
   valid_data = 0.1,
-  lr_start = 1e-2, lr_end = 1e-4,
+  lr_start = 1e-4, lr_end = 1e-5,
   autoresume_path = file.path(params$model_dir,"aba_mouse_cluster_classifier.luz.st"),
   #weight_decay = 1e-4,
-  #initial_weights_path = "~/Downloads/w.mw",
+  initial_weights_path = file.path(params$model_dir,"aba_mouse_cluster_classifier_pruned.luz.w"),
   verbose=TRUE
 )
-luz_save(model,file.path(params$model_dir,"aba_mouse_cluster_classifier.luz"))
+luz_save(model,file.path(params$model_dir,"aba_mouse_cluster_classifier_pruned.luz"))
+luz_save_model_weights(model,file.path(params$model_dir,"aba_mouse_cluster_classifier_pruned.luz.w"))
 
-
+#model <- luz_load(file.path(params$model_dir,"aba_mouse_cluster_classifier.luz"))
 
 
 

@@ -9,7 +9,7 @@ predict_delayed(N, luz_model, ignore.case = FALSE, batch_size = 1024L, ...)
 \arguments{
 \item{N}{expression matrix, ideally log1p(RPM/100)/log(2) counts, but raw counts seems to work too.}
 
-\item{luz_model}{model to be fitted.}
+\item{luz_model}{fitted model to use for predictions}
 
 \item{ignore.case}{if TRUE ignore case when aligning feature names (=gene names). It is useful for easy Human-Mouse gene-name matching.}
 
