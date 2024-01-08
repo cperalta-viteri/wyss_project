@@ -35,13 +35,9 @@ adj_matrix <- function(h) {
 
 #' @param input a (M,N) float tensor tensor
 #' @param target a 1D long tensor
-#' @param h an igraph representing an is_a hierarchy
-nnf_dag_multi_margin_loss <- function(input,target,h) {
-  # Parent matrix
-  P <- adj_matrix(h)
-
-  # Ancestors of target
-  A <- adj_ancestors(h)
+#' @param P Parent matrix: a square boolean 2D tensor
+#' @param A Ancestor matrix: a square boolean 2D tensor
+nnf_dag_multi_margin_loss <- function(input,target,P,A) {
   Y <- A$index_select(1L,target)
 
   # Make a 3D tensor
@@ -86,7 +82,7 @@ mutate(h,name=row_number()) |>
 # Test loss
 y_true <- torch_tensor(c(6L,16L,12L),torch_long())
 y_pred <- torch_rand(length(y_true),igraph::vcount(h),requires_grad = TRUE)
-nnf_dag_multi_margin_loss(y_pred,y_true,h)
+nnf_dag_multi_margin_loss(y_pred,y_true,adj_matrix(h),adj_ancestors(h))
 
 
 
