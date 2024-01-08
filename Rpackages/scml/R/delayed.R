@@ -1,41 +1,5 @@
 
 
-#' @title delayed_classifier_dataset
-#' @description A torch dataset which accepts DelayedArrays.
-#' @param x Expression matrix.
-#' @param y Cell type array.
-#' @param x_dtype torch types.
-#' @param y_dtype torch types.
-#' @import torch
-#' @import DelayedArray
-#' @export
-delayed_classifier_dataset <- torch::dataset(
-  name = "delayed_dataset",
-  initialize = function(x, y = rep(0L, nrow(x)), x_dtype = torch_float(), y_dtype = torch_long()) {
-    stopifnot(identical(length(y), nrow(x)))
-    stopifnot(identical(length(dim(x)), 2L))
-    self$x <- x
-    self$y <- y
-    self$x_dtype <- x_dtype
-    self$y_dtype <- y_dtype
-  },
-  .length = function() {
-    length(self$y)
-  },
-  .getbatch = function(index) {
-    list(
-      x = torch_tensor(as.matrix(self$x[index, , drop = FALSE]), self$x_dtype),
-      y = torch_tensor(self$y[index], self$y_dtype)
-    )
-  },
-  .getitem = function(index) {
-    if (is.list(index)) {index <- unlist(index)}
-    self$.getbatch(index)
-  }
-)
-
-
-
 #' @title predict_delayed
 #' @description Predict cell type given a torch model.
 #' @param N expression matrix, ideally log1p(RPM/100)/log(2) counts, but raw counts seems to work too.
