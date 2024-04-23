@@ -3,7 +3,7 @@
 
 
 
-#' @description A nn_cosine_similarity layer.
+#' @description A nn_cosine_similarity layer, compute cos(w,x) or cos(w,|w|x) when attention is TRUE
 #' @title title nn_cosine_similarity
 #' @param in_features Input number of features.
 #' @param out_features Output number of features.
@@ -14,16 +14,23 @@
 #' p <- nn_cosine_similarity(10,5)(torch::torch_rand(32,10))
 nn_cosine_similarity <- nn_module(
   inherit = nn_linear,
-  initialize = function(in_features,out_features,eps=1e-8) {
+  initialize = function(in_features,out_features,eps=1e-8,attention=TRUE) {
     super$initialize(in_features = in_features, out_features = out_features,bias = FALSE)
     self$eps <- eps
+    self$attention <- attention
   },
   forward = function(x) {
-    x_norm <- x$norm(dim=-1L,p = 2,keepdim = TRUE)$clamp_min(self$eps)
     w_norm <- self$weight$norm(dim=-1L,p=2,keepdim = TRUE)$clamp_min(self$eps)
-    nnf_linear(x/x_norm,self$weight/w_norm)$clamp(-1,1)
+    if (self$attention) {
+      wx_norm <- nnf_linear(x,self$weight)$norm(dim=-1L,p = 2,keepdim = TRUE)$clamp_min(self$eps)
+      return(nnf_linear(x/wx_norm,self$weight*self$weight$abs()/w_norm)$clamp(-1,1))
+    } else {
+      x_norm <- x$norm(dim=-1L,p = 2,keepdim = TRUE)$clamp_min(self$eps)
+      return(nnf_linear(x/x_norm,self$weight/w_norm)$clamp(-1,1))
+    }
   }
 )
+
 
 
 #' @description Cell type classifier NN-based.
