@@ -1,14 +1,13 @@
 params <-
-list(data_dir = "/Users/prados/Desktop/wyss_project/data/", model_dir = "/Users/prados/Desktop/wyss_project/data/")
+list(data_dir = "/Users/prados/Library/CloudStorage/OneDrive-unige.ch/BSP_projects/wyss_project/data/", 
+    model_dir = "/Users/prados/Library/CloudStorage/OneDrive-unige.ch/BSP_projects/wyss_project/data/")
 
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   eval = TRUE
 )
-
-## ----message=FALSE------------------------------------------------------------
 library(scml)
 library(torch)
 library(luz)
@@ -49,22 +48,23 @@ DelayedArray::setAutoBPPARAM(BiocParallel::MulticoreParam(workers = 6L,progressb
 ## ----eval=FALSE---------------------------------------------------------------
 #  # Load ABA dataset
 #  allen <- aba_ds()
-#  allen <- allen[,!is.na(allen$subclass_label)] # Keep only cells with an assigned sublcass
+#  allen <- allen[,!is.na(allen$subclass_label)] # Keep only cells with an assigned subclass
 #  allen <- allen[,!is.na(allen$cluster_label)]  # Keep only cells with an assigned cluster
 #  
 #  # Normalize counts
 #  allen <- scuttle::logNormCounts(allen,center_size_factors=FALSE,size.factors=allen$sum/1e4)
 #  
 #  # Compute target labels to predict
-#  allen$y_true <- paste(allen$class_label,allen$neighborhood_label,allen$subclass_label,allen$cluster_label,sep=" --- ") |>
-#    factor()
+#  #allen$y_true <- paste(allen$class_label,allen$neighborhood_label,allen$subclass_label,allen$cluster_label,sep=" --- ") |> factor()
+#  allen$y_true <- paste(allen$class_label,allen$neighborhood_label,allen$subclass_label,sep=" --- ") |> factor()
 #  stopifnot(all(!is.na(allen$y_true)))
+#  sort(table(allen$y_true))
 #  
 #  # Balance training set
 #  trn_ds <- local({
 #    trn_ds <- allen[,allen$mlset %in% "trn"]
 #    trn_ids <- splitAsList(colnames(trn_ds),paste(trn_ds$y_true,trn_ds$source)) |>
-#      lapply(sample,25,replace=TRUE) |>
+#      lapply(sample,5000,replace=TRUE) |>
 #      unlist() |>
 #      sample()
 #    trn_ds[,trn_ids]
@@ -76,17 +76,16 @@ DelayedArray::setAutoBPPARAM(BiocParallel::MulticoreParam(workers = 6L,progressb
 #  model <- train_delayed_classifier(
 #    x = t(logcounts(trn_ds)),
 #    y = trn_ds$y_true,
-#    pre_pruning_epoch = 10,post_pruning_epoch = 10,
-#    #accelerator = accelerator(cpu=TRUE),
+#    pre_pruning_epoch = 5,post_pruning_epoch = 5,
+#    accelerator = accelerator(cpu=TRUE),
 #    valid_data = 0.1,
-#    #weight_decay = 1e-4,
-#    #auto_resume_path = file.path(params$model_dir,"aba_mouse_cluster_classifier.tmp"),
-#    #initial_weights_path = "~/Downloads/w.mw"
+#    #weight_decay = 1e-2
 #  )
-#  luz_save(model,file.path(params$model_dir,"aba_mouse_cluster_classifier.luz"))
+#  #luz_save(model,file.path(params$model_dir,"aba_mouse_cluster_classifier.luz"))
+#  luz_save(model,file.path(params$model_dir,"aba_mouse_subclass_classifier.luz"))
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  model <- luz_load(file.path(params$model_dir,"aba_mouse_cluster_classifier.luz"))
+#  model <- luz_load(file.path(params$model_dir,"aba_mouse_subclass_classifier.luz"))
 #  plot(model)
 
 ## ----eval=FALSE---------------------------------------------------------------

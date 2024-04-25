@@ -95,7 +95,7 @@ train_delayed_classifier <- function(
       metrics = metrics,
       loss = loss
     ) |>
-    set_hparams(feature_names = colnames(x), class_names = class_names,input_dropout_rate = input_dropout_rate, n = n, dropout_rates = dropout_rates) |>
+    set_hparams(feature_names = colnames(x), class_names = class_names,input_dropout_rate = input_dropout_rate, n = n, dropout_rates = dropout_rates, attention = TRUE) |>
     set_opt_hparams(weight_decay = weight_decay, lr = 1) |>
     fit(
       epoch = pre_pruning_epoch + post_pruning_epoch,

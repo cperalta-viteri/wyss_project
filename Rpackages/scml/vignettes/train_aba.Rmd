@@ -6,8 +6,8 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 params:
-  data_dir: "/Users/prados/Desktop/wyss_project/data/"
-  model_dir: "/Users/prados/Desktop/wyss_project/data/"
+  data_dir: "/Users/prados/Library/CloudStorage/OneDrive-unige.ch/BSP_projects/wyss_project/data/"
+  model_dir: "/Users/prados/Library/CloudStorage/OneDrive-unige.ch/BSP_projects/wyss_project/data/"
 ---
 
 ```{r, include = FALSE}
@@ -16,9 +16,6 @@ knitr::opts_chunk$set(
   comment = "#>",
   eval = TRUE
 )
-```
-
-```{r message=FALSE}
 library(scml)
 library(torch)
 library(luz)
@@ -26,7 +23,6 @@ library(ABAData)
 library(SingleCellExperiment)
 DelayedArray::setAutoBPPARAM(BiocParallel::MulticoreParam(workers = 6L,progressbar = TRUE))
 ```
-
 
 
 
