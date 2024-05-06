@@ -12,13 +12,11 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-```
-
-```{r message=FALSE}
 library(scml)
 library(torch)
 library(luz)
 ```
+
 
 ```{r}
 e <- matrix(ncol = 2,byrow = TRUE,c(

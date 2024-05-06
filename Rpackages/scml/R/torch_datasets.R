@@ -11,9 +11,10 @@
 #' @export
 delayed_classifier_dataset <- torch::dataset(
   name = "delayed_dataset",
-  initialize = function(x, y = rep(0L, nrow(x)), x_dtype = torch_float(), y_dtype = torch_long()) {
-    stopifnot(identical(length(y), nrow(x)))
+  initialize = function(x, y = NULL, x_dtype = torch_float(), y_dtype = torch_long()) {
     stopifnot(identical(length(dim(x)), 2L))
+    if (is.null(y)) y <- rep(0L, nrow(x))
+    stopifnot(identical(length(y), nrow(x)))
     self$x <- x
     self$y <- y
     self$x_dtype <- x_dtype
@@ -44,7 +45,7 @@ delayed_classifier_dataset <- torch::dataset(
 #' @import HDF5Array
 #' @export
 #' @examples
-#' #x <- h5_dataset("~/Desktop/wyss_project/data/ABAMouseTENx/sce/assays.h5",name.x="/assay001*")
+#' #x <- h5_dataset("../../data/ABAMouseTENx/sce/assays.h5",name.x="/assay001*")
 h5_dataset <- torch::dataset(
   name = "h5_dataset",
   get_array = function(x,name,row_idx=NULL,col_idx=NULL) {
@@ -91,8 +92,19 @@ h5_dataset <- torch::dataset(
 )
 
 
-
-
-
-
+#' @title as_dataloader.list
+#' @description Override generic function to handle list(x=DelayedArray,y=factor).
+#' @param x the list to convert
+#' @import luz
+#' @import DelayedArray
+#' @export
+as_dataloader.list <- function(x,...) {
+  if ((length(x)==1L) && (is(x[[1L]],"DelayedArray") || is(x[[1L]],"Matrix"))) {
+    as_dataloader(delayed_classifier_dataset(x[[1L]]),...)
+  } else if ((length(x)==2L) && (is.factor(x[[2L]]) || is.integer(x[[2L]]))) {
+    as_dataloader(delayed_classifier_dataset(x[[1L]],x[[2L]]),...)
+  } else {
+    NextMethod("as_dataloader")
+  }
+}
 

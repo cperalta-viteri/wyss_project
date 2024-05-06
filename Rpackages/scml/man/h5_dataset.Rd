@@ -22,5 +22,5 @@ h5_dataset(
 A torch dataset which accepts DelayedArrays.
 }
 \examples{
-#x <- h5_dataset("~/Desktop/wyss_project/data/ABAMouseTENx/sce/assays.h5",name.x="/assay001*")
+#x <- h5_dataset("../../data/ABAMouseTENx/sce/assays.h5",name.x="/assay001*")
 }

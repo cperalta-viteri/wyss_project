@@ -6,7 +6,7 @@
 \usage{
 delayed_classifier_dataset(
   x,
-  y = rep(0L, nrow(x)),
+  y = NULL,
   x_dtype = torch_float(),
   y_dtype = torch_long()
 )
