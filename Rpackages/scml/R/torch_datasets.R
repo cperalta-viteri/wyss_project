@@ -99,10 +99,14 @@ h5_dataset <- torch::dataset(
 #' @import DelayedArray
 #' @export
 as_dataloader.list <- function(x,...) {
-  if ((length(x)==1L) && (is(x[[1L]],"DelayedArray") || is(x[[1L]],"Matrix"))) {
-    as_dataloader(delayed_classifier_dataset(x[[1L]]),...)
-  } else if ((length(x)==2L) && (is.factor(x[[2L]]) || is.integer(x[[2L]]))) {
-    as_dataloader(delayed_classifier_dataset(x[[1L]],x[[2L]]),...)
+  if ((length(x)>=1L) && (is(x[[1L]],"DelayedArray") || is(x[[1L]],"Matrix"))) {
+    if (length(x)==1L) {
+      as_dataloader(delayed_classifier_dataset(x[[1L]]),...)
+    } else if ((length(x)==2L) && (is.factor(x[[2L]]) || is.integer(x[[2L]]))) {
+      as_dataloader(delayed_classifier_dataset(x[[1L]],x[[2L]]),...)
+    } else {
+      NextMethod("as_dataloader")
+    }
   } else {
     NextMethod("as_dataloader")
   }
